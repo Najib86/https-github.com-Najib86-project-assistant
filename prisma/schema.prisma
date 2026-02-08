@@ -1,0 +1,92 @@
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int       @id @default(autoincrement())
+  name        String
+  email       String    @unique
+  password    String
+  role        String    @default("student") // 'student' or 'supervisor'
+  department  String?
+  projects    Project[] @relation("StudentProjects")
+  supervises  Project[] @relation("SupervisorProjects")
+  comments    Comment[]
+  exports     Export[]
+  createdAt   DateTime  @default(now())
+}
+
+model Project {
+  project_id     Int          @id @default(autoincrement())
+  title          String
+  level          String       // UG / PG
+  type           String       // Survey / System-Based / Hybrid
+  status         String       @default("Draft") // Draft / Submitted / Reviewed / Approved
+  student        User         @relation("StudentProjects", fields: [studentId], references: [id])
+  studentId      Int
+  supervisor     User?        @relation("SupervisorProjects", fields: [supervisorId], references: [id])
+  supervisorId   Int?
+  chapters       Chapter[]
+  questionnaires Questionnaire[]
+  exports        Export[]
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model Chapter {
+  chapter_id   Int       @id @default(autoincrement())
+  project      Project   @relation(fields: [projectId], references: [project_id])
+  projectId    Int
+  chapterNumber Int
+  title        String?
+  content      String?
+  status       String    @default("Draft") // Draft / Submitted / Reviewed / Approved
+  comments     Comment[]
+  plagiarismNotes PlagiarismNote[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Comment {
+  comment_id   Int      @id @default(autoincrement())
+  chapter      Chapter  @relation(fields: [chapterId], references: [chapter_id])
+  chapterId    Int
+  supervisor   User     @relation(fields: [supervisorId], references: [id])
+  supervisorId Int
+  commentText  String
+  createdAt    DateTime @default(now())
+}
+
+model Questionnaire {
+  questionnaire_id Int      @id @default(autoincrement())
+  project          Project  @relation(fields: [projectId], references: [project_id])
+  projectId        Int
+  section          String
+  question         String
+  questionType     String   // Likert / Open-ended / Multiple-choice
+  createdAt        DateTime @default(now())
+}
+
+model Export {
+  export_id   Int      @id @default(autoincrement())
+  project     Project  @relation(fields: [projectId], references: [project_id])
+  projectId   Int
+  exportedBy  User     @relation(fields: [exportedById], references: [id])
+  exportedById Int
+  exportType  String   // DOCX / PDF
+  exportedAt  DateTime @default(now())
+}
+
+model PlagiarismNote {
+  note_id     Int      @id @default(autoincrement())
+  chapter     Chapter  @relation(fields: [chapterId], references: [chapter_id])
+  chapterId   Int
+  note        String
+  createdAt   DateTime @default(now())
+}
