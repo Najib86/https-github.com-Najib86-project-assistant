@@ -33,7 +33,9 @@ model Project {
   supervisor     User?        @relation("SupervisorProjects", fields: [supervisorId], references: [id])
   supervisorId   Int?
   chapters       Chapter[]
+
   questionnaires Questionnaire[]
+  comments       Comment[]
   exports        Export[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
@@ -53,14 +55,22 @@ model Chapter {
   updatedAt    DateTime  @updatedAt
 }
 
+
 model Comment {
-  comment_id   Int      @id @default(autoincrement())
-  chapter      Chapter  @relation(fields: [chapterId], references: [chapter_id])
-  chapterId    Int
-  supervisor   User     @relation(fields: [supervisorId], references: [id])
-  supervisorId Int
-  commentText  String
-  createdAt    DateTime @default(now())
+  comment_id   Int       @id @default(autoincrement())
+  content      String
+  createdAt    DateTime  @default(now())
+  isResolved   Boolean   @default(false)
+  
+  // Relations
+  user         User      @relation(fields: [userId], references: [id])
+  userId       Int
+  
+  project      Project?  @relation(fields: [projectId], references: [project_id])
+  projectId    Int?
+  
+  chapter      Chapter?  @relation(fields: [chapterId], references: [chapter_id])
+  chapterId    Int?
 }
 
 model Questionnaire {
