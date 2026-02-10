@@ -49,7 +49,7 @@ export async function GET(req: Request) {
                         spacing: { after: 100 }
                     }),
                     new Paragraph({
-                        text: `Department of ${project.department}`,
+                        text: `Department of ${project.student.department || "N/A"}`,
                         alignment: AlignmentType.CENTER,
                         spacing: { after: 800 }
                     }),
@@ -69,9 +69,13 @@ export async function GET(req: Request) {
                         spacing: { after: 200 }
                     }),
                     new Paragraph({
-                        text: "(Right-click and update field to generate TOC)",
+                        children: [
+                            new TextRun({
+                                text: "(Right-click and update field to generate TOC)",
+                                italics: true,
+                            }),
+                        ],
                         alignment: AlignmentType.CENTER,
-                        italics: true,
                         spacing: { after: 400 }
                     }),
                     new Paragraph({
@@ -100,7 +104,7 @@ export async function GET(req: Request) {
 
         const buffer = await Packer.toBuffer(doc);
 
-        return new NextResponse(buffer, {
+        return new NextResponse(new Uint8Array(buffer), {
             headers: {
                 "Content-Type": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 "Content-Disposition": `attachment; filename="${project.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.docx"`,

@@ -150,8 +150,11 @@ export default function DashboardLayout({
                 const role = parsedUser.role || "student";
                 const name = parsedUser.name || "User";
 
-                // Only update if we have actual data to avoid redundant renders
-                setUser({ role, name });
+                // Functional update to avoid redundant state changes/cascading renders
+                setUser(prev => {
+                    if (prev.role === role && prev.name === name) return prev;
+                    return { role, name };
+                });
             } catch (e) {
                 console.error("Failed to parse user", e);
             }
