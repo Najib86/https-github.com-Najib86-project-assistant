@@ -1,24 +1,12 @@
 
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
-
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.NEXT_PUBLIC_GEMINI_API_KEY || "");
+import { generateAIContent } from "@/lib/ai-service";
 
 export async function POST(req: Request) {
-    try {
-        const { topic, level, sampleText } = await req.json();
+  try {
+    const { topic, level, sampleText } = await req.json();
 
-        if (!process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
-            return NextResponse.json(
-                { error: "Gemini API Key not configured" },
-                { status: 500 }
-            );
-        }
-
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-        const prompt = `
+    const prompt = `
 You are an expert university academic research assistant. 
 Your task is to automatically generate **full university-standard project content** for Chapters 1–5, including outlines, detailed drafts, project status tracking, plagiarism awareness notes, and full report preparation. Follow formal academic writing standards.
 
@@ -88,30 +76,29 @@ JSON Output Format:
 }
 `;
 
-        const result = await model.generateContent(prompt);
-        const responseText = result.response.text();
+    const responseText = await generateAIContent(prompt);
 
-        // Clean up potential markdown code blocks (```json ... ```)
-        const jsonString = responseText.replace(/```json|```/g, "").trim();
+    // Clean up potential markdown code blocks (```json ... ```)
+    const jsonString = responseText.replace(/```json|```/g, "").trim();
 
-        let parsedData;
-        try {
-            parsedData = JSON.parse(jsonString);
-        } catch (e) {
-            console.error("Failed to parse AI response as JSON:", responseText);
-            return NextResponse.json(
-                { error: "Failed to generate structured content", raw: responseText },
-                { status: 500 }
-            );
-        }
-
-        return NextResponse.json({ result: parsedData });
-
-    } catch (error) {
-        console.error("Error generating chapter content:", error);
-        return NextResponse.json(
-            { error: "Internal Server Error" },
-            { status: 500 }
-        );
+    let parsedData;
+    try {
+      parsedData = JSON.parse(jsonString);
+    } catch (e) {
+      console.error("Failed to parse AI response as JSON:", responseText);
+      return NextResponse.json(
+        { error: "Failed to generate structured content", raw: responseText },
+        { status: 500 }
+      );
     }
+
+    return NextResponse.json({ result: parsedData });
+
+  } catch (error) {
+    console.error("Error generating chapter content:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
 }

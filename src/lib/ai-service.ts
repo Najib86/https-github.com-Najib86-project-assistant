@@ -1,9 +1,10 @@
 
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { HfInference } from "@huggingface/inference";
 import prisma from "@/lib/prisma";
 
-const apiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
-const genAI = new GoogleGenerativeAI(apiKey || "");
+const geminiApiKey = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
+const hfApiKey = process.env.HUGGINGFACE_API_TOKEN || process.env.NEXT_PUBLIC_HUGGINGFACE_API_TOKEN;
 
 export const CHAPTERS_LIST = [
     { id: 1, title: "Abstract" },
@@ -17,11 +18,43 @@ export const CHAPTERS_LIST = [
     { id: 9, title: "References" }
 ];
 
+export async function generateAIContent(prompt: string): Promise<string> {
+    // Try Gemini first
+    if (geminiApiKey) {
+        try {
+            const genAI = new GoogleGenerativeAI(geminiApiKey);
+            const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+            const result = await model.generateContent(prompt);
+            return result.response.text();
+        } catch (error) {
+            console.warn("Gemini generation failed, attempting fallback to Hugging Face...", error);
+        }
+    }
+
+    // Fallback to Hugging Face
+    if (hfApiKey) {
+        try {
+            const hf = new HfInference(hfApiKey);
+            // Using a reliable instruction-tuned model
+            const result = await hf.textGeneration({
+                model: "mistralai/Mistral-7B-Instruct-v0.3", 
+                inputs: prompt,
+                parameters: {
+                    max_new_tokens: 4000,
+                    return_full_text: false
+                }
+            });
+            return result.generated_text;
+        } catch (error) {
+            console.error("Hugging Face generation failed:", error);
+            throw error; // Rethrow if both fail
+        }
+    }
+
+    throw new Error("No valid API keys found for Gemini or Hugging Face");
+}
+
 export async function generateChapterContent(projectId: number, chapterNumber: number, chapterTitle: string, topic: string, level: string, sampleText?: string) {
-    if (!apiKey) throw new Error("Gemini API Key missing");
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
     const prompt = `
 Context: Writing an academic project report for a ${level || "University"} level requirement.
 Chapter: ${chapterTitle}
@@ -39,8 +72,7 @@ ${sampleText ? `Style Reference (Mimic this writing style/tone and incorporate r
 Task: Generate the content for this chapter now. Do not include introductory conversational text, just the chapter content.
 `;
 
-    const result = await model.generateContent(prompt);
-    const content = result.response.text();
+    const content = await generateAIContent(prompt);
 
     return await prisma.chapter.upsert({
         where: {
