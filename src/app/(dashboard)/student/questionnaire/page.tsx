@@ -1,93 +1,169 @@
 
-import { Button } from "@/components/ui/button"
-import { PlusCircle, Trash, GripVertical, CheckCircle } from "lucide-react"
+"use client";
 
-export default function QuestionnaireBuilder() {
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { PlusCircle, Trash, Save, ArrowLeft, Loader2, Wand2 } from "lucide-react";
+import Link from "next/link";
+
+export default function ProjectQuestionnaire() {
+    const searchParams = useSearchParams();
+    const router = useRouter();
+    const projectId = searchParams.get("projectId");
+
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+
+    // Form fields
+    const [problemStatement, setProblemStatement] = useState("");
+    const [objectives, setObjectives] = useState<string[]>([""]);
+    const [methodology, setMethodology] = useState("");
+
+    useEffect(() => {
+        if (!projectId) return;
+
+        const fetchProject = async () => {
+            try {
+                const res = await fetch(`/api/projects/${projectId}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    setProblemStatement(data.problemStatement || "");
+                    setObjectives(data.objectives ? JSON.parse(data.objectives) : [""]);
+                    setMethodology(data.methodology || "");
+                }
+            } catch (error) {
+                console.error("Failed to fetch project details", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProject();
+    }, [projectId]);
+
+    const handleAddObjective = () => {
+        setObjectives([...objectives, ""]);
+    };
+
+    const handleObjectiveChange = (index: number, value: string) => {
+        const newObjectives = [...objectives];
+        newObjectives[index] = value;
+        setObjectives(newObjectives);
+    };
+
+    const handleRemoveObjective = (index: number) => {
+        const newObjectives = objectives.filter((_, i) => i !== index);
+        setObjectives(newObjectives);
+    };
+
+    const handleSave = async () => {
+        if (!projectId) return;
+        setSaving(true);
+
+        try {
+            const res = await fetch(`/api/projects/${projectId}/update-context`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    problemStatement,
+                    objectives: JSON.stringify(objectives.filter(o => o.trim() !== "")),
+                    methodology
+                }),
+            });
+
+            if (!res.ok) throw new Error("Failed to save");
+
+            // Navigate back or show success
+            alert("Project context saved successfully! You can now generate chapters.");
+            router.push(`/student/project/${projectId}`);
+        } catch (error) {
+            console.error(error);
+            alert("Failed to save project context.");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) return <div className="p-10 text-center"><Loader2 className="animate-spin inline mr-2" /> Loading...</div>;
+    if (!projectId) return <div className="p-10 text-center">Invalid Project ID</div>;
+
     return (
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-3xl mx-auto space-y-8 pb-20">
             {/* Header */}
-            <div className="flex justify-between items-center bg-white p-6 rounded-lg shadow-sm border">
+            <div className="flex items-center gap-4 mb-6">
+                <Button variant="ghost" size="icon" asChild>
+                    <Link href={`/student/project/${projectId}`}>
+                        <ArrowLeft className="h-5 w-5" />
+                    </Link>
+                </Button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Research Questionnaire</h1>
-                    <p className="text-gray-500 mt-2">Design your data collection instrument.</p>
+                    <h1 className="text-2xl font-bold text-gray-900">Project Context Questionnaire</h1>
+                    <p className="text-gray-500">Answer these key questions to help AI write better chapters for you.</p>
                 </div>
-                <div className="flex gap-4">
-                    <Button variant="outline">
-                        Save Draft
-                    </Button>
-                    <Button>
-                        Export PDF
+            </div>
+
+            {/* Problem Statement */}
+            <div className="bg-white p-6 rounded-lg shadow-sm border space-y-4">
+                <div className="flex justify-between items-start">
+                    <h2 className="text-lg font-semibold text-gray-800">1. Problem Statement</h2>
+                    <Wand2 className="h-5 w-5 text-indigo-400" />
+                </div>
+                <p className="text-sm text-gray-500">Describe the core issue your project aims to solve. Be specific.</p>
+                <textarea
+                    className="w-full h-32 p-3 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="E.g. Traditional manual attendance systems are prone to errors and time-consuming..."
+                    value={problemStatement}
+                    onChange={(e) => setProblemStatement(e.target.value)}
+                />
+            </div>
+
+            {/* Research Objectives */}
+            <div className="bg-white p-6 rounded-lg shadow-sm border space-y-4">
+                <h2 className="text-lg font-semibold text-gray-800">2. Research Objectives</h2>
+                <p className="text-sm text-gray-500">List the specific goals of your project.</p>
+
+                <div className="space-y-3">
+                    {objectives.map((obj, index) => (
+                        <div key={index} className="flex gap-2">
+                            <span className="py-2 text-gray-400 font-medium">{index + 1}.</span>
+                            <input
+                                className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-indigo-500"
+                                placeholder={`Objective ${index + 1}`}
+                                value={obj}
+                                onChange={(e) => handleObjectiveChange(index, e.target.value)}
+                            />
+                            {objectives.length > 1 && (
+                                <Button size="icon" variant="ghost" onClick={() => handleRemoveObjective(index)} className="text-red-400 hover:text-red-600">
+                                    <Trash className="h-4 w-4" />
+                                </Button>
+                            )}
+                        </div>
+                    ))}
+                    <Button variant="outline" size="sm" onClick={handleAddObjective} className="mt-2 text-indigo-600">
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Objective
                     </Button>
                 </div>
             </div>
 
-            {/* Demographics Section */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Section A: Demographics</h2>
-                <div className="space-y-4 text-sm text-gray-600">
-                    <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-md">
-                        <span className="font-semibold w-8 text-center text-gray-400">1</span>
-                        <span className="flex-1">Gender (Male / Female)</span>
-                        <Button size="icon" variant="ghost" className="h-4 w-4 text-red-500">
-                            <Trash className="h-4 w-4" />
-                        </Button>
-                    </div>
-                    <div className="flex items-center gap-4 bg-gray-50 p-2 rounded-md">
-                        <span className="font-semibold w-8 text-center text-gray-400">2</span>
-                        <span className="flex-1">Age Range</span>
-                        <Button size="icon" variant="ghost" className="h-4 w-4 text-red-500">
-                            <Trash className="h-4 w-4" />
-                        </Button>
-                    </div>
-                    <Button variant="ghost" size="sm" className="w-full text-indigo-600 hover:text-indigo-700">
-                        <PlusCircle className="mr-2 h-4 w-4" /> Add Demographic Field
-                    </Button>
-                </div>
+            {/* Methodology */}
+            <div className="bg-white p-6 rounded-lg shadow-sm border space-y-4">
+                <h2 className="text-lg font-semibold text-gray-800">3. Methodology (Brief)</h2>
+                <p className="text-sm text-gray-500">What approach or tools will you use? (e.g. Agile, Waterfall, Python/Django, Survey Research)</p>
+                <textarea
+                    className="w-full h-32 p-3 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    placeholder="E.g. We will use the Agile development methodology. The backend will be built with Node.js..."
+                    value={methodology}
+                    onChange={(e) => setMethodology(e.target.value)}
+                />
             </div>
 
-            {/* Research Questions Section */}
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-                <h2 className="text-lg font-semibold text-gray-800 mb-4 border-b pb-2">Section B: Research Questions (Likert Scale)</h2>
-                <div className="space-y-4">
-                    <div className="flex items-center gap-4 bg-white border border-l-4 border-l-indigo-500 p-4 rounded-md shadow-sm">
-                        <GripVertical className="h-5 w-5 text-gray-400 cursor-move" />
-                        <div className="flex-1">
-                            <p className="font-medium text-gray-800">I find it difficult to maintain academic tone.</p>
-                            <div className="flex gap-4 mt-2 text-xs text-gray-500 uppercase">
-                                <span className="bg-gray-100 px-2 py-1 rounded">Strongly Agree</span>
-                                <span className="bg-gray-100 px-2 py-1 rounded">Agree</span>
-                                <span className="bg-gray-100 px-2 py-1 rounded">Disagree</span>
-                                <span className="bg-gray-100 px-2 py-1 rounded">Strongly Disagree</span>
-                            </div>
-                        </div>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500">
-                            <Trash className="h-4 w-4" />
-                        </Button>
-                    </div>
-
-                    <div className="flex items-center gap-4 bg-white border border-gray-200 p-4 rounded-md shadow-sm">
-                        <GripVertical className="h-5 w-5 text-gray-400 cursor-move" />
-                        <div className="flex-1">
-                            <p className="font-medium text-gray-800">AI tools help structure my thoughts better.</p>
-                            <div className="flex gap-4 mt-2 text-xs text-gray-500 uppercase">
-                                <span className="bg-gray-100 px-2 py-1 rounded">Strongly Agree</span>
-                                <span className="bg-gray-100 px-2 py-1 rounded">Agree</span>
-                                <span className="bg-gray-100 px-2 py-1 rounded">Disagree</span>
-                                <span className="bg-gray-100 px-2 py-1 rounded">Strongly Disagree</span>
-                            </div>
-                        </div>
-                        <Button size="icon" variant="ghost" className="h-8 w-8 text-red-500">
-                            <Trash className="h-4 w-4" />
-                        </Button>
-                    </div>
-
-                    <div className="flex justify-center p-4 border border-dashed rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer transition-colors">
-                        <div className="text-center">
-                            <PlusCircle className="mx-auto h-8 w-8 text-gray-400 mb-2" />
-                            <span className="text-sm text-gray-500 font-medium">Add New Question</span>
-                        </div>
-                    </div>
-                </div>
+            {/* Save Action */}
+            <div className="flex justify-end pt-4">
+                <Button size="lg" onClick={handleSave} disabled={saving}>
+                    {saving ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2 h-4 w-4" />}
+                    Save Project Context
+                </Button>
             </div>
         </div>
     )

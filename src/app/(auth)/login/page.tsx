@@ -37,8 +37,17 @@ export default function LoginPage() {
                 throw new Error(data.error || "Login failed");
             }
 
-            // In a real app, handle session/token here
-            router.push("/student");
+            const data = await res.json();
+            // Store user info
+            localStorage.setItem("user", JSON.stringify(data.user));
+
+            if (data.user.role === "student") {
+                router.push("/student");
+            } else if (data.user.role === "supervisor") {
+                router.push("/supervisor");
+            } else {
+                router.push("/student"); // default
+            }
         } catch (err: any) {
             setError(err.message);
         } finally {

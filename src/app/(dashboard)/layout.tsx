@@ -1,6 +1,7 @@
 
 import { cn } from "@/lib/utils"
 import Link from "next/link"
+import Image from "next/image"
 import { BookOpen, FolderOpen, PenTool, MessageSquare, Settings } from "lucide-react"
 
 const sidebarItems = [
@@ -19,7 +20,7 @@ export default function DashboardLayout({
             {/* Sidebar */}
             <aside className="w-64 bg-white border-r px-4 py-6 hidden md:block">
                 <h1 className="text-xl font-bold mb-8 px-2 flex items-center gap-2">
-                    <BookOpen className="h-6 w-6 text-indigo-600" />
+                    <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
                     ProjectAssistant
                 </h1>
                 <nav className="space-y-2">

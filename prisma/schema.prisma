@@ -40,20 +40,28 @@ model Project {
   exports        Export[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  
+  // Context for AI Generation
+  objectives     String?      // List of objectives
+  problemStatement String?    // Detailed problem statement
+  methodology    String?      // Brief methodology description
+  referenceText  String?      // Global reference style/content extracted text
 }
 
 model Chapter {
   chapter_id   Int       @id @default(autoincrement())
-  project      Project   @relation(fields: [projectId], references: [project_id])
+  project      Project   @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
   projectId    Int
   chapterNumber Int
   title        String?
-  content      String?
+  content      String? // We might want Text or String with large limit
   status       String    @default("Draft") // Draft / Submitted / Reviewed / Approved
   comments     Comment[]
   plagiarismNotes PlagiarismNote[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+
+  @@unique([projectId, chapterNumber])
 }
 
 

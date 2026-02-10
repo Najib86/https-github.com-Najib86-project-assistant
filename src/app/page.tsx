@@ -1,5 +1,6 @@
 
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { BookOpen, GraduationCap, CheckCircle } from "lucide-react";
 
@@ -9,7 +10,7 @@ export default function Home() {
       {/* Header */}
       <header className="px-6 h-16 flex items-center justify-between border-b bg-white">
         <div className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-indigo-600" />
+          <Image src="/logo.png" alt="Logo" width={32} height={32} className="object-contain" />
           <span className="font-bold text-lg">ProjectAssistant</span>
         </div>
         <div className="flex gap-4">
@@ -28,7 +29,7 @@ export default function Home() {
           Your AI-Powered <span className="text-indigo-600">Research Partner</span> for University Projects
         </h1>
         <p className="text-lg md:text-xl text-gray-600 max-w-2xl mb-8">
-          ProjectAssistant guides you through every chapter, from Introduction to Conclusion. Get structured drafts, avoid writer's block, and collaborate seamlessly with your supervisor.
+          ProjectAssistant guides you through every chapter, from Introduction to Conclusion. Get structured drafts, avoid writer&apos;s block, and collaborate seamlessly with your supervisor.
         </p>
         <div className="flex gap-4">
           <Button size="lg" asChild>
@@ -79,6 +80,6 @@ export default function Home() {
       <footer className="py-6 text-center text-gray-500 text-sm border-t bg-gray-50">
         © 2026 ProjectAssistant. All rights reserved.
       </footer>
-    </div>
+    </div >
   );
 }
