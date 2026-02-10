@@ -4,7 +4,8 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { BookOpen, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -57,10 +58,16 @@ export default function LoginPage() {
 
     return (
         <div className="flex flex-col items-center space-y-6">
-            <div className="flex flex-col items-center gap-2 text-center">
-                <div className="shadow-sm rounded-lg p-2 bg-indigo-50">
-                    <BookOpen className="h-6 w-6 text-indigo-600" />
-                </div>
+            <div className="flex flex-col items-center gap-4 text-center">
+                <Link href="/" className="transition-transform hover:scale-110">
+                    <Image
+                        src="/logo.png"
+                        alt="Logo"
+                        width={64}
+                        height={64}
+                        className="rounded-2xl shadow-xl shadow-indigo-100"
+                    />
+                </Link>
                 <h1 className="text-2xl font-bold tracking-tight text-gray-900">Welcome back</h1>
                 <p className="text-sm text-muted-foreground">
                     Enter your email to sign in to your dashboard

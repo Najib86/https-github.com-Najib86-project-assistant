@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
     BookOpen, CheckCircle, Clock, ChevronRight,
@@ -80,66 +81,86 @@ export default function ProjectDashboard({ params }: { params: Promise<{ id: str
     }
 
     return (
-        <div className="max-w-5xl mx-auto space-y-8">
-            <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+        <div className="space-y-6 md:space-y-8 max-w-5xl mx-auto px-1">
+            <header className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-2 border-b border-gray-100">
+                <div className="space-y-3">
+                    <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold uppercase tracking-widest text-gray-400">
                         <Link href="/student" className="hover:text-indigo-600 transition-colors">Dashboard</Link>
-                        <ChevronRight className="h-4 w-4" />
-                        <span className="font-medium text-gray-900">Project Overview</span>
+                        <ChevronRight className="h-3 w-3" />
+                        <span className="text-gray-900">Project Overview</span>
                     </div>
-                    <h1 className="text-3xl font-bold text-gray-900">{project.title}</h1>
-                    <p className="text-gray-500 mt-1">{project.level} • {project.type} • Dept: {project.department}</p>
+                    <h1 className="text-2xl md:text-4xl font-black text-gray-900 leading-tight">{project.title}</h1>
+                    <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm text-gray-500 font-medium">
+                        <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md">{project.level}</span>
+                        <span className="h-1 w-1 rounded-full bg-gray-300" />
+                        <span>{project.type}</span>
+                        {project.department && (
+                            <>
+                                <span className="h-1 w-1 rounded-full bg-gray-300" />
+                                <span className="text-gray-400 italic">Dept: {project.department}</span>
+                            </>
+                        )}
+                    </div>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Button variant="outline" asChild>
+                    <Button variant="outline" asChild className="w-full md:w-auto rounded-xl shadow-sm border-gray-200 font-bold h-11">
                         <Link href={`/api/export/docx?projectId=${project.project_id}`}>
-                            <Download className="h-4 w-4 mr-2" />
+                            <Download className="h-4 w-4 mr-2 text-indigo-600" />
                             Export Report
                         </Link>
                     </Button>
                 </div>
             </header>
 
-            {/* Dashboard and Chapters UI logic here... */}
-            <div className="bg-white rounded-xl border shadow-sm p-6">
-                <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
-                    <BookOpen className="h-5 w-5 text-indigo-500" />
-                    Project Chapters
-                </h2>
-                <div className="grid gap-4">
-                    {chaptersList.map((chapter) => {
-                        const existingChapter = project.chapters?.find((c) => c.chapterNumber === chapter.id);
-                        return (
-                            <div key={chapter.id} className="flex items-center justify-between p-4 border rounded-lg hover:border-indigo-200 hover:bg-indigo-50/30 transition-all group">
-                                <div className="flex items-center gap-4">
-                                    <div className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold ${existingChapter ? 'bg-indigo-100 text-indigo-600' : 'bg-gray-100 text-gray-500'}`}>
-                                        {chapter.id}
+            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden">
+                <div className="p-6 md:p-8">
+                    <h2 className="text-xl font-black mb-6 flex items-center gap-3 text-gray-900">
+                        <div className="bg-indigo-100 p-2 rounded-xl">
+                            <BookOpen className="h-5 w-5 text-indigo-600" />
+                        </div>
+                        Project Chapters
+                    </h2>
+                    <div className="grid gap-3 md:gap-4">
+                        {chaptersList.map((chapter) => {
+                            const existingChapter = project.chapters?.find((c) => c.chapterNumber === chapter.id);
+                            return (
+                                <div key={chapter.id} className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 md:p-5 border border-gray-100 rounded-2xl hover:border-indigo-200 hover:bg-indigo-50/20 transition-all gap-4">
+                                    <div className="flex items-center gap-4">
+                                        <div className={cn(
+                                            "h-12 w-12 shrink-0 rounded-xl flex items-center justify-center text-sm font-black transition-colors shadow-sm",
+                                            existingChapter ? 'bg-indigo-600 text-white' : 'bg-gray-50 text-gray-400 border border-gray-100'
+                                        )}>
+                                            {chapter.id}
+                                        </div>
+                                        <div className="min-w-0">
+                                            <h3 className="font-bold text-gray-900 text-base md:text-lg truncate group-hover:text-indigo-600 transition-colors">
+                                                {chapter.title}
+                                            </h3>
+                                            <div className="mt-0.5">
+                                                {existingChapter ? (
+                                                    <span className="text-[10px] md:text-xs text-green-600 flex items-center gap-1 font-bold uppercase tracking-wider">
+                                                        <CheckCircle className="h-3 w-3" />
+                                                        Ready
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[10px] md:text-xs text-gray-400 flex items-center gap-1 font-bold uppercase tracking-wider">
+                                                        <Clock className="h-3 w-3" />
+                                                        Pending
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-semibold text-gray-900">{chapter.title}</h3>
-                                        {existingChapter ? (
-                                            <span className="text-xs text-green-600 flex items-center gap-1 font-medium">
-                                                <CheckCircle className="h-3 w-3" />
-                                                Available
-                                            </span>
-                                        ) : (
-                                            <span className="text-xs text-gray-400 flex items-center gap-1">
-                                                <Clock className="h-3 w-3" />
-                                                Pending Generation
-                                            </span>
-                                        )}
-                                    </div>
+                                    <Button variant="outline" size="sm" asChild className="rounded-xl shadow-sm border-gray-200 font-bold hover:bg-white hover:border-indigo-400 hover:text-indigo-600 w-full sm:w-auto h-10 px-6">
+                                        <Link href={`/student/chapter-writer?projectId=${projectId}&chapter=${chapter.id}`}>
+                                            {existingChapter ? "Edit" : "Write"}
+                                            <ChevronRight className="h-4 w-4 ml-1 opacity-50" />
+                                        </Link>
+                                    </Button>
                                 </div>
-                                <Button variant="ghost" size="sm" asChild>
-                                    <Link href={`/student/chapter-writer?projectId=${projectId}&chapter=${chapter.id}`}>
-                                        {existingChapter ? "Edit Chapter" : "Open Editor"}
-                                        <ChevronRight className="h-4 w-4 ml-1" />
-                                    </Link>
-                                </Button>
-                            </div>
-                        );
-                    })}
+                            );
+                        })}
+                    </div>
                 </div>
             </div>
         </div>
