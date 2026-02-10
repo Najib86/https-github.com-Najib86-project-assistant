@@ -143,18 +143,21 @@ export default function DashboardLayout({
 
     useEffect(() => {
         const userStr = localStorage.getItem("user");
+
         if (userStr) {
             try {
                 const parsedUser = JSON.parse(userStr);
                 const role = parsedUser.role || "student";
                 const name = parsedUser.name || "User";
 
-                // Update state once mounted to ensure UI consistency
+                // Only update if we have actual data to avoid redundant renders
                 setUser({ role, name });
             } catch (e) {
                 console.error("Failed to parse user", e);
             }
         }
+
+        // Mark as mounted at the end of initialization
         setMounted(true);
     }, []);
 

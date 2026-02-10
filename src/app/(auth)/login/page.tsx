@@ -49,8 +49,8 @@ export default function LoginPage() {
             } else {
                 router.push("/student"); // default
             }
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "An unexpected error occurred");
         } finally {
             setIsLoading(false);
         }

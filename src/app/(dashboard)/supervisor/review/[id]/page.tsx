@@ -88,7 +88,8 @@ export default function SupervisorReviewPage() {
     }, [project]);
 
     const handlePostComment = async () => {
-        if (!newComment.trim()) return;
+        const currentProject = project;
+        if (!newComment.trim() || !currentProject) return;
         setPostingComment(true);
 
         try {
@@ -96,7 +97,7 @@ export default function SupervisorReviewPage() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    projectId: project.project_id,
+                    projectId: currentProject.project_id,
                     userId: SUPERVISOR_ID,
                     content: newComment
                 }),

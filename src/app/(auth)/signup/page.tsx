@@ -41,8 +41,8 @@ export default function SignupPage() {
             // In a real app, you'd save the token/session here
             // For now, redirect to login
             router.push("/login");
-        } catch (err: any) {
-            setError(err.message);
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "An unexpected error occurred");
         } finally {
             setIsLoading(false);
         }
