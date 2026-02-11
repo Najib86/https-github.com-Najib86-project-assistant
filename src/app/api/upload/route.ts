@@ -1,4 +1,3 @@
-
 import { NextResponse } from "next/server";
 import * as mammoth from "mammoth";
 import { PDFParse } from "pdf-parse";

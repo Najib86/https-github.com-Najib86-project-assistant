@@ -94,10 +94,10 @@ JSON Output Format:
 
     return NextResponse.json({ result: parsedData });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating chapter content:", error);
     return NextResponse.json(
-      { error: "Internal Server Error" },
+      { error: "Internal Server Error", details: error.message, stack: error.stack },
       { status: 500 }
     );
   }

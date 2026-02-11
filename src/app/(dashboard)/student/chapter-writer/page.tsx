@@ -4,7 +4,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Save, Wand2, Loader2, UploadCloud, RefreshCcw, ArrowLeft, CheckCircle, X } from "lucide-react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +29,7 @@ export default function ChapterWriter() {
 }
 
 function ChapterWriterContent() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const projectId = searchParams.get('projectId');
     const chapterIdParam = searchParams.get('chapter');
@@ -167,7 +168,38 @@ function ChapterWriterContent() {
         }
     };
 
-    if (!projectId) return <div className="p-10">Invalid Project ID</div>;
+
+    // Redirect if no project ID
+    useEffect(() => {
+        if (!projectId) {
+            const userStr = localStorage.getItem("user");
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    fetch(`/api/projects?studentId=${user.id}`)
+                        .then(res => res.json())
+                        .then(projects => {
+                            if (projects && projects.length > 0) {
+                                // Redirect to the most recent project (first in list usually)
+                                const latestId = projects[0].project_id;
+                                router.replace(`/student/chapter-writer?projectId=${latestId}`);
+                            } else {
+                                router.push('/student'); // No projects, go to dashboard
+                            }
+                        })
+                        .catch(() => router.push('/student'));
+                } catch {
+                    router.push('/login');
+                }
+            } else {
+                router.push('/login');
+            }
+        }
+    }, [projectId, router]);
+
+
+    if (!projectId) return <div className="flex bg-gray-50 h-screen items-center justify-center"><Loader2 className="animate-spin text-indigo-600 mr-2" /> Loading Project Context...</div>;
+
 
     const activeChapter = CHAPTERS_LIST.find(c => c.id === activeChapterId) || CHAPTERS_LIST[0];
 

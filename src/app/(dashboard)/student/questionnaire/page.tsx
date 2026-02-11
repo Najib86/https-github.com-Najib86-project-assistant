@@ -86,7 +86,37 @@ export default function ProjectQuestionnaire() {
     };
 
     if (loading) return <div className="p-10 text-center"><Loader2 className="animate-spin inline mr-2" /> Loading...</div>;
-    if (!projectId) return <div className="p-10 text-center">Invalid Project ID</div>;
+
+    // Redirect if no project ID for Interview Bot
+    useEffect(() => {
+        if (!projectId) {
+            const userStr = localStorage.getItem("user");
+            if (userStr) {
+                try {
+                    const user = JSON.parse(userStr);
+                    fetch(`/api/projects?studentId=${user.id}`)
+                        .then(res => res.json())
+                        .then(projects => {
+                            if (projects && projects.length > 0) {
+                                // Redirect to the most recent project (first in list usually)
+                                const latestId = projects[0].project_id;
+                                router.replace(`/student/questionnaire?projectId=${latestId}`);
+                            } else {
+                                router.push('/student'); // No projects, go to dashboard
+                            }
+                        })
+                        .catch(() => router.push('/student'));
+                } catch {
+                    router.push('/login');
+                }
+            } else {
+                router.push('/login');
+            }
+        }
+    }, [projectId, router]);
+
+    if (!projectId) return <div className="p-10 text-center flex items-center justify-center h-screen"><Loader2 className="animate-spin text-indigo-600 mr-2" /> Loading Project Context...</div>;
+
 
     return (
         <div className="max-w-3xl mx-auto space-y-8 pb-20">

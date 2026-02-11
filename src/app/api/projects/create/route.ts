@@ -2,7 +2,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import * as mammoth from "mammoth";
-import { PDFParse } from "pdf-parse";
+import { PDFParse } from "pdf-parse"; // Reverted to named import
 import { generateChapterContent, CHAPTERS_LIST } from "@/lib/ai-service";
 
 export async function POST(req: Request) {
@@ -25,7 +25,7 @@ export async function POST(req: Request) {
             try {
                 const buffer = Buffer.from(await file.arrayBuffer());
                 if (file.type === "application/pdf") {
-                    const parser = new PDFParse({ data: buffer });
+                    const parser = new PDFParse({ data: buffer }); // Reverted to class usage
                     const result = await parser.getText();
                     extractedText = result.text;
                 } else if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
