@@ -2,16 +2,16 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-    const { id } = await params;
-    const projectId = parseInt(id);
+export async function POST(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
+    const { projectId } = await params;
+    const project_id = parseInt(projectId);
 
     try {
         const { problemStatement, objectives, methodology, referenceText } = await req.json();
 
         // Update Project Context
         const updatedProject = await prisma.project.update({
-            where: { project_id: projectId },
+            where: { project_id },
             data: {
                 problemStatement,
                 objectives,

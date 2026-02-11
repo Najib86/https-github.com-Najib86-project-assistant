@@ -5,16 +5,19 @@ import { NextResponse } from "next/server";
 export async function GET(req: Request) {
     const { searchParams } = new URL(req.url);
     const studentId = searchParams.get('studentId');
+    const supervisorId = searchParams.get('supervisorId');
 
-    if (!studentId) {
-        return NextResponse.json({ error: "Student ID required" }, { status: 400 });
+    if (!studentId && !supervisorId) {
+        return NextResponse.json({ error: "Student ID or Supervisor ID required" }, { status: 400 });
     }
 
     try {
+        const where: any = {};
+        if (studentId) where.studentId = parseInt(studentId);
+        if (supervisorId) where.supervisorId = parseInt(supervisorId);
+
         const projects = await prisma.project.findMany({
-            where: {
-                studentId: parseInt(studentId),
-            },
+            where,
             include: {
                 chapters: true,
             },

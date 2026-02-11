@@ -40,13 +40,32 @@ export async function POST(req: Request) {
             }
         }
 
+        const inviteCode = formData.get("inviteCode") as string;
+
+        let finalSupervisorId = supervisorId ? parseInt(supervisorId) : null;
+
+        if (inviteCode) {
+            const invite = await prisma.supervisorInvite.findUnique({
+                where: { code: inviteCode }
+            });
+
+            if (invite && invite.expiresAt > new Date()) {
+                finalSupervisorId = invite.supervisorId;
+            } else {
+                // Optionally return error if code is invalid, or just ignore?
+                // User would prefer to know if code is invalid.
+                if (!invite) return NextResponse.json({ error: "Invalid invite code" }, { status: 400 });
+                if (invite.expiresAt <= new Date()) return NextResponse.json({ error: "Invite code expired" }, { status: 400 });
+            }
+        }
+
         const project = await prisma.project.create({
             data: {
                 title,
                 level,
                 type,
                 studentId: parseInt(studentId),
-                supervisorId: supervisorId ? parseInt(supervisorId) : null,
+                supervisorId: finalSupervisorId,
                 referenceText: extractedText,
             },
         });

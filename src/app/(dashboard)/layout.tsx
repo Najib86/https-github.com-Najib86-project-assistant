@@ -26,13 +26,13 @@ interface NavItem {
 }
 
 const studentItems: NavItem[] = [
-    { href: "/student", icon: LayoutDashboard, label: "Overview" },
+    { href: "/student/dashboard", icon: LayoutDashboard, label: "Overview" },
     { href: "/student/chapter-writer", icon: PenTool, label: "Drafting Room" },
     { href: "/student/questionnaire", icon: MessageSquare, label: "Interview Bot" },
 ];
 
 const supervisorItems: NavItem[] = [
-    { href: "/supervisor", icon: Users, label: "Student Panel" },
+    { href: "/supervisor/dashboard", icon: Users, label: "Student Panel" },
     { href: "/supervisor/review", icon: CheckSquare, label: "Review Tasks" },
 ];
 
