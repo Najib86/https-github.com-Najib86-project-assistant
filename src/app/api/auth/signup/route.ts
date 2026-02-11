@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
     try {
-        const { name, email, password } = await req.json();
+        const { name, email, password, role } = await req.json();
 
         if (!name || !email || !password) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
                 name,
                 email,
                 password, // WARNING: Store hashed passwords in production
-                role: "student"
+                role: (role === "student" || role === "supervisor") ? role : "student"
             },
         });
 

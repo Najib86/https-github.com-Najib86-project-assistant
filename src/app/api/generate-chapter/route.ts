@@ -1,6 +1,6 @@
 
 import { NextResponse } from "next/server";
-import { generateAIContent } from "@/lib/ai-service";
+import { generateAIResponse } from "@/lib/ai-service";
 
 export async function POST(req: Request) {
   try {
@@ -76,7 +76,7 @@ JSON Output Format:
 }
 `;
 
-    const responseText = await generateAIContent(prompt);
+    const responseText = await generateAIResponse(prompt, "json");
 
     // Clean up potential markdown code blocks (```json ... ```)
     const jsonString = responseText.replace(/```json|```/g, "").trim();

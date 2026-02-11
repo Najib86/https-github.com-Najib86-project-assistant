@@ -20,6 +20,9 @@ model User {
   supervises  Project[] @relation("SupervisorProjects")
   comments    Comment[]
   exports     Export[]
+  invites     SupervisorInvite[]
+  memberships ProjectMember[]
+  chapterEdits ChapterVersion[]
   createdAt   DateTime  @default(now())
 }
 
@@ -38,6 +41,8 @@ model Project {
   questionnaires Questionnaire[]
   comments       Comment[]
   exports        Export[]
+  members        ProjectMember[]
+  citations      Citation[]
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
   
@@ -58,6 +63,7 @@ model Chapter {
   status       String    @default("Draft") // Draft / Submitted / Reviewed / Approved
   comments     Comment[]
   plagiarismNotes PlagiarismNote[]
+  versions     ChapterVersion[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
@@ -68,6 +74,8 @@ model Chapter {
 model Comment {
   comment_id   Int       @id @default(autoincrement())
   content      String
+  anchorText   String?  // Text selected for comment
+  positionIndex Int?    // Position in the text
   createdAt    DateTime  @default(now())
   isResolved   Boolean   @default(false)
   
@@ -107,5 +115,48 @@ model PlagiarismNote {
   chapter     Chapter  @relation(fields: [chapterId], references: [chapter_id])
   chapterId   Int
   note        String
+  score       Int      @default(0) // 0-100 similarity score
   createdAt   DateTime @default(now())
+}
+
+model SupervisorInvite {
+  id           Int      @id @default(autoincrement())
+  supervisor   User     @relation(fields: [supervisorId], references: [id])
+  supervisorId Int
+  code         String   @unique
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+}
+
+model ProjectMember {
+  id        Int      @id @default(autoincrement())
+  project   Project  @relation(fields: [projectId], references: [project_id])
+  projectId Int
+  student   User     @relation(fields: [studentId], references: [id])
+  studentId Int
+  role      String   @default("member") // leader / member
+  joinedAt  DateTime @default(now())
+
+  @@unique([projectId, studentId])
+}
+
+model ChapterVersion {
+  id              Int      @id @default(autoincrement())
+  chapter         Chapter  @relation(fields: [chapterId], references: [chapter_id])
+  chapterId       Int
+  contentSnapshot String?  // Content at time of save
+  editedBy        User?    @relation(fields: [editedById], references: [id])
+  editedById      Int?
+  createdAt       DateTime @default(now())
+  versionNumber   Int      @default(1)
+}
+
+model Citation {
+  id         Int      @id @default(autoincrement())
+  project    Project  @relation(fields: [projectId], references: [project_id])
+  projectId  Int
+  style      String   // APA / MLA / IEEE
+  sourceText String
+  formatted  String
+  createdAt  DateTime @default(now())
 }
