@@ -1,10 +1,32 @@
 
 import { NextResponse } from "next/server";
 import { generateAIResponse } from "@/lib/ai-service";
+import { redis } from "@/lib/redis";
+import { rateLimit } from "@/lib/rate-limit";
+import crypto from "crypto";
 
 export async function POST(req: Request) {
   try {
-    const { topic, level, sampleText } = await req.json();
+    const { topic, level, sampleText, userId } = await req.json();
+
+    if (!topic) {
+      return NextResponse.json({ error: "Missing topic" }, { status: 400 });
+    }
+
+    // 1. Rate Limiting
+    if (userId) {
+      await rateLimit(userId.toString());
+    }
+
+    // 2. Redis Caching
+    const topicHash = crypto.createHash("md5").update(topic).digest("hex");
+    const cacheKey = `chapter:full:${topicHash}`;
+
+    const cachedResult = await redis.get(cacheKey);
+    if (cachedResult) {
+      console.log("Serving full project from cache:", cacheKey);
+      return NextResponse.json({ result: cachedResult });
+    }
 
     const prompt = `
 You are an expert university academic research assistant. 
@@ -92,6 +114,9 @@ JSON Output Format:
       );
     }
 
+    // Cache the result
+    await redis.set(cacheKey, parsedData, { ex: 3600 });
+
     return NextResponse.json({ result: parsedData });
 
   } catch (error: any) {
@@ -102,3 +127,4 @@ JSON Output Format:
     );
   }
 }
+
