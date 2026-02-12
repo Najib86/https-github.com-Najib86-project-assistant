@@ -230,6 +230,24 @@ export default function DashboardLayout({
                 <main className="flex-1 px-4 py-8 md:px-8 md:py-12 lg:px-12 lg:py-16 max-w-[1600px] w-full mx-auto">
                     {children}
                 </main>
+
+                <footer className="px-8 py-8 border-t border-gray-100 bg-white/50">
+                    <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex flex-col items-center md:items-start gap-2">
+                            <p className="text-[10px] font-black text-indigo-900/40 uppercase tracking-[0.2em]">
+                                Powered by Synapse Engineering and supplies
+                            </p>
+                            <div className="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                <a href="tel:08028110448" className="hover:text-indigo-600 transition-colors">08028110448</a>
+                                <span className="opacity-30">•</span>
+                                <a href="https://www.synapseengineering.com.ng/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">www.synapseengineering.com.ng</a>
+                            </div>
+                        </div>
+                        <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                            © 2026 ProjectAssistant Platform.
+                        </p>
+                    </div>
+                </footer>
             </div>
         </div>
     );

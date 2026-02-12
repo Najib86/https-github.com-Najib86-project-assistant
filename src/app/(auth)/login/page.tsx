@@ -120,18 +120,7 @@ function LoginForm() {
                         </div>
 
                         <div className="grid grid-cols-1 gap-4 lg:gap-6 w-full pt-4">
-                            {[
-                                {
-                                    icon: <Bot className="w-6 h-6 text-indigo-600" />,
-                                    title: "AI Compliance Check",
-                                    desc: "Automated verification against university standards"
-                                },
-                                {
-                                    icon: <FileCheck className="w-6 h-6 text-indigo-600" />,
-                                    title: "Real-time Supervision",
-                                    desc: "Direct feedback loop between student and supervisor"
-                                }
-                            ].map((feature, idx) => (
+                            {features.map((feature, idx) => (
                                 <div key={idx} className="flex items-start gap-4 p-4 rounded-2xl bg-white/80 border border-white/50 hover:bg-white hover:shadow-lg hover:-translate-y-1 transition-all duration-300 backdrop-blur-sm group">
                                     <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-indigo-50 flex items-center justify-center border border-indigo-100 group-hover:bg-white transition-colors">
                                         {feature.icon}
@@ -257,10 +246,21 @@ function LoginForm() {
                                     Create an account
                                 </Link>
                             </p>
-                            <p className="text-[10px] font-bold text-gray-400 mt-6 uppercase tracking-widest leading-loose">
-                                &copy; 2026 Project Assistant Platform. <br />
-                                <a href="#" className="hover:text-gray-600">Terms</a> &bull; <a href="#" className="hover:text-gray-600">Privacy</a>
-                            </p>
+                            <div className="mt-8 space-y-4">
+                                <p className="text-[10px] font-black text-indigo-900/40 uppercase tracking-[0.2em]">
+                                    Powered by Synapse Engineering and supplies
+                                </p>
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                        <a href="tel:08028110448" className="hover:text-indigo-600 transition-colors">08028110448</a>
+                                        <span className="opacity-30">•</span>
+                                        <a href="https://www.synapseengineering.com.ng/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">www.synapseengineering.com.ng</a>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-2">
+                                        &copy; 2026 Project Assistant Platform.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -204,21 +204,47 @@ export default function Home() {
       </main>
 
       {/* Footer */}
-      <footer className="py-12 bg-gray-50 border-t border-gray-100 relative z-10">
-        <div className="container mx-auto px-6 text-center space-y-6">
-          <div className="flex items-center justify-center gap-2 opacity-80 hover:opacity-100 transition-all cursor-default group">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={24}
-              height={24}
-              className="rounded-md"
-            />
-            <span className="font-bold text-sm">ProjectAssistant</span>
+      <footer className="py-16 bg-white border-t border-gray-100 relative z-10">
+        <div className="container mx-auto px-6 text-center space-y-10">
+          <div className="flex flex-col items-center gap-8">
+            <div className="flex items-center justify-center gap-2 opacity-80 hover:opacity-100 transition-all cursor-default group">
+              <Image
+                src="/logo.png"
+                alt="Logo"
+                width={28}
+                height={28}
+                className="rounded-lg shadow-sm"
+              />
+              <span className="font-black text-lg tracking-tighter">Proj<span className="text-indigo-600">Asst</span></span>
+            </div>
+
+            <div className="space-y-4">
+              <p className="text-indigo-900/40 text-[10px] font-black uppercase tracking-[0.3em]">
+                Powered by Synapse Engineering and supplies
+              </p>
+              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
+                <a href="tel:08028110448" className="flex items-center gap-2 hover:text-indigo-600 transition-colors group">
+                  <span className="w-1 h-1 rounded-full bg-indigo-200 group-hover:bg-indigo-600 transition-colors" />
+                  08028110448
+                </a>
+                <a href="https://www.synapseengineering.com.ng/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-indigo-600 transition-colors group">
+                  <span className="w-1 h-1 rounded-full bg-indigo-200 group-hover:bg-indigo-600 transition-colors" />
+                  synapseengineering.com.ng
+                </a>
+              </div>
+            </div>
           </div>
-          <p className="text-gray-400 text-xs font-bold uppercase tracking-widest">
-            © 2026 ProjectAssistant. Built for the modern researcher.
-          </p>
+
+          <div className="pt-10 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-6 max-w-6xl mx-auto">
+            <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">
+              © 2026 ProjectAssistant Platform. All Rights Reserved.
+            </p>
+            <div className="flex items-center gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+              <a href="#" className="hover:text-indigo-600 transition-colors">Terms</a>
+              <a href="#" className="hover:text-indigo-600 transition-colors">Privacy</a>
+              <a href="#" className="hover:text-indigo-600 transition-colors">Cookies</a>
+            </div>
+          </div>
         </div>
       </footer>
     </div >

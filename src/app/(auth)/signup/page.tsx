@@ -291,10 +291,21 @@ export default function SignupPage() {
                                     Sign in here
                                 </Link>
                             </p>
-                            <p className="text-[10px] font-bold text-gray-400 mt-6 uppercase tracking-widest leading-loose">
-                                &copy; 2026 Project Assistant Platform. <br />
-                                <a href="#" className="hover:text-gray-600">Terms</a> &bull; <a href="#" className="hover:text-gray-600">Privacy</a>
-                            </p>
+                            <div className="mt-8 space-y-4">
+                                <p className="text-[10px] font-black text-indigo-900/40 uppercase tracking-[0.2em]">
+                                    Powered by Synapse Engineering and supplies
+                                </p>
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="flex items-center gap-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
+                                        <a href="tel:08028110448" className="hover:text-indigo-600 transition-colors">08028110448</a>
+                                        <span className="opacity-30">•</span>
+                                        <a href="https://www.synapseengineering.com.ng/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">www.synapseengineering.com.ng</a>
+                                    </div>
+                                    <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-2">
+                                        &copy; 2026 Project Assistant Platform.
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
