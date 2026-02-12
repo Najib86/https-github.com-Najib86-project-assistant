@@ -99,7 +99,7 @@ export default function StudentDashboard() {
                 setGeneratingStatus("AI is generating all project chapters based on your topic...");
             }
 
-            const res = await fetch("/api/projects/create", {
+            const res = await fetch("/api/projects", {
                 method: "POST",
                 body: data,
             });

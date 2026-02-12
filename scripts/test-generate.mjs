@@ -50,7 +50,7 @@ async function testProjectGeneration() {
     // No file upload for this test
 
     try {
-        const projectRes = await fetch(`${BASE_URL}/api/projects/create`, {
+        const projectRes = await fetch(`${BASE_URL}/api/projects`, {
             method: 'POST',
             body: formData,
             headers: formData.getHeaders()
