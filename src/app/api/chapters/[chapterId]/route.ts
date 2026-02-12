@@ -2,7 +2,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: Promise<{ chapterId: string }> }) {
+export async function GET(_: Request, { params }: { params: Promise<{ chapterId: string }> }) {
     try {
         const { chapterId } = await params;
         const chapter = await prisma.chapter.findUnique({

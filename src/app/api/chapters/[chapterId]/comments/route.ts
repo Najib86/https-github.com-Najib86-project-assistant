@@ -2,7 +2,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: Promise<{ chapterId: string }> }) {
+export async function GET(_: Request, { params }: { params: Promise<{ chapterId: string }> }) {
     try {
         const { chapterId } = await params;
         const comments = await prisma.comment.findMany({
@@ -29,7 +29,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ chapterI
 export async function POST(req: Request, { params }: { params: Promise<{ chapterId: string }> }) {
     try {
         const { chapterId } = await params;
-        const { content, userId, anchorText, positionIndex } = await req.json();
+        const { content, userId } = await req.json();
 
         if (!content || !userId) {
             return NextResponse.json({ error: "Content and User ID required" }, { status: 400 });
@@ -40,9 +40,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ chapter
                 chapterId: parseInt(chapterId),
                 userId: parseInt(userId),
                 content,
-                anchorText, // Text selected
-                positionIndex, // Position in content
-                resolved: false,
+                isResolved: false,
                 createdAt: new Date()
             },
             include: {

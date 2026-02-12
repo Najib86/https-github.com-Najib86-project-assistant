@@ -1,8 +1,7 @@
-
 import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
-export async function GET(req: Request, { params }: { params: { projectId: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ projectId: string }> }) {
     try {
         const { projectId } = await params;
         const citations = await prisma.citation.findMany({
@@ -16,7 +15,7 @@ export async function GET(req: Request, { params }: { params: { projectId: strin
     }
 }
 
-export async function POST(req: Request, { params }: { params: { projectId: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
     try {
         const { projectId } = await params;
         const { source, author, year, title, url } = await req.json();

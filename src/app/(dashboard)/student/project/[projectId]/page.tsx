@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useParams, useRouter } from "next/navigation";
-import { Loader2, Plus, Users, ChevronRight, FileText, CheckCircle, AlertCircle, Edit } from "lucide-react"
+import { Loader2, Plus, Users, ChevronRight, FileText, CheckCircle, AlertCircle, Edit, X } from "lucide-react"
 import { cn } from "@/lib/utils";
 
 interface Chapter {
@@ -15,6 +15,14 @@ interface Chapter {
     status: string;
 }
 
+interface Citation {
+    citation_id: number;
+    title?: string;
+    sourceText: string;
+    formatted: string;
+    // other fields if needed
+}
+
 interface User {
     id: number;
     name: string;
@@ -22,7 +30,7 @@ interface User {
 }
 
 interface Member {
-    id: number;
+    member_id: number;
     role: string;
     student: User;
 }
@@ -47,7 +55,7 @@ export default function StudentProjectDetails() {
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
     const [members, setMembers] = useState<Member[]>([]);
-    const [citations, setCitations] = useState<any[]>([]); // Use any for now or define interface
+    const [citations, setCitations] = useState<Citation[]>([]);
     const [showAddCitation, setShowAddCitation] = useState(false);
     const [newCitation, setNewCitation] = useState({ title: "", author: "", year: "", url: "", source: "" });
     const [showAddMember, setShowAddMember] = useState(false);
@@ -89,8 +97,6 @@ export default function StudentProjectDetails() {
             console.error(error);
         }
     }, [projectId]);
-
-
 
     const fetchCitations = useCallback(async () => {
         if (!projectId) return;
@@ -152,6 +158,34 @@ export default function StudentProjectDetails() {
             alert("Failed to add member");
         } finally {
             setAddingMember(false);
+        }
+    };
+
+    const handleDeleteCitation = async (id: number) => {
+        if (!confirm("Are you sure you want to delete this citation?")) return;
+        try {
+            const res = await fetch(`/api/projects/${projectId}/citations/${id}`, {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                setCitations(citations.filter(c => c.citation_id !== id));
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    const handleDeleteMember = async (id: number) => {
+        if (!confirm("Remove this member from the project?")) return;
+        try {
+            const res = await fetch(`/api/projects/${projectId}/members/${id}`, {
+                method: "DELETE"
+            });
+            if (res.ok) {
+                setMembers(members.filter(m => m.member_id !== id));
+            }
+        } catch (error) {
+            console.error(error);
         }
     };
 
@@ -295,7 +329,7 @@ export default function StudentProjectDetails() {
 
                             {/* Members */}
                             {members.map(member => (
-                                <div key={member.id} className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                <div key={member.member_id} className="group relative flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
                                     <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-600 font-bold text-xs ring-2 ring-white shadow-sm">
                                         {member.student.name.charAt(0)}
                                     </div>
@@ -306,6 +340,16 @@ export default function StudentProjectDetails() {
                                     <span className="text-[10px] bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full font-medium">
                                         {member.role}
                                     </span>
+                                    {isOwner && (
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onClick={() => handleDeleteMember(member.member_id)}
+                                            className="absolute right-2 opacity-0 group-hover:opacity-100 h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full"
+                                        >
+                                            <X className="h-3 w-3" />
+                                        </Button>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -335,8 +379,16 @@ export default function StudentProjectDetails() {
                         <div className="space-y-3">
                             {citations.length === 0 && <p className="text-sm text-gray-400 italic">No citations added.</p>}
                             {citations.map(cit => (
-                                <div key={cit.id} className="p-2 hover:bg-gray-50 rounded-lg text-sm text-gray-700 break-words border-l-2 border-transparent hover:border-indigo-600 pl-3 transition-all">
+                                <div key={cit.citation_id} className="group relative p-2 hover:bg-gray-50 rounded-lg text-sm text-gray-700 break-words border-l-2 border-transparent hover:border-indigo-600 pl-3 transition-all">
                                     {cit.formatted || cit.sourceText}
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => handleDeleteCitation(cit.citation_id)}
+                                        className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 h-6 w-6 p-0 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-full"
+                                    >
+                                        <X className="h-3 w-3" />
+                                    </Button>
                                 </div>
                             ))}
                         </div>

@@ -1,8 +1,7 @@
-
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request, { params }: { params: { projectId: string } }) {
+export async function POST(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
     try {
         const { email } = await req.json();
         const { projectId } = await params;
@@ -66,7 +65,7 @@ export async function POST(req: Request, { params }: { params: { projectId: stri
     }
 }
 
-export async function GET(req: Request, { params }: { params: { projectId: string } }) {
+export async function GET(_: Request, { params }: { params: Promise<{ projectId: string }> }) {
     try {
         const { projectId } = await params;
         const members = await prisma.projectMember.findMany({

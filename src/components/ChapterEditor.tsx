@@ -8,8 +8,9 @@ import { Loader2, Save, MessageSquare, History, Check, X, Send, ChevronRight, Al
 import { cn } from "@/lib/utils";
 
 interface Comment {
-    id: number;
+    comment_id: number;
     content: string;
+    isResolved: boolean;
     user: {
         id: number;
         name: string;
@@ -19,7 +20,7 @@ interface Comment {
 }
 
 interface Version {
-    id: number;
+    version_id: number;
     versionNumber: number;
     contentSnapshot: string;
     createdAt: string;
@@ -156,7 +157,7 @@ export default function ChapterEditor({ chapterId, initialContent, initialStatus
         try {
             const res = await fetch(`/api/comments/${commentId}/resolve`, { method: "POST" });
             if (res.ok) {
-                setComments(comments.map(c => c.id === commentId ? { ...c, isResolved: true } : c));
+                setComments(comments.map(c => c.comment_id === commentId ? { ...c, isResolved: true } : c));
             }
         } catch (error) {
             console.error("Failed to resolve", error);
@@ -236,7 +237,7 @@ export default function ChapterEditor({ chapterId, initialContent, initialStatus
                             <h3 className="font-bold text-gray-900">Version History</h3>
                             {versions.length === 0 ? <p className="text-gray-500">No versions saved yet.</p> : (
                                 versions.map(v => (
-                                    <div key={v.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                    <div key={v.version_id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
                                         <div>
                                             <p className="font-bold text-sm">Version {v.versionNumber}</p>
                                             <p className="text-xs text-gray-500">{new Date(v.createdAt).toLocaleString()}</p>
@@ -282,7 +283,7 @@ export default function ChapterEditor({ chapterId, initialContent, initialStatus
                         <div className="text-center py-8 text-gray-400 text-sm">No comments yet.</div>
                     ) : (
                         comments.map(comment => (
-                            <div key={comment.id} className={cn("rounded-lg p-3 border", comment.isResolved ? "bg-green-50 border-green-100 opacity-60" : "bg-gray-50 border-gray-100")}>
+                            <div key={comment.comment_id} className={cn("rounded-lg p-3 border", comment.isResolved ? "bg-green-50 border-green-100 opacity-60" : "bg-gray-50 border-gray-100")}>
                                 <div className="flex items-center justify-between mb-1">
                                     <div className="flex items-center gap-2">
                                         <span className="font-bold text-xs text-gray-900">{comment.user.name}</span>
@@ -292,7 +293,7 @@ export default function ChapterEditor({ chapterId, initialContent, initialStatus
                                 </div>
                                 <p className="text-sm text-gray-700">{comment.content}</p>
                                 {!comment.isResolved && role === 'supervisor' && (
-                                    <Button variant="ghost" size="sm" onClick={() => handleResolveComment(comment.id)} className="mt-2 h-6 text-xs w-full justify-start px-2 text-green-600 hover:text-green-700 hover:bg-green-50">
+                                    <Button variant="ghost" size="sm" onClick={() => handleResolveComment(comment.comment_id)} className="mt-2 h-6 text-xs w-full justify-start px-2 text-green-600 hover:text-green-700 hover:bg-green-50">
                                         <Check className="h-3 w-3 mr-1" />
                                         Mark as Resolved
                                     </Button>

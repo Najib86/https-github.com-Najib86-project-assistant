@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { GraduationCap, ArrowRight, Sparkles, Brain, Shield, Upload } from "lucide-react";
+import { GraduationCap, ArrowRight, Sparkles, Brain, Shield, FileCheck } from "lucide-react";
 import { HeroCarousel } from "@/components/HeroCarousel";
 
 export default function Home() {
@@ -41,60 +41,115 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-1 relative z-10">
+      <main className="flex-1 relative z-10 w-full">
         {/* Hero Section */}
-        <section className="relative pt-20 pb-32 md:pt-32 md:pb-52 px-6 overflow-hidden">
+        <section className="relative pt-20 pb-32 md:pt-40 md:pb-60 px-6 overflow-hidden min-h-[90vh] flex items-center">
           <HeroCarousel />
 
-          <div className="container mx-auto relative z-10">
-            <div className="max-w-4xl text-left space-y-10 animate-in fade-in slide-in-from-left-8 duration-1000">
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-indigo-50/80 backdrop-blur-md border border-indigo-100 text-indigo-600 text-[10px] font-black uppercase tracking-widest shadow-sm">
-                <Sparkles className="h-3 w-3" />
-                Your AI Research Architect
-              </div>
-
-              <h1 className="text-6xl md:text-8xl font-black tracking-tight text-gray-900 leading-[0.9]">
-                Generate complete <br />
-                academic projects <br />
-                <span className="text-indigo-600">instantly.</span>
-              </h1>
-
-              <p className="text-xl md:text-2xl text-gray-600 max-w-2xl font-medium leading-relaxed">
-                Transform your research topic into a structured, university-grade project in minutes. From abstract to conclusion, we handle the heavy lifting.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                <Button size="lg" asChild className="w-full sm:w-auto rounded-2xl px-10 py-8 text-xl font-black shadow-2xl shadow-indigo-200 group">
-                  <Link href="/signup" className="flex items-center gap-2">
-                    Get Started Free
-                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild className="w-full sm:w-auto rounded-2xl px-10 py-8 text-xl font-bold border-gray-200 bg-white/50 backdrop-blur-md shadow-sm hover:bg-white text-gray-700">
-                  <Link href="/upload" className="flex items-center gap-2">
-                    <Upload className="h-5 w-5" />
-                    Upload Past Project
-                  </Link>
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-6 pt-12 border-t border-gray-200/50">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map((i) => (
-                    <div key={i} className="h-12 w-12 rounded-full border-2 border-white bg-gray-100 overflow-hidden shadow-md">
-                      <Image
-                        src={`https://i.pravatar.cc/100?u=${i + 10}`}
-                        alt="User"
-                        width={48}
-                        height={48}
-                        className="grayscale hover:grayscale-0 transition-all duration-300"
-                      />
-                    </div>
-                  ))}
+          <div className="max-w-[1440px] mx-auto w-full relative z-10">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-24 items-center">
+              <div className="lg:col-span-7 space-y-12 animate-in fade-in slide-in-from-left-12 duration-1000">
+                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-indigo-100 text-indigo-600 text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-50/20">
+                  <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
+                  Your AI Research Architect
                 </div>
-                <div>
-                  <p className="text-sm font-black text-gray-900 leading-none">Joined by 2,000+ students</p>
-                  <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Across Nigerian Universities</p>
+
+                <h1 className="text-6xl md:text-7xl xl:text-8xl font-black tracking-tighter text-gray-900 leading-[0.85]">
+                  Academic projects <br />
+                  <span className="text-indigo-600">reimagined.</span>
+                </h1>
+
+                <p className="text-xl md:text-2xl text-gray-600 max-w-2xl font-medium leading-relaxed">
+                  Transform complex research topics into structured, university-grade documents in minutes. Smart outlines, citations, and full chapters generated instantly.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-5 pt-8">
+                  <Button size="lg" asChild className="w-full sm:w-auto rounded-2xl px-12 py-10 text-xl font-black shadow-2xl shadow-indigo-300 transition-all hover:-translate-y-1 hover:shadow-indigo-400 group h-auto">
+                    <Link href="/signup" className="flex items-center gap-3">
+                      Start Your Project
+                      <ArrowRight className="h-6 w-6 transition-transform group-hover:translate-x-2" />
+                    </Link>
+                  </Button>
+                </div>
+
+                <div className="flex items-center gap-8 pt-16 border-t border-gray-200/60 max-w-md">
+                  <div className="flex -space-x-4">
+                    {[10, 15, 20, 25].map((u) => (
+                      <div key={u} className="h-14 w-14 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-xl">
+                        <Image
+                          src={`https://i.pravatar.cc/100?u=${u}`}
+                          alt="User"
+                          width={56}
+                          height={56}
+                          className="grayscale hover:grayscale-0 transition-all duration-500"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((s) => (
+                        <Sparkles key={s} className="w-3 h-3 text-amber-500 fill-amber-500" />
+                      ))}
+                    </div>
+                    <p className="text-sm font-black text-gray-900">2,000+ Students</p>
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nigeria&apos;s #1 AI Tool</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Desktop Desktop Visual Column */}
+              <div className="hidden lg:block lg:col-span-5 relative animate-in zoom-in-95 fade-in duration-1000 delay-300">
+                <div className="relative">
+                  {/* Floating Notification */}
+                  <div className="absolute -top-12 -left-8 z-20 animate-bounce transition-all duration-[3000ms]">
+                    <div className="bg-white p-4 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-4">
+                      <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white">
+                        <FileCheck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Status</p>
+                        <p className="text-xs font-bold text-gray-900 mt-1">Chapter 1 Complete</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Main Preview Card */}
+                  <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] border border-white shadow-2xl shadow-indigo-100/50 p-8 transform rotate-2 hover:rotate-0 transition-all duration-700">
+                    <div className="space-y-6">
+                      <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-8 h-8 bg-indigo-100 rounded-lg" />
+                          <div className="w-24 h-3 bg-gray-100 rounded-full" />
+                        </div>
+                        <div className="flex gap-2">
+                          <div className="w-4 h-4 rounded-full bg-red-100" />
+                          <div className="w-4 h-4 rounded-full bg-amber-100" />
+                          <div className="w-4 h-4 rounded-full bg-green-100" />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <div className="w-full h-4 bg-indigo-50 rounded-full" />
+                        <div className="w-3/4 h-4 bg-gray-50 rounded-full" />
+                        <div className="grid grid-cols-3 gap-3">
+                          <div className="h-20 bg-gray-50 rounded-2xl" />
+                          <div className="h-20 bg-gray-50 rounded-2xl" />
+                          <div className="h-20 bg-indigo-50/50 border border-indigo-100 rounded-2xl p-3 flex flex-col justify-end">
+                            <div className="w-full h-2 bg-indigo-200 rounded-full" />
+                          </div>
+                        </div>
+                        <div className="w-full h-32 bg-gray-50 rounded-3xl" />
+                      </div>
+                      <div className="pt-4 flex justify-end">
+                        <div className="px-6 py-3 bg-indigo-600 rounded-xl text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-200">
+                          Finalizing Thesis
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Glass Card Underneath */}
+                  <div className="absolute -bottom-16 -right-8 w-64 h-64 bg-white/40 backdrop-blur-md rounded-[3rem] -z-10 border border-white/50" />
                 </div>
               </div>
             </div>

@@ -2,7 +2,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function GET(req: Request, { params }: { params: Promise<{ chapterId: string }> }) {
+export async function GET(_: Request, { params }: { params: Promise<{ chapterId: string }> }) {
     try {
         const { chapterId } = await params;
         const versions = await prisma.chapterVersion.findMany({
@@ -17,7 +17,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ chapterI
     }
 }
 
-export async function POST(req: Request, { params }: { params: Promise<{ chapterId: string }> }) {
+export async function POST(_: Request, { params }: { params: Promise<{ chapterId: string }> }) {
     try {
         const { chapterId } = await params;
         // Allows forcing a version creation manually via API if needed

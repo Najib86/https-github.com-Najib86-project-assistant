@@ -2,7 +2,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request, { params }: { params: { commentId: string } }) {
+export async function POST(_: Request, { params }: { params: Promise<{ commentId: string }> }) {
     try {
         const { commentId } = await params;
         const resolved = await prisma.comment.update({
