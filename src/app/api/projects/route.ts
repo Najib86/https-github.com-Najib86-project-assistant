@@ -2,7 +2,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import * as mammoth from "mammoth";
-import pdf from "pdf-parse/lib/pdf-parse.js";
+import { PDFParse } from "pdf-parse";
 import { generateChapterContent, CHAPTERS_LIST } from "@/lib/ai-service";
 
 export async function GET(req: Request) {
@@ -15,7 +15,7 @@ export async function GET(req: Request) {
     }
 
     try {
-        const where: any = {};
+        const where: { studentId?: number; supervisorId?: number } = {};
         if (studentId) where.studentId = parseInt(studentId);
         if (supervisorId) where.supervisorId = parseInt(supervisorId);
 
@@ -56,7 +56,8 @@ export async function POST(req: Request) {
             try {
                 const buffer = Buffer.from(await file.arrayBuffer());
                 if (file.type === "application/pdf") {
-                    const data = await pdf(buffer);
+                    const parser = new PDFParse({ data: buffer });
+                    const data = await parser.getText();
                     extractedText = data.text;
                 } else if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
                     const result = await mammoth.extractRawText({ buffer: buffer });
