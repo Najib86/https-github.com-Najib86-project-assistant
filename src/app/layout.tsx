@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ProjectAssistant | Academic Writing & Supervisor Support",
+  title: "PROJECTASSISTANTAI | AI for Final Year Projects and Academic Research",
   description: "AI-powered platform for university project writing and supervision.",
 };
 

@@ -108,11 +108,11 @@ function LoginForm() {
 
                         <div className="space-y-4">
                             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black tracking-tight text-gray-900 leading-[1.1]">
-                                Project Assistant <br />
+                                PROJECTASSISTANTAI <br />
                                 <span className="text-indigo-600">Platform</span>
                             </h1>
                             <p className="text-lg lg:text-xl font-medium text-gray-600 leading-relaxed">
-                                AI Academic Project & Compliance Management
+                                AI for Final Year Projects and Academic Research
                             </p>
                             <p className="text-sm lg:text-base text-gray-500 leading-relaxed max-w-md">
                                 Reconnect with your academic progress and oversee project developments with ease.
@@ -285,7 +285,7 @@ function LoginForm() {
                                         <a href="https://www.synapseengineering.com.ng/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">www.synapseengineering.com.ng</a>
                                     </div>
                                     <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-2">
-                                        &copy; 2026 Project Assistant Platform.
+                                        &copy; 2026 PROJECTASSISTANTAI Platform.
                                     </p>
                                 </div>
                             </div>
