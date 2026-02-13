@@ -2,7 +2,8 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/lib/db";
-import prisma from "@/lib/prisma"
+import prisma from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -23,13 +24,18 @@ export const authOptions: NextAuthOptions = {
                     where: { email: credentials.email }
                 });
 
-                // WARNING: In production, use bcrypt or similar to hash and compare passwords
-                if (user && user.password === credentials.password) {
+                if (!user || !user.password) return null;
+
+                // Compare hashed password
+                const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+
+                if (isValidPassword) {
                     return {
                         id: user.id.toString(),
                         name: user.name,
                         email: user.email,
                         role: user.role,
+                        emailVerified: user.email_verified,
                     };
                 }
                 return null;
@@ -40,32 +46,59 @@ export const authOptions: NextAuthOptions = {
         async signIn({ user, account }) {
             if (account?.provider === "google") {
                 try {
-                    await db`
-            UPDATE users
-            SET email_verified=true
-            WHERE email=${user.email}
-          `;
+                    // Check if user exists
+                    const existingUser = await prisma.user.findUnique({
+                        where: { email: user.email! }
+                    });
+
+                    if (existingUser) {
+                        // Update existing user
+                        await prisma.user.update({
+                            where: { email: user.email! },
+                            data: {
+                                email_verified: true,
+                                provider: "google"
+                            }
+                        });
+                    } else {
+                        // Create new user from Google OAuth
+                        await prisma.user.create({
+                            data: {
+                                name: user.name || "",
+                                email: user.email!,
+                                email_verified: true,
+                                provider: "google",
+                                role: "student" // Default role
+                            }
+                        });
+                    }
                 } catch (error) {
-                    console.error("Error auto-verifying Google user:", error);
+                    console.error("Error handling Google user:", error);
+                    return false;
                 }
             }
             return true;
         },
         async jwt({ token, user }) {
             if (user) {
+                token.id = user.id;
                 token.email = user.email;
                 // @ts-ignore
                 token.role = user.role;
+                // @ts-ignore
+                token.emailVerified = user.emailVerified;
             }
             return token;
         },
         async session({ session, token }) {
-            if (token?.email) {
-                if (session.user) {
-                    session.user.email = token.email as string;
-                    // @ts-ignore
-                    session.user.role = token.role as string;
-                }
+            if (token && session.user) {
+                // @ts-ignore
+                session.user.id = token.id as string;
+                session.user.email = token.email as string;
+                // @ts-ignore
+                session.user.role = token.role as string;
+                // @ts-ignore
+                session.user.emailVerified = token.emailVerified as boolean;
             }
             return session;
         },
@@ -75,7 +108,8 @@ export const authOptions: NextAuthOptions = {
     },
     secret: process.env.NEXTAUTH_SECRET,
     pages: {
-        signIn: "/login",
+        signIn: "/auth/login",
+        error: "/auth/login",
     },
 };
 

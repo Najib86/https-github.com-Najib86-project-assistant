@@ -1,0 +1,151 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED")
+}
+
+model User {
+  id                Int                @id @default(autoincrement())
+  name              String
+  email             String             @unique
+  password          String
+  role              String             @default("student")
+  department        String?
+  email_verified    Boolean            @default(false) @map("email_verified")
+  createdAt         DateTime           @default(now())
+  comments          Comment[]
+  exports           Export[]
+  projects          Project[]          @relation("StudentProjects")
+  supervises        Project[]          @relation("SupervisorProjects")
+  projectMembers    ProjectMember[]
+  supervisorInvites SupervisorInvite[]
+
+  @@map("users")
+}
+
+model SupervisorInvite {
+  invite_id    Int      @id @default(autoincrement())
+  code         String   @unique
+  supervisorId Int
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+  supervisor   User     @relation(fields: [supervisorId], references: [id])
+}
+
+model Project {
+  project_id       Int             @id @default(autoincrement())
+  title            String
+  level            String
+  type             String
+  status           String          @default("Draft")
+  studentId        Int
+  supervisorId     Int?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  methodology      String?
+  objectives       String?
+  problemStatement String?
+  referenceText    String?
+  chapters         Chapter[]
+  citations        Citation[]
+  comments         Comment[]
+  exports          Export[]
+  student          User            @relation("StudentProjects", fields: [studentId], references: [id])
+  supervisor       User?           @relation("SupervisorProjects", fields: [supervisorId], references: [id])
+  members          ProjectMember[]
+  questionnaires   Questionnaire[]
+}
+
+model Chapter {
+  chapter_id      Int              @id @default(autoincrement())
+  projectId       Int
+  chapterNumber   Int
+  title           String?
+  content         String?
+  status          String           @default("Draft")
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  project         Project          @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+  versions        ChapterVersion[]
+  comments        Comment[]
+  plagiarismNotes PlagiarismNote[]
+
+  @@unique([projectId, chapterNumber])
+}
+
+model ChapterVersion {
+  chapterId       Int
+  contentSnapshot String
+  createdAt       DateTime @default(now())
+  versionNumber   Int
+  version_id      Int      @id @default(autoincrement())
+  chapter         Chapter  @relation(fields: [chapterId], references: [chapter_id], onDelete: Cascade)
+}
+
+model Comment {
+  comment_id Int      @id @default(autoincrement())
+  content    String
+  createdAt  DateTime @default(now())
+  isResolved Boolean  @default(false)
+  userId     Int
+  projectId  Int?
+  chapterId  Int?
+  chapter    Chapter? @relation(fields: [chapterId], references: [chapter_id])
+  project    Project? @relation(fields: [projectId], references: [project_id])
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Questionnaire {
+  questionnaire_id Int      @id @default(autoincrement())
+  projectId        Int
+  section          String
+  question         String
+  questionType     String
+  createdAt        DateTime @default(now())
+  project          Project  @relation(fields: [projectId], references: [project_id])
+}
+
+model Export {
+  export_id    Int      @id @default(autoincrement())
+  projectId    Int
+  exportedById Int
+  exportType   String
+  exportedAt   DateTime @default(now())
+  exportedBy   User     @relation(fields: [exportedById], references: [id])
+  project      Project  @relation(fields: [projectId], references: [project_id])
+}
+
+model PlagiarismNote {
+  note_id   Int      @id @default(autoincrement())
+  chapterId Int
+  note      String
+  createdAt DateTime @default(now())
+  score     Int      @default(0)
+  chapter   Chapter  @relation(fields: [chapterId], references: [chapter_id])
+}
+
+model Citation {
+  projectId   Int
+  style       String   @default("APA")
+  sourceText  String
+  formatted   String
+  createdAt   DateTime @default(now())
+  citation_id Int      @id @default(autoincrement())
+  project     Project  @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+}
+
+model ProjectMember {
+  projectId Int
+  studentId Int
+  role      String   @default("member")
+  joinedAt  DateTime @default(now())
+  member_id Int      @id @default(autoincrement())
+  project   Project  @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+

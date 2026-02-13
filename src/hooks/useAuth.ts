@@ -1,0 +1,15 @@
+import { useSession } from "next-auth/react";
+
+export function useAuth() {
+    const { data: session, status } = useSession();
+    
+    return {
+        user: session?.user,
+        // @ts-ignore
+        role: session?.user?.role as "student" | "supervisor" | undefined,
+        // @ts-ignore
+        userId: session?.user?.id,
+        isLoading: status === "loading",
+        isAuthenticated: status === "authenticated",
+    };
+}
