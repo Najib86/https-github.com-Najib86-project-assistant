@@ -102,16 +102,16 @@ function LoginForm() {
                 <div className="relative z-10 w-full max-w-lg">
                     <div className="space-y-6 lg:space-y-8">
                         <div className="flex items-center gap-3 mb-8 lg:mb-12">
-                            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100">
+                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg border border-gray-100">
                                 <Image
                                     src="/logo.png"
                                     alt="Logo"
-                                    width={28}
-                                    height={28}
-                                    className="brightness-0 invert"
+                                    width={32}
+                                    height={32}
+                                    className="rounded-lg"
                                 />
                             </div>
-                            <span className="text-xl font-black text-gray-900 tracking-tighter">PROJECTASSISTANTAI</span>
+                            <span className="text-xl font-black text-gray-900 tracking-tighter uppercase">PROJECTASSISTANTAI</span>
                         </div>
 
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-indigo-100 shadow-sm mb-4">
@@ -167,13 +167,13 @@ function LoginForm() {
                 <div className="w-full max-w-[480px] py-12 lg:py-0">
                     <div className="bg-white rounded-[2.5rem] lg:shadow-2xl lg:shadow-indigo-100/50 lg:border border-gray-100 p-8 lg:p-12 relative">
                         <div className="flex flex-col items-center gap-3 mb-10">
-                            <div className="w-16 h-16 bg-indigo-600 rounded-[1.25rem] flex items-center justify-center mb-2 shadow-xl shadow-indigo-200">
+                            <div className="w-20 h-20 bg-white rounded-[1.5rem] flex items-center justify-center mb-2 shadow-xl shadow-indigo-100/50 border border-gray-100">
                                 <Image
                                     src="/logo.png"
                                     alt="Logo"
-                                    width={40}
-                                    height={40}
-                                    className="brightness-0 invert"
+                                    width={56}
+                                    height={56}
+                                    className=""
                                 />
                             </div>
                             <h2 className="text-3xl font-black text-gray-900 tracking-tight">Welcome Back</h2>

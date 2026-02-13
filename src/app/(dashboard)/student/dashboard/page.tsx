@@ -4,9 +4,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { PlusCircle, Loader2, BookOpen, X } from "lucide-react"
+import { PlusCircle, Loader2, X } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 interface Project {
     project_id: number;
@@ -143,9 +144,15 @@ export default function StudentDashboard() {
 
             {/* Empty State */}
             {projects.length === 0 && !showCreateModal ? (
-                <div className="flex flex-col items-center justify-center p-8 md:p-12 border-2 border-dashed rounded-2xl bg-gray-50/50">
-                    <div className="bg-indigo-100/80 p-5 rounded-full mb-4">
-                        <BookOpen className="h-8 w-8 text-indigo-600" />
+                <div className="flex flex-col items-center justify-center p-8 md:p-12 border-2 border-dashed rounded-[2rem] bg-gray-50/50 border-gray-100">
+                    <div className="bg-white p-6 rounded-[1.5rem] mb-6 shadow-xl shadow-indigo-100/50 border border-gray-100">
+                        <Image
+                            src="/logo.png"
+                            alt="Logo"
+                            width={64}
+                            height={64}
+                            className=""
+                        />
                     </div>
                     <h2 className="text-xl font-bold text-gray-900 mb-2">No Projects Yet</h2>
                     <p className="text-sm md:text-base text-gray-500 mb-6 text-center max-w-sm px-4">

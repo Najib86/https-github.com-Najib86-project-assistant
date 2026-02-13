@@ -8,6 +8,7 @@ import ChapterEditor from "@/components/ChapterEditor";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const CHAPTERS_LIST = [
     { id: 1, title: "Abstract", hint: "Summary of the entire project, including problem, method, results, and conclusion." },
@@ -304,12 +305,18 @@ function ChapterWriterContent() {
                     )}>
                         <div className="p-5 border-b bg-indigo-600 flex justify-between items-center lg:rounded-none">
                             <div className="flex items-center gap-3">
-                                <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
-                                    <Wand2 className="h-5 w-5 text-white" />
+                                <div className="bg-white rounded-xl p-1.5 shadow-sm">
+                                    <Image
+                                        src="/logo.png"
+                                        alt="Logo"
+                                        width={24}
+                                        height={24}
+                                        className="rounded-md"
+                                    />
                                 </div>
                                 <div>
                                     <h3 className="font-black text-white text-sm uppercase tracking-widest">AI Copilot</h3>
-                                    <p className="text-[10px] text-indigo-100 font-medium">Drafting Assistant</p>
+                                    <p className="text-[10px] text-indigo-100 font-medium">PROJECTASSISTANTAI</p>
                                 </div>
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => setShowAiPanel(false)} className="text-white hover:bg-white/10 rounded-full">
