@@ -36,3 +36,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ projectId:
         return NextResponse.json({ error: "Failed to fetch project" }, { status: 500 });
     }
 }
+
+export async function POST() {
+    return new Response("Method Not Allowed", { status: 405 });
+}
