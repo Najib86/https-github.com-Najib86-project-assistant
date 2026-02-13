@@ -31,11 +31,6 @@ const studentItems: NavItem[] = [
     { href: "/student/questionnaire", icon: MessageSquare, label: "Interview Bot" },
 ];
 
-export const metadata: Metadata = {
-    title: "PROJECTASSISTANTAI | AI for Final Year Projects and Academic Research",
-    description: "AI-powered platform for university project writing and supervision.",
-};
-
 const supervisorItems: NavItem[] = [
     { href: "/supervisor/dashboard", icon: Users, label: "Student Panel" },
     { href: "/supervisor/review", icon: CheckSquare, label: "Review Tasks" },

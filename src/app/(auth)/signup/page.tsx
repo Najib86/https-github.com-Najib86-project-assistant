@@ -97,6 +97,19 @@ export default function SignupPage() {
 
                 <div className="relative z-10 w-full max-w-lg">
                     <div className="space-y-6 lg:space-y-8">
+                        <div className="flex items-center gap-3 mb-8 lg:mb-12">
+                            <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-100">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Logo"
+                                    width={28}
+                                    height={28}
+                                    className="brightness-0 invert"
+                                />
+                            </div>
+                            <span className="text-xl font-black text-gray-900 tracking-tighter">PROJECTASSISTANTAI</span>
+                        </div>
+
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-indigo-100 shadow-sm mb-4">
                             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                             <span className="text-xs font-semibold text-indigo-900 tracking-wide uppercase">New Session Open</span>

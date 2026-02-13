@@ -15,7 +15,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {},
   turbopack: {
-    root: "./",
+    // Ensuring an absolute path for Turbopack root to avoid multi-root workspace detection issues
+    root: typeof process !== 'undefined' ? process.cwd() : "./",
   },
 };
 

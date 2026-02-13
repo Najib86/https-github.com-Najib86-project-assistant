@@ -27,7 +27,7 @@ export default function Home() {
               className="rounded-lg transition-transform group-hover:scale-110"
             />
             <span className="font-black text-xl tracking-tighter text-gray-900">
-              Proj<span className="text-indigo-600">Asst</span>
+              PROJECTASSISTANTAI
             </span>
           </Link>
         </div>
@@ -51,7 +51,7 @@ export default function Home() {
               <div className="lg:col-span-7 space-y-12 animate-in fade-in slide-in-from-left-12 duration-1000">
                 <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-indigo-100 text-indigo-600 text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-50/20">
                   <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-                  Your AI Research Architect
+                  AI for Final Year Projects and Academic Research
                 </div>
 
                 <h1 className="text-6xl md:text-7xl xl:text-8xl font-black tracking-tighter text-gray-900 leading-[0.85]">
@@ -215,7 +215,7 @@ export default function Home() {
                 height={28}
                 className="rounded-lg shadow-sm"
               />
-              <span className="font-black text-lg tracking-tighter">Proj<span className="text-indigo-600">Asst</span></span>
+              <span className="font-black text-lg tracking-tighter">PROJECTASSISTANTAI</span>
             </div>
 
             <div className="space-y-4">
@@ -237,7 +237,7 @@ export default function Home() {
 
           <div className="pt-10 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-6 max-w-6xl mx-auto">
             <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-              © 2026 ProjectAssistant Platform. All Rights Reserved.
+              © 2026 PROJECTASSISTANTAI Platform. All Rights Reserved.
             </p>
             <div className="flex items-center gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               <a href="#" className="hover:text-indigo-600 transition-colors">Terms</a>
