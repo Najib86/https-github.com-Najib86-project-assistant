@@ -166,7 +166,7 @@ function LoginForm() {
             <div className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 xl:p-20 order-1 lg:order-2 bg-white min-h-screen lg:min-h-0 overflow-y-auto">
                 <div className="w-full max-w-[480px] py-12 lg:py-0">
                     <div className="bg-white rounded-[2.5rem] lg:shadow-2xl lg:shadow-indigo-100/50 lg:border border-gray-100 p-8 lg:p-12 relative">
-                        <div className="flex flex-col items-center gap-3 mb-10">
+                        <div className="flex flex-col items-center md:items-start gap-2">
                             <div className="w-20 h-20 bg-white rounded-[1.5rem] flex items-center justify-center mb-2 shadow-xl shadow-indigo-100/50 border border-gray-100">
                                 <Image
                                     src="/logo.png"

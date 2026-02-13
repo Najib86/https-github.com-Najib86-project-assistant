@@ -215,13 +215,13 @@ export default function DashboardLayout({
                     </div>
                 </header>
 
-                <main className="flex-1 px-4 py-8 md:px-8 md:py-12 lg:px-12 lg:py-16 max-w-[1600px] w-full mx-auto">
+                <main className="flex-1 px-4 py-6 md:px-8 md:py-8 lg:px-10 lg:py-10 max-w-[1600px] w-full mx-auto">
                     {children}
                 </main>
 
                 <footer className="px-8 py-8 border-t border-gray-100 bg-white/50">
                     <div className="max-w-[1600px] mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex flex-col items-center md:items-start gap-2">
+                        <div className="flex flex-col items-center gap-3 mb-8">
                             <p className="text-[10px] font-black text-indigo-900/40 uppercase tracking-[0.2em]">
                                 Powered by Synapse Engineering and supplies
                             </p>

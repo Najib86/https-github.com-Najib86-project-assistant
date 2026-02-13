@@ -11,12 +11,16 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-[#fafbfc] overflow-x-hidden">
       {/* Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-200/30 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[10%] right-[-5%] w-[30%] h-[30%] bg-purple-200/20 rounded-full blur-[100px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-200/40 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[40%] bg-purple-200/30 rounded-full blur-[100px]" />
+        {/* Added a subtle center glow to reduce blank feel */}
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-blue-50/50 rounded-full blur-[140px]" />
+        {/* Subtle pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: `radial-gradient(#4f46e5 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }} />
       </div>
 
       {/* Header */}
-      <header className="px-6 md:px-12 h-20 flex items-center justify-between sticky top-0 bg-white/70 backdrop-blur-xl z-50 border-b border-gray-100">
+      <header className="px-6 md:px-12 h-16 md:h-18 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-100/50">
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3 group">
             <Image
@@ -43,12 +47,12 @@ export default function Home() {
 
       <main className="flex-1 relative z-10 w-full">
         {/* Hero Section */}
-        <section className="relative pt-20 pb-32 md:pt-40 md:pb-60 px-6 overflow-hidden min-h-[90vh] flex items-center">
+        <section className="relative pt-12 pb-20 md:pt-24 md:pb-32 px-6 overflow-hidden min-h-[85vh] flex items-center">
           <HeroCarousel />
 
           <div className="max-w-[1440px] mx-auto w-full relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-24 items-center">
-              <div className="lg:col-span-7 space-y-12 animate-in fade-in slide-in-from-left-12 duration-1000">
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20 items-center">
+              <div className="lg:col-span-7 space-y-8 md:space-y-10 animate-in fade-in slide-in-from-left-12 duration-1000">
                 <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-indigo-100 text-indigo-600 text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-50/20">
                   <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
                   AI for Final Year Projects and Academic Research
@@ -72,7 +76,7 @@ export default function Home() {
                   </Button>
                 </div>
 
-                <div className="flex items-center gap-8 pt-16 border-t border-gray-200/60 max-w-md">
+                <div className="flex items-center gap-6 pt-12 border-t border-gray-200/60 max-w-md">
                   <div className="flex -space-x-4">
                     {[10, 15, 20, 25].map((u) => (
                       <div key={u} className="h-14 w-14 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-xl">
@@ -157,11 +161,11 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-32 bg-white relative">
+        <section id="features" className="py-20 md:py-28 bg-[#fafbfc]/80 backdrop-blur-sm relative border-y border-gray-100/50">
           <div className="container px-6 mx-auto">
-            <div className="text-center mb-20 space-y-4">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600">The Powerhouse</h2>
-              <p className="text-4xl md:text-5xl font-black text-gray-900">Everything you need to <br className="hidden md:block" /> finish your degree.</p>
+            <div className="text-center mb-16 space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 opacity-80">The Powerhouse</h2>
+              <p className="text-3xl md:text-5xl font-black text-gray-900 leading-tight">Everything you need to <br className="hidden md:block" /> finish your degree.</p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
@@ -188,7 +192,7 @@ export default function Home() {
                   textColor: "text-green-600"
                 }
               ].map((feature, i) => (
-                <div key={i} className="flex flex-col p-10 rounded-[2.5rem] bg-gray-50/50 border border-gray-100 hover:border-indigo-200 hover:bg-white hover:shadow-2xl transition-all duration-500 group">
+                <div key={i} className="flex flex-col p-8 rounded-[2rem] bg-white border border-gray-100 hover:border-indigo-200 hover:shadow-2xl hover:shadow-indigo-100/40 transition-all duration-500 group">
                   <div className={cn(feature.color, "p-5 rounded-2xl w-fit mb-8 transition-transform group-hover:scale-110 shadow-sm")}>
                     <feature.icon className={cn(feature.textColor, "h-8 w-8")} />
                   </div>
@@ -201,11 +205,36 @@ export default function Home() {
             </div>
           </div>
         </section>
+        {/* CTA Section */}
+        <section className="py-20 px-6 relative overflow-hidden">
+          <div className="absolute inset-0 bg-indigo-600 -z-10" />
+          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-blue-600 to-indigo-800 -z-10 opacity-90" />
+          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
+            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-white/10 rounded-full blur-[100px]" />
+          </div>
+
+          <div className="max-w-4xl mx-auto text-center space-y-8 py-10">
+            <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
+              Ready to graduate with <br className="hidden md:block" /> a world-class project?
+            </h2>
+            <p className="text-indigo-100 text-lg md:text-xl font-medium max-w-2xl mx-auto opacity-90">
+              Join thousands of students across Nigeria who are using PROJECTASSISTANTAI to streamline their research and writing.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
+              <Button size="lg" asChild className="bg-white text-indigo-600 hover:bg-gray-50 rounded-2xl px-10 h-16 text-lg font-black shadow-2xl">
+                <Link href="/signup">Get Started Now</Link>
+              </Button>
+              <Button size="lg" variant="outline" asChild className="border-indigo-200 text-white hover:bg-white/10 rounded-2xl px-10 h-16 text-lg font-black">
+                <Link href="/login">View Demo</Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Footer */}
-      <footer className="py-16 bg-white border-t border-gray-100 relative z-10">
-        <div className="container mx-auto px-6 text-center space-y-10">
+      <footer className="py-12 bg-white border-t border-gray-100 relative z-10">
+        <div className="container mx-auto px-6 text-center space-y-8">
           <div className="flex flex-col items-center gap-8">
             <div className="flex items-center justify-center gap-2 opacity-80 hover:opacity-100 transition-all cursor-default group">
               <Image
