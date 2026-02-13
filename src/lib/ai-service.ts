@@ -1,11 +1,14 @@
 import Groq from "groq-sdk";
 import prisma from "@/lib/prisma";
 import { GEMINI_API_ENDPOINT } from "./constants";
+import { google } from "@ai-sdk/google";
+import { streamText } from "ai";
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const groqApiKey = process.env.GROQ_API_KEY;
 const openRouterApiKey = process.env.OPENROUTER_API_KEY;
 const hfApiKey = process.env.HUGGINGFACE_API_TOKEN;
+
 
 export const CHAPTERS_LIST = [
     { id: 1, title: "Abstract" },
@@ -244,6 +247,13 @@ async function generateMock(prompt: string, mode: string = "text"): Promise<stri
 This is a mock generated content because AI APIs are unavailable.
             
 Original Prompt: ${prompt.substring(0, 100)}...`;
+}
+
+export async function streamAIResponse(prompt: string) {
+    return streamText({
+        model: google("gemini-1.5-flash"),
+        prompt: prompt,
+    });
 }
 
 export async function generateAIResponse(prompt: string, mode: string = "text"): Promise<string> {

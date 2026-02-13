@@ -1,49 +1,44 @@
-import { NextResponse } from "next/server";
-import { generateChapterContent } from "@/lib/ai-service";
-import { redis } from "@/lib/redis";
-import { rateLimit } from "@/lib/rate-limit";
-import crypto from "crypto";
+import { streamText } from "ai";
+import { google } from "@ai-sdk/google";
+import { z } from "zod";
+
+const generateSchema = z.object({
+    projectId: z.coerce.number(),
+    chapterNumber: z.coerce.number(),
+    chapterTitle: z.string().optional(),
+    topic: z.string().min(5),
+    level: z.string().optional(),
+    sampleText: z.string().optional(),
+    stream: z.boolean().optional().default(true),
+});
 
 export async function POST(req: Request) {
     try {
-        const { projectId, chapterNumber, chapterTitle, topic, level, sampleText, userId, department } = await req.json();
+        const body = await req.json();
+        const validated = generateSchema.safeParse(body);
 
-        if (!projectId || !chapterNumber || !topic) {
-            return NextResponse.json({ error: "Missing required fields (Project ID, Chapter Number, Topic)" }, { status: 400 });
+        if (!validated.success) {
+            return new Response(JSON.stringify({ error: validated.error.message }), { status: 400 });
         }
 
-        // 1. Rate Limiting
-        if (userId) {
-            await rateLimit(userId.toString());
-        }
+        const { chapterNumber, chapterTitle, topic, level } = validated.data;
 
-        // 2. Redis Caching
-        const topicHash = crypto.createHash("md5").update(topic).digest("hex");
-        const cacheKey = `chapter:${department || "general"}:${topicHash}:${chapterNumber}`;
+        const prompt = `
+            Context: Writing an academic project report at ${level || "University"} level.
+            Chapter ${chapterNumber}: ${chapterTitle || "General"}
+            Topic: "${topic}"
+            Instructions: Write a detailed academic draft with proper headings and APA-style citations.
+        `;
 
-        const cachedChapter = await redis.get(cacheKey);
-        if (cachedChapter) {
-            console.log("Serving from cache:", cacheKey);
-            return NextResponse.json(cachedChapter);
-        }
+        const result = await streamText({
+            model: google("gemini-1.5-flash"),
+            prompt: prompt,
+        });
 
-        const chapter = await generateChapterContent(
-            parseInt(projectId),
-            parseInt(chapterNumber),
-            chapterTitle || `Chapter ${chapterNumber}`,
-            topic,
-            level,
-            sampleText
-        );
-
-        // Store in Redis with TTL = 1 hour
-        await redis.set(cacheKey, chapter, { ex: 3600 });
-
-        return NextResponse.json(chapter);
+        return result.toTextStreamResponse();
 
     } catch (error: any) {
         console.error("Error generating chapter:", error);
-        return NextResponse.json({ error: error.message || "Failed to generate chapter" }, { status: 500 });
+        return new Response(JSON.stringify({ error: "Generation failed" }), { status: 500 });
     }
 }
-

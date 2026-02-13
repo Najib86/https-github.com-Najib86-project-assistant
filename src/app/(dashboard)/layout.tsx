@@ -1,7 +1,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
@@ -103,10 +103,7 @@ const SidebarContent = ({
                     </div>
                 </div>
                 <button
-                    onClick={() => {
-                        localStorage.removeItem("user");
-                        window.location.href = "/login";
-                    }}
+                    onClick={() => signOut({ callbackUrl: "/login" })}
                     className="flex w-full items-center justify-center gap-2 py-2 text-[10px] font-black text-red-500 hover:bg-red-50 rounded-xl transition-all uppercase tracking-widest"
                 >
                     <LogOut className="h-3.5 w-3.5" />
@@ -131,43 +128,34 @@ const SidebarContent = ({
     </div>
 );
 
+import { useSession, signOut } from "next-auth/react";
+
 export default function DashboardLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-    const [user, setUser] = useState({ role: "student", name: "User" });
-    const [mounted, setMounted] = useState(false);
+    const { data: session, status } = useSession();
     const pathname = usePathname();
-
-    useEffect(() => {
-        const userStr = localStorage.getItem("user");
-
-        if (userStr) {
-            try {
-                const parsedUser = JSON.parse(userStr);
-                const role = parsedUser.role || "student";
-                const name = parsedUser.name || "User";
-
-                // Functional update to avoid redundant state changes/cascading renders
-                setUser(prev => {
-                    if (prev.role === role && prev.name === name) return prev;
-                    return { role, name };
-                });
-            } catch (e) {
-                console.error("Failed to parse user", e);
-            }
-        }
-
-        // Mark as mounted at the end of initialization
-        setMounted(true);
-    }, []);
 
     const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
     const closeSidebar = () => setIsSidebarOpen(false);
 
-    if (!mounted) return null; // Or a loading skeleton
+    if (status === "loading") {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-gray-50 flex-col gap-4">
+                <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+                <p className="font-black text-[10px] text-indigo-400 uppercase tracking-[0.2em]">Securing Session...</p>
+            </div>
+        );
+    }
+
+    const user = {
+        name: session?.user?.name || "User",
+        role: (session?.user as { role?: string })?.role || "student"
+    };
+
 
     const activeItems = user.role === "supervisor" ? supervisorItems : studentItems;
 

@@ -75,6 +75,7 @@ export default function StudentChapterPage() {
             <div className="flex-1 min-h-0">
                 <ChapterEditor
                     chapterId={chapter.chapter_id}
+                    projectId={Number(projectId)}
                     initialContent={chapter.content || ""}
                     initialStatus={chapter.status}
                     role="student"

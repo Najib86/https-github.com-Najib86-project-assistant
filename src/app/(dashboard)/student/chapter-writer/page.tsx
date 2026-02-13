@@ -4,6 +4,7 @@
 import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { Save, Wand2, Loader2, UploadCloud, RefreshCcw, ArrowLeft, CheckCircle, X } from "lucide-react";
+import ChapterEditor from "@/components/ChapterEditor";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -282,59 +283,16 @@ function ChapterWriterContent() {
                 </aside>
 
                 {/* Main Editor */}
-                <main className="flex-1 flex flex-col relative bg-white z-10 overflow-hidden">
-                    {/* Visual Editor */}
-                    <div className="flex-1 overflow-y-auto outline-none">
-                        <div className="max-w-3xl mx-auto w-full px-6 py-8 md:py-16">
-                            <h2 className="text-gray-300 font-black text-3xl md:text-5xl mb-8 select-none tracking-tighter">
-                                {activeChapter.title}
-                            </h2>
-                            <textarea
-                                className="w-full min-h-[70vh] resize-none outline-none text-base md:text-xl leading-relaxed text-gray-800 font-serif placeholder:text-gray-200 bg-transparent selection:bg-indigo-100"
-                                placeholder={`Start drafting your ${activeChapter.title.toLowerCase()} here...`}
-                                value={content}
-                                onChange={(e) => setContent(e.target.value)}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Mobile Navigation Bar - Toggle for switching chapters on mobile */}
-                    <div className="lg:hidden bg-white border-t px-4 py-3 flex items-center justify-between gap-2 overflow-x-auto whitespace-nowrap no-scrollbar pb-20 sm:pb-3">
-                        {CHAPTERS_LIST.map((chap) => (
-                            <button
-                                key={chap.id}
-                                onClick={() => setActiveChapterId(chap.id)}
-                                className={cn(
-                                    "px-3 py-1.5 rounded-full text-xs font-bold transition-all shrink-0",
-                                    activeChapterId === chap.id
-                                        ? "bg-indigo-600 text-white shadow-md scale-105"
-                                        : "bg-gray-100 text-gray-500 hover:bg-gray-200"
-                                )}
-                            >
-                                {chap.title}
-                            </button>
-                        ))}
-                    </div>
-
-                    {/* Mobile Floating Action Buttons */}
-                    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 z-50 sm:hidden">
-                        {!showAiPanel && (
-                            <Button
-                                onClick={() => setShowAiPanel(true)}
-                                className="rounded-full bg-indigo-600 text-white p-4 h-14 w-14 shadow-2xl shadow-indigo-300 animate-in zoom-in"
-                            >
-                                <Wand2 className="h-6 w-6" />
-                            </Button>
-                        )}
-                        <Button
-                            onClick={handleSave}
-                            disabled={isSaving}
-                            className="rounded-full bg-black text-white px-6 h-14 shadow-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2"
-                        >
-                            {isSaving ? <Loader2 className="animate-spin h-5 w-5" /> : <Save className="h-5 w-5" />}
-                            Save Draft
-                        </Button>
-                    </div>
+                <main className="flex-1 flex flex-col relative bg-white dark:bg-gray-950 z-10 overflow-hidden">
+                    <ChapterEditor
+                        chapterId={activeChapterId}
+                        projectId={parseInt(projectId)}
+                        initialContent={content}
+                        initialStatus="Draft"
+                        role="student"
+                        userId={1} // TODO: Get from session
+                        onStatusChange={() => setLastSaved(new Date())}
+                    />
                 </main>
 
                 {/* AI Assistant Panel - Full height on desktop, Bottom/Top drawer on mobile */}
