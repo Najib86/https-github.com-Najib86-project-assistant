@@ -22,9 +22,10 @@ export async function GET(req: Request) {
         // Validate DB connection
         try {
             await prisma.$connect();
-        } catch (dbErr: any) {
-            console.error("DB connection error in GET:", dbErr.message);
-            return NextResponse.json({ error: "Database connection failed", details: dbErr.message }, { status: 503 });
+        } catch (dbErr: unknown) {
+            const errorMessage = dbErr instanceof Error ? dbErr.message : "Unknown database error";
+            console.error("DB connection error in GET:", errorMessage);
+            return NextResponse.json({ error: "Database connection failed", details: errorMessage }, { status: 503 });
         }
 
         const where: { studentId?: number; supervisorId?: number } = {};
@@ -44,9 +45,10 @@ export async function GET(req: Request) {
         });
 
         return NextResponse.json(projects || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
         console.error("Critical GET error:", error);
-        return NextResponse.json({ error: "Internal Server Error", message: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Internal Server Error", message: errorMessage }, { status: 500 });
     }
 }
 
@@ -89,13 +91,23 @@ export async function POST(req: Request) {
                 } else if (file.type === "text/plain") {
                     extractedText = buffer.toString("utf-8");
                 }
-            } catch (err: any) {
-                console.warn("Soft failure in file extraction:", err.message);
+            } catch (err: unknown) {
+                const errorMessage = err instanceof Error ? err.message : "Unknown extraction error";
+                console.warn("Soft failure in file extraction:", errorMessage);
             }
         }
 
         const studentId = parseInt(studentIdStr);
         let finalSupervisorId = supervisorIdStr ? parseInt(supervisorIdStr) : null;
+
+        // Validation: Ensure student exists
+        const studentExists = await prisma.user.findUnique({
+            where: { id: studentId }
+        });
+
+        if (!studentExists) {
+            return NextResponse.json({ error: "User not found. Please log in again." }, { status: 401 });
+        }
 
         if (inviteCode) {
             const invite = await prisma.supervisorInvite.findUnique({ where: { code: inviteCode } });
@@ -129,9 +141,10 @@ export async function POST(req: Request) {
         await Promise.all(chapterPromises);
 
         return NextResponse.json(project, { status: 201 });
-    } catch (error: any) {
+    } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : "Failed to create project";
         console.error("Critical POST error:", error);
-        return NextResponse.json({ error: "Failed to create project", message: error.message }, { status: 500 });
+        return NextResponse.json({ error: "Failed to create project", message: errorMessage }, { status: 500 });
     }
 }
 

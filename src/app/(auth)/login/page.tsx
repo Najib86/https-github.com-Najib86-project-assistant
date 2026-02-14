@@ -53,10 +53,17 @@ function LoginForm() {
             const sessionRes = await fetch("/api/auth/session");
             const session = await sessionRes.json();
 
-            if (session?.user?.role === "supervisor") {
-                router.push("/supervisor");
+            if (session?.user) {
+                // Critical: Set user in localStorage for client-side checks on dashboard
+                localStorage.setItem("user", JSON.stringify(session.user));
+
+                if (session.user.role === "supervisor") {
+                    router.push("/supervisor");
+                } else {
+                    router.push("/student");
+                }
             } else {
-                router.push("/student");
+                setError("Failed to retrieve session details");
             }
         } catch (err) {
             setError(err instanceof Error ? err.message : "An unexpected error occurred");

@@ -105,6 +105,14 @@ export default function StudentDashboard() {
                 body: data,
             });
 
+            if (res.status === 401) {
+                alert("Session expired. Please log in again.");
+                localStorage.removeItem("user");
+                router.push("/auth/login");
+                setGeneratingStatus(""); // Clear status
+                return; // Stop execution
+            }
+
             if (!res.ok) throw new Error("Failed to create project");
 
             const newProject = await res.json();
