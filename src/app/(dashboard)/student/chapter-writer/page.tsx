@@ -316,7 +316,7 @@ function ChapterWriterContent() {
                                 </div>
                                 <div>
                                     <h3 className="font-black text-white text-sm uppercase tracking-widest">AI Copilot</h3>
-                                    <p className="text-[10px] text-indigo-100 font-medium">PROJECTASSISTANTAI</p>
+                                    <p className="text-[10px] text-indigo-100 font-medium">ProjectAssistantAI</p>
                                 </div>
                             </div>
                             <Button variant="ghost" size="icon" onClick={() => setShowAiPanel(false)} className="text-white hover:bg-white/10 rounded-full">

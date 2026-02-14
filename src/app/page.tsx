@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { GraduationCap, ArrowRight, Sparkles, Brain, Shield, FileCheck } from "lucide-react";
+import { GraduationCap, ArrowRight, Sparkles, Brain, Shield, FileCheck, MessageSquare, LayoutDashboard, FileText, CheckCircle, Users } from "lucide-react";
 import { HeroCarousel } from "@/components/HeroCarousel";
 
 export default function Home() {
@@ -108,45 +108,111 @@ export default function Home() {
                   {/* Floating Notification */}
                   <div className="absolute -top-12 -left-8 z-20 animate-bounce transition-all duration-[3000ms]">
                     <div className="bg-white p-4 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-4">
-                      <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center text-white">
-                        <FileCheck className="w-5 h-5" />
+                      <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white relative">
+                        <MessageSquare className="w-5 h-5" />
+                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
                       </div>
                       <div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">Status</p>
-                        <p className="text-xs font-bold text-gray-900 mt-1">Chapter 1 Complete</p>
+                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">New Comment</p>
+                        <p className="text-xs font-bold text-gray-900 mt-1">Supervisor: &quot;Great progress on Ch. 3!&quot;</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Main Preview Card */}
-                  <div className="bg-white/80 backdrop-blur-2xl rounded-[3rem] border border-white shadow-2xl shadow-indigo-100/50 p-8 transform rotate-2 hover:rotate-0 transition-all duration-700">
-                    <div className="space-y-6">
-                      <div className="flex items-center justify-between border-b border-gray-100 pb-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 bg-indigo-100 rounded-lg" />
-                          <div className="w-24 h-3 bg-gray-100 rounded-full" />
+                  {/* Main Dashboard Card */}
+                  <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] border border-white shadow-2xl shadow-indigo-100/50 p-6 transform rotate-1 hover:rotate-0 transition-all duration-700">
+                    {/* Fake Browser/App Header */}
+                    <div className="flex items-center justify-between border-b border-gray-100/80 pb-6 mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="flex -space-x-3">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
+                              <Image
+                                src={`https://i.pravatar.cc/100?u=${i + 25}`}
+                                width={32}
+                                height={32}
+                                alt="Collaborator"
+                                className="object-cover"
+                              />
+                            </div>
+                          ))}
+                          <div className="w-8 h-8 rounded-full border-2 border-white bg-indigo-50 flex items-center justify-center text-[10px] font-bold text-indigo-600">+2</div>
                         </div>
-                        <div className="flex gap-2">
-                          <div className="w-4 h-4 rounded-full bg-red-100" />
-                          <div className="w-4 h-4 rounded-full bg-amber-100" />
-                          <div className="w-4 h-4 rounded-full bg-green-100" />
+                        <div className="h-8 w-[1px] bg-gray-200" />
+                        <div>
+                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Project</p>
+                          <p className="text-sm font-bold text-gray-900">Thesis: AI in Healthcare</p>
                         </div>
                       </div>
-                      <div className="space-y-4">
-                        <div className="w-full h-4 bg-indigo-50 rounded-full" />
-                        <div className="w-3/4 h-4 bg-gray-50 rounded-full" />
-                        <div className="grid grid-cols-3 gap-3">
-                          <div className="h-20 bg-gray-50 rounded-2xl" />
-                          <div className="h-20 bg-gray-50 rounded-2xl" />
-                          <div className="h-20 bg-indigo-50/50 border border-indigo-100 rounded-2xl p-3 flex flex-col justify-end">
-                            <div className="w-full h-2 bg-indigo-200 rounded-full" />
+                      <div className="flex gap-2">
+                        <div className="px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-[10px] font-bold uppercase tracking-wide flex items-center gap-2">
+                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                          Live
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dashboard Grid */}
+                    <div className="grid grid-cols-12 gap-6">
+                      {/* Left Sidebar (Mini) */}
+                      <div className="col-span-3 space-y-3">
+                        {[
+                          { icon: LayoutDashboard, label: 'Overview', active: true },
+                          { icon: FileText, label: 'Drafts', active: false },
+                          { icon: Users, label: 'Team', active: false },
+                        ].map((item, i) => (
+                          <div key={i} className={cn("p-3 rounded-xl flex items-center gap-3 transition-colors", item.active ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400')}>
+                            <item.icon className="w-4 h-4" />
+                            <div className={cn("h-2 w-12 rounded-full", item.active ? 'bg-indigo-200' : 'bg-gray-100')} />
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* Content Area */}
+                      <div className="col-span-9 space-y-5">
+                        {/* Progress Section */}
+                        <div className="p-4 rounded-2xl bg-gray-50/50 border border-gray-100 space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-[10px] font-black uppercase tracking-wider text-gray-500">Chapter 4: Methodology</span>
+                            <span className="text-[10px] font-bold text-indigo-600">85%</span>
+                          </div>
+                          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+                            <div className="h-full w-[85%] bg-indigo-500 rounded-full" />
+                          </div>
+                          <div className="flex gap-2 mt-2">
+                            <div className="px-2 py-1 bg-white rounded-md text-[8px] font-bold text-gray-400 shadow-sm border border-gray-100">Research Design</div>
+                            <div className="px-2 py-1 bg-white rounded-md text-[8px] font-bold text-gray-400 shadow-sm border border-gray-100">Data Collection</div>
                           </div>
                         </div>
-                        <div className="w-full h-32 bg-gray-50 rounded-3xl" />
-                      </div>
-                      <div className="pt-4 flex justify-end">
-                        <div className="px-6 py-3 bg-indigo-600 rounded-xl text-white text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-200">
-                          Finalizing Thesis
+
+                        {/* Active Task / Collab */}
+                        <div className="flex gap-4">
+                          <div className="flex-1 p-4 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 relative overflow-hidden">
+                            <div className="relative z-10">
+                              <p className="text-[10px] font-medium opacity-80 uppercase tracking-widest mb-1">Current Task</p>
+                              <p className="text-sm font-bold">Reviewing Citations</p>
+                              <div className="flex items-center gap-2 mt-3">
+                                <div className="w-5 h-5 rounded-full border border-white/30 overflow-hidden relative">
+                                  <Image
+                                    src="https://i.pravatar.cc/100?u=30"
+                                    width={20}
+                                    height={20}
+                                    alt="User"
+                                    className="object-cover"
+                                  />
+                                </div>
+                                <span className="text-[10px] opacity-80">Sarah is editing...</span>
+                              </div>
+                            </div>
+                            <div className="absolute right-0 bottom-0 w-20 h-20 bg-white/10 rounded-full blur-xl transform translate-x-1/2 translate-y-1/2" />
+                          </div>
+
+                          <div className="w-1/3 p-4 rounded-2xl border border-gray-100 flex flex-col items-center justify-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                              <CheckCircle className="w-4 h-4" />
+                            </div>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase text-center">3 Done</span>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -218,15 +284,15 @@ export default function Home() {
               Ready to graduate with <br className="hidden md:block" /> a world-class project?
             </h2>
             <p className="text-indigo-100 text-lg md:text-xl font-medium max-w-2xl mx-auto opacity-90">
-              Join thousands of students across Nigeria who are using PROJECTASSISTANTAI to streamline their research and writing.
+              Join thousands of students across Nigeria who are using ProjectAssistantAI to streamline their research and writing.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Button size="lg" asChild className="bg-white text-indigo-600 hover:bg-gray-50 rounded-2xl px-10 h-16 text-lg font-black shadow-2xl">
                 <Link href="/signup">Get Started Now</Link>
               </Button>
-              <Button size="lg" variant="outline" asChild className="border-indigo-200 text-white hover:bg-white/10 rounded-2xl px-10 h-16 text-lg font-black">
+              {/* <Button size="lg" variant="outline" asChild className="border-indigo-200 text-white hover:bg-white/10 rounded-2xl px-10 h-16 text-lg font-black">
                 <Link href="/login">View Demo</Link>
-              </Button>
+              </Button> */}
             </div>
           </div>
         </section>
@@ -244,7 +310,7 @@ export default function Home() {
                 height={28}
                 className="rounded-lg shadow-sm"
               />
-              <span className="font-black text-lg tracking-tighter">PROJECTASSISTANTAI</span>
+              <span className="font-black text-lg tracking-tighter">ProjectAssistantAI</span>
             </div>
 
             <div className="space-y-4">
@@ -266,7 +332,7 @@ export default function Home() {
 
           <div className="pt-10 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-6 max-w-6xl mx-auto">
             <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-              © 2026 PROJECTASSISTANTAI Platform. All Rights Reserved.
+              © 2026 ProjectAssistantAI Platform. All Rights Reserved.
             </p>
             <div className="flex items-center gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
               <a href="#" className="hover:text-indigo-600 transition-colors">Terms</a>

@@ -111,7 +111,7 @@ function LoginForm() {
                                     className="rounded-lg"
                                 />
                             </div>
-                            <span className="text-xl font-black text-gray-900 tracking-tighter uppercase">PROJECTASSISTANTAI</span>
+                            <span className="text-xl font-black text-gray-900 tracking-tighter uppercase">ProjectAssistantAI</span>
                         </div>
 
                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-indigo-100 shadow-sm mb-4">
@@ -121,7 +121,7 @@ function LoginForm() {
 
                         <div className="space-y-4">
                             <h1 className="text-4xl lg:text-5xl xl:text-6xl font-black tracking-tight text-gray-900 leading-[1.1]">
-                                PROJECTASSISTANTAI <br />
+                                ProjectAssistantAI <br />
                                 <span className="text-indigo-600">Platform</span>
                             </h1>
                             <p className="text-lg lg:text-xl font-medium text-gray-600 leading-relaxed">
@@ -298,7 +298,7 @@ function LoginForm() {
                                         <a href="https://www.synapseengineering.com.ng/" target="_blank" rel="noopener noreferrer" className="hover:text-indigo-600 transition-colors">www.synapseengineering.com.ng</a>
                                     </div>
                                     <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest mt-2">
-                                        &copy; 2026 PROJECTASSISTANTAI Platform.
+                                        &copy; 2026 ProjectAssistantAI Platform.
                                     </p>
                                 </div>
                             </div>

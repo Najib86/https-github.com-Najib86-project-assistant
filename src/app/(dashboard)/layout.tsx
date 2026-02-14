@@ -63,7 +63,7 @@ const SidebarContent = ({
                     className="rounded-lg shadow-sm"
                 />
                 <span className="text-xl font-black text-gray-900 tracking-tighter">
-                    PROJECTASSISTANTAI
+                    ProjectAssistantAI
                 </span>
             </Link>
         </div>
@@ -208,7 +208,7 @@ export default function DashboardLayout({
                         <Button variant="ghost" size="icon" onClick={toggleSidebar} className="rounded-xl hover:bg-gray-50 -ml-2">
                             <Menu className="h-6 w-6 text-gray-900" />
                         </Button>
-                        <span className="font-black text-xl text-gray-900 tracking-tighter">PROJECTASSISTANTAI</span>
+                        <span className="font-black text-xl text-gray-900 tracking-tighter">ProjectAssistantAI</span>
                     </div>
                     <div className="h-10 w-10 rounded-2xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-xs font-black text-indigo-700 shadow-sm shadow-indigo-50">
                         {user.name.substring(0, 2).toUpperCase()}
@@ -232,7 +232,7 @@ export default function DashboardLayout({
                             </div>
                         </div>
                         <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest">
-                            © 2026 PROJECTASSISTANTAI Platform.
+                            © 2026 ProjectAssistantAI Platform.
                         </p>
                     </div>
                 </footer>
