@@ -31,7 +31,7 @@ export default function Home() {
               className="rounded-lg transition-transform group-hover:scale-110"
             />
             <span className="font-black text-xl tracking-tighter text-gray-900">
-              PROJECTASSISTANTAI
+              ProjectAssistantAI
             </span>
           </Link>
         </div>
@@ -70,7 +70,7 @@ export default function Home() {
                 <div className="flex flex-col sm:flex-row gap-5 pt-8">
                   <Button size="lg" asChild className="w-full sm:w-auto rounded-2xl px-12 py-10 text-xl font-black shadow-2xl shadow-indigo-300 transition-all hover:-translate-y-1 hover:shadow-indigo-400 group h-auto">
                     <Link href="/signup" className="flex items-center gap-3">
-                      Start Your Project
+                      Start Your Project Free
                       <ArrowRight className="h-6 w-6 transition-transform group-hover:translate-x-2" />
                     </Link>
                   </Button>

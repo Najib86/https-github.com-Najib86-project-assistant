@@ -176,7 +176,7 @@ Middleware automatically redirects:
 ## TODO
 
 - [X] Implement email verification service (SendGrid, Resend, etc.)
-- [ ] Add password reset functionality
+- [X] Add password reset functionality
 - [ ] Update all components using localStorage
 - [X] Add "Remember me" option
 - [ ] Implement rate limiting on auth endpoints

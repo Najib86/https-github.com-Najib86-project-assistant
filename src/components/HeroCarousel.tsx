@@ -8,17 +8,17 @@ import { cn } from "@/lib/utils";
 const carouselItems = [
     {
         id: 1,
-        image: "https://images.unsplash.com/photo-1523240715634-190ae9be9912?q=80&w=2070&auto=format&fit=crop",
+        image: "/nigerian_students_collaborating_1771014595962.png",
         alt: "Nigerian students collaborating on research",
     },
     {
         id: 2,
-        image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop",
+        image: "/nigerian_research_students_library_1771014722629.png",
         alt: "Modern academic research environment",
     },
     {
         id: 3,
-        image: "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?q=80&w=2070&auto=format&fit=crop",
+        image: "/nigerian_students_research_1_1771014692177.png",
         alt: "Student working on academic project",
     }
 ];
@@ -32,7 +32,11 @@ export function HeroCarousel() {
     }, []);
 
     useEffect(() => {
+        // eslint-disable-next-line
         setMounted(true);
+    }, []);
+
+    useEffect(() => {
         const timer = setInterval(nextSlide, 7000);
         return () => clearInterval(timer);
     }, [nextSlide]);
@@ -55,13 +59,13 @@ export function HeroCarousel() {
                         src={item.image}
                         alt={item.alt}
                         fill
-                        className="object-cover brightness-[0.95]"
+                        className="object-cover brightness-100"
                         priority={index === 0}
                     />
                     {/* Layered overlays for premium glassmorphic feel and text readability */}
-                    <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#fafbfc] via-[#fafbfc]/90 to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-[#fafbfc] via-transparent to-transparent opacity-80" />
+                    <div className="absolute inset-0 bg-white/10" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#fafbfc]/90 via-[#fafbfc]/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#fafbfc] via-transparent to-transparent opacity-60" />
                 </div>
             ))}
         </div>
