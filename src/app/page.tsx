@@ -8,13 +8,13 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 
 export default function Home() {
   return (
-    <div className="flex flex-col min-h-screen bg-[#fafbfc] overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-background overflow-x-hidden">
       {/* Background Elements */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-200/40 rounded-full blur-[120px] animate-pulse" />
-        <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[40%] bg-purple-200/30 rounded-full blur-[100px]" />
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-100/40 rounded-full blur-[120px] animate-pulse" />
+        <div className="absolute bottom-[10%] right-[-10%] w-[40%] h-[40%] bg-purple-100/30 rounded-full blur-[100px]" />
         {/* Added a subtle center glow to reduce blank feel */}
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-blue-50/50 rounded-full blur-[140px]" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-blue-50/30 rounded-full blur-[140px]" />
         {/* Subtle pattern overlay */}
         <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: `radial-gradient(#4f46e5 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }} />
       </div>
@@ -227,7 +227,7 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-20 md:py-28 bg-[#fafbfc]/80 backdrop-blur-sm relative border-y border-gray-100/50">
+        <section id="features" className="py-20 md:py-28 bg-gray-50/80 backdrop-blur-sm relative border-y border-gray-100/50">
           <div className="container px-6 mx-auto">
             <div className="text-center mb-16 space-y-3">
               <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 opacity-80">The Powerhouse</h2>
