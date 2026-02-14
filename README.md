@@ -1,76 +1,201 @@
-# ProjectAssistant
+# Project Assistant
 
-ProjectAssistant is an AI-powered academic writing and supervision platform designed to streamline the research process for students and supervisors. It leverages Google Gemini AI to assist with drafting, structuring, and refining academic content while providing a dedicated dashboard for supervisor review and feedback.
+**Project Assistant** is an AI-powered platform designed to guide students through the thesis/project writing process and streamline the supervision loop. It bridges the gap between AI capabilities and academic rigor, offering a dual-interface for Students and Supervisors.
 
-## 🚀 Key Features
+## 🌟 Overview
 
-### For Students
-- **Smart Drafting**: Generate structured chapter drafts (Introduction, Literature Review, Methodology, etc.) using AI-guided templates.
-- **Academic Tone Refinement**: Rewrite content to meet academic standards (e.g., "Make Formal", "Objective Tone").
-- **Questionnaire Builder**: Create and manage research instruments directly within the platform.
-- **Progress Tracking**: Visualize completion status for each chapter.
+The transition from coursework to independent research is often overwhelming. ProjectAssistant addresses this by:
+*   **For Students:** Providing an AI Co-Pilot that acts as an "Academic Mentor," helping structure chapters, refine tone, and track progress.
+*   **For Supervisors:** Offering a centralized dashboard to track student progress, review drafts, and provide inline feedback.
 
-### For Supervisors
-- **Submission Review**: View student drafts in real-time.
-- **Inline Feedback**: Add specific comments and requests for revision.
-- **Approval Workflow**: Approve chapters or request changes before final export.
+### Key Differentiators
+*   **Academic Tone Engine:** Unlike generic AI, ProjectAssistant is prompted to strictly follow academic standards and "5-Chapter" structures.
+*   **Role-Based Workflows:** Distinct experiences for students (creation) and supervisors (review).
+*   **Real-time Feedback:** Integrated commenting and review systems.
 
-## 🛠 Tech Stack
+---
 
-- **Frontend**: [Next.js 16](https://nextjs.org/) (App Router), React 19
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/)
-- **Database**: SQLite (Development) / PostgreSQL (Production) via [Prisma ORM](https://www.prisma.io/)
-- **AI Engine**: [Google Gemini Pro](https://deepmind.google/technologies/gemini/) (`gemini-1.5-pro` or similar)
-- **Authentication**: Custom (Sessionless/Token-based simulation)
+## 🏗️ Architecture & Tech Stack
 
-## 📦 Prerequisites
+The application is built as a modern full-stack web app:
 
-- Node.js 18+ 
-- npm or yarn
+*   **Frontend:** [Next.js 16](https://nextjs.org/) (React 19) - App Router.
+*   **Styling:** Tailwind CSS v4, Lucide React icons.
+*   **Backend:** Next.js API Routes.
+*   **Database:**
+    *   **Primary:** PostgreSQL (Production) / SQLite (Dev) via [Prisma ORM](https://www.prisma.io/).
+    *   **Caching/Rate Limiting:** Upstash Redis.
+*   **AI Engine:** Google Gemini API (`gemini-1.5-flash` / `gemini-pro`).
+*   **Authentication:** NextAuth.js (v4) with Role-Based Access Control (RBAC).
+*   **Real-time:** Socket.io (server & client).
+*   **File Handling:** `docx`, `pdf-parse`, `mammoth` for document processing.
+
+### Directory Structure
+```
+src/
+├── app/                  # Next.js App Router
+│   ├── (auth)/           # Authentication routes (login, signup)
+│   ├── (dashboard)/      # Protected dashboard routes
+│   │   ├── student/      # Student-specific pages
+│   │   └── supervisor/   # Supervisor-specific pages
+│   └── api/              # API Endpoints
+├── components/           # Reusable React components
+│   ├── ui/               # UI primitives (buttons, inputs)
+│   └── providers/        # Context providers (Auth, Theme)
+├── lib/                  # Utilities and configurations
+│   ├── prisma.ts         # Database client
+│   ├── redis.ts          # Redis client
+│   ├── ai-service.ts     # Gemini AI integration
+│   └── auth.ts           # Auth helpers
+└── hooks/                # Custom React hooks
+```
+
+---
 
 ## 🚀 Getting Started
 
-1.  **Clone the repository**:
+### Prerequisites
+*   Node.js 18+
+*   npm or pnpm
+*   A Google Cloud Project with Gemini API enabled.
+*   Upstash Redis database (for caching/ratelimiting).
+
+### Installation
+
+1.  **Clone the repository:**
     ```bash
     git clone https://github.com/your-username/project-assistant.git
     cd project-assistant
     ```
 
-2.  **Install dependencies**:
+2.  **Install dependencies:**
     ```bash
     npm install
+    # or
+    pnpm install
     ```
 
-3.  **Configure Environment**:
-    Copy the `.env.example` (or create `.env`) and add your API keys:
+3.  **Environment Setup:**
+    Create a `.env` file in the root directory:
+
     ```env
+    # App
+    NEXT_PUBLIC_APP_URL="http://localhost:3000"
+    NODE_ENV="development"
+
+    # Database (Prisma)
+    # Use generic SQLite for local dev if not using Postgres yet
     DATABASE_URL="file:./dev.db"
-    GEMINI_API_KEY="your_gemini_api_key_here"
+    
+    # Authentication (NextAuth)
+    NEXTAUTH_URL="http://localhost:3000"
+    NEXTAUTH_SECRET="your-super-secret-key-base64"
+    
+    # AI (Google Gemini)
+    GEMINI_API_KEY="your-gemini-api-key"
+
+    # Redis (Upstash)
+    UPSTASH_REDIS_REST_URL="your-upstash-url"
+    UPSTASH_REDIS_REST_TOKEN="your-upstash-token"
+
+    # Optional: Google OAuth
+    GOOGLE_CLIENT_ID=""
+    GOOGLE_CLIENT_SECRET=""
     ```
 
-4.  **Setup Database**:
-    Initialize the SQLite database with Prisma:
+4.  **Database Migration:**
     ```bash
+    npx prisma generate
     npx prisma migrate dev --name init
     ```
-    *(Or `npx prisma db push` if you want to skip migrations)*
 
-5.  **Run the Development Server**:
+5.  **Run Development Server:**
     ```bash
     npm run dev
     ```
+    Access the app at `http://localhost:3000`.
 
-6.  **Open the App**:
-    Visit [http://localhost:3000](http://localhost:3000) in your browser.
+---
 
-## 🤝 Contributing
+## 💎 Features & Status
 
-1.  Fork the Project
-2.  Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the Branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+*Current Status as of Feb 2026*
+
+### ✅ Core Features (Implemented)
+*   **Authentication:** Secure Login/Signup with robust Role-Based Access Control (Student/Supervisor).
+*   **Student Dashboard:**
+    *   Project creation w/ metadata (Title, Department, Level).
+    *   **Chapter Writer:** Full-screen rich text editor with AI copilot.
+    *   **AI Tools:** "Rewrite for Clarity", "Make Formal", Plagiarism check mock-up.
+    *   **Export:** Generate formatted DOCX files.
+*   **Supervisor Dashboard:**
+    *   Invite code generation for students.
+    *   Project overview & status tracking.
+    *   Review mode: View chapters and add comments.
+*   **AI Integration:**
+    *   Real-time content generation via Gemini.
+    *   Context-aware suggestions based on project topic.
+
+### ⚠️ In Progress / Partial
+*   **Interview Bot:** Questionnaire exists but integration with Chapter Generation is pending.
+*   **Real-time Collaboration:** Socket.io setup exists but chat interface is not fully connected.
+*   **Citations:** Manual entry working; auto-formatting pending.
+
+### 📅 Roadmap
+*   **Phase 1 (Immediate):** Fix Interview Bot data flow, implement real-time Chat.
+*   **Phase 2:** Advanced Literature Search (DOI integration), Notification System.
+*   **Phase 3:** Mobile App (PWA), Plagiarism API integration (Turnitin).
+
+---
+
+## 🛠️ Development Guide
+
+### Authentication
+The project uses **NextAuth.js**.
+*   **Middleware:** Protected routes are handled in `middleware.ts`.
+*   **Client:** Use `useAuth` hook in `src/hooks/useAuth.ts` to access user session and role.
+    ```typescript
+    const { user, role, isAuthenticated } = useAuth();
+    ```
+
+### Database Management
+*   **Schema:** Defined in `prisma/schema.prisma`.
+*   **Studio:** Run `npx prisma studio` to view/edit data in the browser.
+
+### AI Service
+Located in `src/lib/ai-service.ts`.
+*   Uses `@google/generative-ai`.
+*   **Prompts:** System prompts are carefully engineered to enforce academic tone.
+
+---
+
+## ❓ Troubleshooting
+
+### Connection Issues
+*   **Prisma Error:** If you see connection errors, ensure `DATABASE_URL` is correct and run `npx prisma generate`.
+*   **Redis Error:** Check `UPSTASH_REDIS_REST_URL` and `TOKEN`.
+
+### Build Errors
+*   **Type Errors:** TypeScript strict mode is on. Ensure all props and state variables are typed.
+*   **Linting:** Run `npm run lint` to catch issues before committing.
+
+### Authentication
+*   **Login Loop:** Check `NEXTAUTH_URL` matches your running host. Clear cookies if issues persist.
+*   **Credentials:** Default dev accounts (if seeded) or create new ones via Sign Up.
+
+---
+
+## 🧪 Testing
+
+*   **Auth Tests:** `npm run test:auth` (checks for plaintext passwords, etc.)
+*   **Manual Testing:**
+    *   Login as Student -> Create Project -> Write Chapter.
+    *   Login as Supervisor -> View Project -> Comment.
+
+---
 
 ## 📄 License
+This project is proprietary.
 
-Distributed under the MIT License. See `LICENSE` for more information.
+---
+*Documentation consolidated from internal project files.*
