@@ -9,56 +9,72 @@ datasource db {
 }
 
 model User {
-  id             Int             @id @default(autoincrement())
-  name           String
-  email          String          @unique
-  password       String?         @map("password_hash")
-  role           String          @default("student")
-  department     String?
-  provider       String?         @default("credentials")
-  email_verified Boolean         @default(false) @map("email_verified")
-  createdAt      DateTime        @default(now())
-  comments       Comment[]
-  exports        Export[]
-  projects       Project[]       @relation("StudentProjects")
-  supervises     Project[]       @relation("SupervisorProjects")
-  projectMembers ProjectMember[]
-  supervisorInvites SupervisorInvite[]
+  id              Int                @id @default(autoincrement())
+  name            String
+  email           String             @unique
+  password        String?            @map("password_hash")
+  role            String             @default("student")
+  department      String?
+  provider        String?            @default("credentials")
+  email_verified  Boolean            @default(false) @map("email_verified")
+  createdAt       DateTime           @default(now())
+  comments        Comment[]
+  exports         Export[]
+  projects        Project[]          @relation("StudentProjects")
+  supervises      Project[]          @relation("SupervisorProjects")
+  projectMembers  ProjectMember[]
+  acceptedInvites SupervisorInvite[] @relation("AcceptedInvites")
+  sentInvites     MemberInvite[]     @relation("InvitedMembers")
+  messages        Message[]
+  activities      ProjectActivity[]
 
   @@map("users")
 }
 
 model SupervisorInvite {
-  invite_id    Int      @id @default(autoincrement())
-  code         String   @unique
-  supervisorId Int
+  invite_id    Int       @id @default(autoincrement())
+  token        String    @unique
+  projectId    Int
+  email        String?
   expiresAt    DateTime
-  createdAt    DateTime @default(now())
-  supervisor   User     @relation(fields: [supervisorId], references: [id])
+  createdAt    DateTime  @default(now())
+  acceptedById Int?
+  acceptedAt   DateTime?
+  status       String    @default("pending")
+
+  project      Project   @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+  acceptedBy   User?     @relation("AcceptedInvites", fields: [acceptedById], references: [id])
+
+  @@index([token])
+  @@index([projectId])
 }
 
 model Project {
-  project_id       Int             @id @default(autoincrement())
-  title            String
-  level            String
-  type             String
-  status           String          @default("Draft")
-  studentId        Int
-  supervisorId     Int?
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
-  methodology      String?
-  objectives       String?
-  problemStatement String?
-  referenceText    String?
-  chapters         Chapter[]
-  comments         Comment[]
-  exports          Export[]
-  student          User            @relation("StudentProjects", fields: [studentId], references: [id])
-  supervisor       User?           @relation("SupervisorProjects", fields: [supervisorId], references: [id])
-  questionnaires   Questionnaire[]
-  members          ProjectMember[]
-  citations        Citation[]
+  project_id        Int                @id @default(autoincrement())
+  title             String
+  level             String
+  type              String
+  status            String             @default("Draft")
+  studentId         Int
+  supervisorId      Int?
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  methodology       String?
+  objectives        String?
+  problemStatement  String?
+  referenceText     String?
+  chapters          Chapter[]
+  comments          Comment[]
+  exports           Export[]
+  student           User               @relation("StudentProjects", fields: [studentId], references: [id])
+  supervisor        User?              @relation("SupervisorProjects", fields: [supervisorId], references: [id])
+  questionnaires    Questionnaire[]
+  members           ProjectMember[]
+  citations         Citation[]
+  supervisorInvites SupervisorInvite[]
+  memberInvites     MemberInvite[]     @relation("MemberInvites")
+  messages          Message[]
+  activities        ProjectActivity[]
 }
 
 model Chapter {
@@ -147,4 +163,49 @@ model ProjectMember {
   joinedAt  DateTime @default(now())
   project   Project  @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
   student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([studentId])
+}
+
+model MemberInvite {
+  invite_id  Int       @id @default(autoincrement())
+  token      String    @unique
+  projectId  Int
+  email      String
+  invitedBy  Int
+  expiresAt  DateTime
+  createdAt  DateTime  @default(now())
+  acceptedAt DateTime?
+  status     String    @default("pending")
+
+  project    Project   @relation("MemberInvites", fields: [projectId], references: [project_id], onDelete: Cascade)
+  inviter    User      @relation("InvitedMembers", fields: [invitedBy], references: [id], onDelete: Cascade)
+
+  @@index([token])
+  @@index([projectId])
+  @@index([email])
+}
+
+model Message {
+  message_id Int      @id @default(autoincrement())
+  content    String   @db.Text
+  projectId  Int
+  senderId   Int
+  createdAt  DateTime @default(now())
+  
+  sender     User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  project    Project  @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+}
+
+model ProjectActivity {
+  activity_id Int      @id @default(autoincrement())
+  projectId   Int
+  userId      Int
+  action      String
+  details     String?
+  createdAt   DateTime @default(now())
+
+  project     Project  @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

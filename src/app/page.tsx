@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { GraduationCap, ArrowRight, Sparkles, Brain, Shield, FileCheck, MessageSquare, LayoutDashboard, FileText, CheckCircle, Users } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, LayoutDashboard, FileText, CheckCircle, Users } from "lucide-react";
 import { HeroCarousel } from "@/components/HeroCarousel";
 
 export default function Home() {
@@ -237,21 +237,21 @@ export default function Home() {
             <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
               {[
                 {
-                  icon: GraduationCap,
+                  //  icon: GraduationCap,
                   title: "Academic Fidelity",
                   desc: "Drafts generated follow strict university standards for Chapters 1-5, ensuring your project structure is always perfect.",
                   color: "bg-indigo-50",
                   textColor: "text-indigo-600"
                 },
                 {
-                  icon: Brain,
+                  //   icon: Brain,
                   title: "Smart Synthesis",
                   desc: "Our AI doesn't just write; it synthesizes complex information to provide logical arguments and literature connections.",
                   color: "bg-purple-50",
                   textColor: "text-purple-600"
                 },
                 {
-                  icon: Shield,
+                  //   icon: Shield,
                   title: "Supervisor Ready",
                   desc: "Build credibility with your supervisor using our review interface for inline comments and direct feedback.",
                   color: "bg-green-50",
@@ -259,9 +259,9 @@ export default function Home() {
                 }
               ].map((feature, i) => (
                 <div key={i} className="flex flex-col p-8 rounded-[2rem] bg-white border border-gray-100 hover:border-indigo-200 hover:shadow-2xl hover:shadow-indigo-100/40 transition-all duration-500 group">
-                  <div className={cn(feature.color, "p-5 rounded-2xl w-fit mb-8 transition-transform group-hover:scale-110 shadow-sm")}>
+                  {/* <div className={cn(feature.color, "p-5 rounded-2xl w-fit mb-8 transition-transform group-hover:scale-110 shadow-sm")}>
                     <feature.icon className={cn(feature.textColor, "h-8 w-8")} />
-                  </div>
+                  </div> */}
                   <h3 className="text-2xl font-black mb-4 text-gray-900">{feature.title}</h3>
                   <p className="text-gray-500 font-medium leading-relaxed">
                     {feature.desc}
@@ -271,77 +271,10 @@ export default function Home() {
             </div>
           </div>
         </section>
-        {/* CTA Section */}
-        <section className="py-20 px-6 relative overflow-hidden">
-          <div className="absolute inset-0 bg-indigo-600 -z-10" />
-          <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 via-blue-600 to-indigo-800 -z-10 opacity-90" />
-          <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none -z-10">
-            <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-white/10 rounded-full blur-[100px]" />
-          </div>
 
-          <div className="max-w-4xl mx-auto text-center space-y-8 py-10">
-            <h2 className="text-3xl md:text-5xl font-black text-white leading-tight">
-              Ready to graduate with <br className="hidden md:block" /> a world-class project?
-            </h2>
-            <p className="text-indigo-100 text-lg md:text-xl font-medium max-w-2xl mx-auto opacity-90">
-              Join thousands of students across Nigeria who are using ProjectAssistantAI to streamline their research and writing.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Button size="lg" asChild className="bg-white text-indigo-600 hover:bg-gray-50 rounded-2xl px-10 h-16 text-lg font-black shadow-2xl">
-                <Link href="/signup">Get Started Now</Link>
-              </Button>
-              {/* <Button size="lg" variant="outline" asChild className="border-indigo-200 text-white hover:bg-white/10 rounded-2xl px-10 h-16 text-lg font-black">
-                <Link href="/login">View Demo</Link>
-              </Button> */}
-            </div>
-          </div>
-        </section>
       </main>
 
-      {/* Footer */}
-      <footer className="py-12 bg-white border-t border-gray-100 relative z-10">
-        <div className="container mx-auto px-6 text-center space-y-8">
-          <div className="flex flex-col items-center gap-8">
-            <div className="flex items-center justify-center gap-2 opacity-80 hover:opacity-100 transition-all cursor-default group">
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                width={28}
-                height={28}
-                className="rounded-lg shadow-sm"
-              />
-              <span className="font-black text-lg tracking-tighter">ProjectAssistantAI</span>
-            </div>
 
-            <div className="space-y-4">
-              <p className="text-indigo-900/40 text-[10px] font-black uppercase tracking-[0.3em]">
-                Powered by Synapse Engineering and supplies
-              </p>
-              <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-4 text-[11px] font-bold text-gray-500 uppercase tracking-widest">
-                <a href="tel:08028110448" className="flex items-center gap-2 hover:text-indigo-600 transition-colors group">
-                  <span className="w-1 h-1 rounded-full bg-indigo-200 group-hover:bg-indigo-600 transition-colors" />
-                  08028110448
-                </a>
-                <a href="https://www.synapseengineering.com.ng/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-indigo-600 transition-colors group">
-                  <span className="w-1 h-1 rounded-full bg-indigo-200 group-hover:bg-indigo-600 transition-colors" />
-                  synapseengineering.com.ng
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-10 border-t border-gray-50 flex flex-col md:flex-row items-center justify-between gap-6 max-w-6xl mx-auto">
-            <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">
-              © 2026 ProjectAssistantAI Platform. All Rights Reserved.
-            </p>
-            <div className="flex items-center gap-6 text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-              <a href="#" className="hover:text-indigo-600 transition-colors">Terms</a>
-              <a href="#" className="hover:text-indigo-600 transition-colors">Privacy</a>
-              <a href="#" className="hover:text-indigo-600 transition-colors">Cookies</a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div >
   );
 }

@@ -24,7 +24,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ chapterI
     try {
         const { chapterId } = await params;
         const body = await req.json();
-        const { content, status } = body;
+        const { content, status, userId } = body;
 
         // Check if versioning is requested
         const shouldCreateVersion = body.createVersion;
@@ -45,6 +45,18 @@ export async function PUT(req: Request, { params }: { params: Promise<{ chapterI
                     contentSnapshot: content || "",
                     versionNumber: await getNextVersionNumber(parseInt(chapterId)),
                     createdAt: new Date()
+                }
+            });
+        }
+
+        // Log Activity
+        if (userId) {
+            await prisma.projectActivity.create({
+                data: {
+                    projectId: updatedChapter.projectId,
+                    userId: parseInt(userId),
+                    action: "edited_chapter",
+                    details: `Chapter ${updatedChapter.chapterNumber}: ${updatedChapter.title || "Untitled"}`
                 }
             });
         }
