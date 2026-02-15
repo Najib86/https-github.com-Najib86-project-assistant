@@ -5,8 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Send, MoreVertical, Phone, Video, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-// @ts-expect-error - Socket type issue
-import { io, Socket } from "socket.io-client";
+import io from "socket.io-client";
 
 interface Message {
     message_id: number;
@@ -26,7 +25,8 @@ interface Props {
     userRole: string; // 'student' or 'supervisor'
 }
 
-let socket: Socket;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let socket: any;
 
 export default function ChatInterface({ projectId, userId, userName, userRole }: Props) {
     const [messages, setMessages] = useState<Message[]>([]);

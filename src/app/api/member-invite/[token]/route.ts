@@ -9,7 +9,6 @@ export async function GET(
     try {
         const { token } = await params;
 
-        // @ts-expect-error Prisma Client type not updated
         const invite = await prisma.memberInvite.findUnique({
             where: { token },
             include: {
@@ -70,7 +69,6 @@ export async function POST(
         // Cast user to include custom properties
         const user = sessionUser as { id: string; role: string; name?: string | null; email?: string | null };
 
-        // @ts-expect-error Prisma Client type not updated
         const invite = await prisma.memberInvite.findUnique({
             where: { token },
             include: { project: true }
@@ -111,7 +109,6 @@ export async function POST(
 
         if (existingMember) {
             // Mark invite as accepted anyway as cleanup
-            // @ts-expect-error Prisma Client type not updated
             await prisma.memberInvite.update({
                 where: { invite_id: invite.invite_id },
                 data: {
@@ -136,7 +133,6 @@ export async function POST(
 
         // Transaction to update invite and add member
         await prisma.$transaction([
-            // @ts-expect-error Prisma Client type not updated
             prisma.memberInvite.update({
                 where: { invite_id: invite.invite_id },
                 data: {
@@ -186,7 +182,6 @@ export async function DELETE(
 
         const user = sessionUser as { id: string; role: string; name?: string | null; email?: string | null };
 
-        // @ts-expect-error Prisma Client type not updated
         const invite = await prisma.memberInvite.findUnique({
             where: { token },
             include: { project: true }
@@ -202,7 +197,6 @@ export async function DELETE(
             return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
         }
 
-        // @ts-expect-error Prisma Client type not updated
         await prisma.memberInvite.delete({
             where: { invite_id: invite.invite_id }
         });

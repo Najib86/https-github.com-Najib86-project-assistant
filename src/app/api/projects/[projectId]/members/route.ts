@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import crypto from "crypto";
-import { sendMemberInviteEmail } from "@/lib/email";
+import { sendMemberInviteEmail, sendMemberAddedEmail } from "@/lib/email";
 
 export async function POST(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
     try {
@@ -76,6 +76,28 @@ export async function POST(req: Request, { params }: { params: Promise<{ project
                     details: `Added ${user.name} to the team`
                 }
             });
+
+            // Send notification email
+            const inviter = await prisma.user.findUnique({
+                where: { id: parseInt(invitedBy) },
+                select: { name: true }
+            });
+
+            if (project && inviter && user.email) {
+                const projectUrl = `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/student/project/${projectId}`;
+                try {
+                    await sendMemberAddedEmail({
+                        to: user.email,
+                        inviterName: inviter.name || 'A team member',
+                        projectTitle: project.title,
+                        projectLevel: project.level,
+                        projectType: project.type,
+                        projectUrl
+                    });
+                } catch (emailError) {
+                    console.error('Failed to send added member email:', emailError);
+                }
+            }
 
             return NextResponse.json({
                 type: "member_added",

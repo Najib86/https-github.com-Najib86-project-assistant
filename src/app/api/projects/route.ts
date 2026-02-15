@@ -110,9 +110,12 @@ export async function POST(req: Request) {
         }
 
         if (inviteCode) {
-            const invite = await prisma.supervisorInvite.findUnique({ where: { code: inviteCode } });
+            const invite = await prisma.supervisorInvite.findUnique({
+                where: { token: inviteCode },
+                include: { project: true }
+            });
             if (invite && invite.expiresAt > new Date()) {
-                finalSupervisorId = invite.supervisorId;
+                finalSupervisorId = invite.project.supervisorId;
             } else {
                 return NextResponse.json({ error: "Invalid/Expired code" }, { status: 400 });
             }

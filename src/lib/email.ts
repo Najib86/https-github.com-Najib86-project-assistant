@@ -248,3 +248,155 @@ export async function sendMemberInviteEmail({
         text,
     });
 }
+
+export function getMemberAddedEmailTemplate({
+    inviterName,
+    projectTitle,
+    projectLevel,
+    projectType,
+    projectUrl,
+}: {
+    inviterName: string;
+    projectTitle: string;
+    projectLevel: string;
+    projectType: string;
+    projectUrl: string;
+}) {
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You've been added to a project</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f3f4f6;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f3f4f6; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); overflow: hidden;">
+                    <!-- Header -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 40px 40px 30px; text-align: center;">
+                            <div style="width: 80px; height: 80px; background-color: rgba(255, 255, 255, 0.2); border-radius: 16px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
+                                <span style="font-size: 40px;">✅</span>
+                            </div>
+                            <h1 style="margin: 0; color: #ffffff; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">
+                                You've been added!
+                            </h1>
+                            <p style="margin: 10px 0 0; color: rgba(255, 255, 255, 0.9); font-size: 16px;">
+                                Welcome to the team
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- Content -->
+                    <tr>
+                        <td style="padding: 40px;">
+                            <p style="margin: 0 0 20px; color: #374151; font-size: 16px; line-height: 1.6;">
+                                Hi there,
+                            </p>
+                            <p style="margin: 0 0 30px; color: #374151; font-size: 16px; line-height: 1.6;">
+                                <strong>${inviterName}</strong> has added you to their project team. You can now access the project workspace.
+                            </p>
+                            
+                            <!-- Project Details Box -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f9fafb; border-radius: 12px; border: 1px solid #e5e7eb; margin-bottom: 30px;">
+                                <tr>
+                                    <td style="padding: 24px;">
+                                        <p style="margin: 0 0 8px; color: #6b7280; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                                            Project
+                                        </p>
+                                        <p style="margin: 0 0 16px; color: #111827; font-size: 18px; font-weight: 700; line-height: 1.4;">
+                                            ${projectTitle}
+                                        </p>
+                                        <div style="display: flex; gap: 8px; align-items: center;">
+                                            <span style="color: #6b7280; font-size: 13px; font-weight: 500;">${projectLevel}</span>
+                                            <span style="color: #d1d5db;">•</span>
+                                            <span style="color: #6b7280; font-size: 13px; font-weight: 500;">${projectType}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                            
+                            <!-- CTA Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 30px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="${projectUrl}" style="display: inline-block; background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 12px; font-size: 16px; font-weight: 700; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);">
+                                            View Project
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding: 30px 40px; background-color: #f9fafb; border-top: 1px solid #e5e7eb;">
+                            <p style="margin: 0; color: #9ca3af; font-size: 11px; text-align: center;">
+                                © ${new Date().getFullYear()} ${process.env.APP_NAME || 'Project Assistant'}. All rights reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    `;
+
+    const text = `
+You've been added to a project team!
+
+Hi there,
+
+${inviterName} has added you to their project team.
+
+Project Details:
+- Title: ${projectTitle}
+- Level: ${projectLevel}
+- Type: ${projectType}
+
+Access the project here:
+${projectUrl}
+
+---
+© ${new Date().getFullYear()} ${process.env.APP_NAME || 'Project Assistant'}
+    `;
+
+    return { html, text };
+}
+
+export async function sendMemberAddedEmail({
+    to,
+    inviterName,
+    projectTitle,
+    projectLevel,
+    projectType,
+    projectUrl,
+}: {
+    to: string;
+    inviterName: string;
+    projectTitle: string;
+    projectLevel: string;
+    projectType: string;
+    projectUrl: string;
+}) {
+    const { html, text } = getMemberAddedEmailTemplate({
+        inviterName,
+        projectTitle,
+        projectLevel,
+        projectType,
+        projectUrl,
+    });
+
+    return sendEmail({
+        to,
+        subject: `You've been added to "${projectTitle}"`,
+        html,
+        text,
+    });
+}
