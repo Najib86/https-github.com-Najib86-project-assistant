@@ -4,7 +4,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Loader2, GraduationCap, UserCheck, Bot, FileCheck, Smartphone, ShieldCheck, ArrowRight } from "lucide-react"
+import { Loader2, Bot, FileCheck, Smartphone, ShieldCheck, ArrowRight, Check, Eye, EyeOff } from "lucide-react"
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -13,6 +13,7 @@ export default function SignupPage() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -32,6 +33,14 @@ export default function SignupPage() {
         e.preventDefault();
         setIsLoading(true);
         setError("");
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            setError("Please enter a valid email address");
+            setIsLoading(false);
+            return;
+        }
 
         try {
             const res = await fetch("/api/auth/signup", {
@@ -185,49 +194,49 @@ export default function SignupPage() {
                             )}
 
                             {/* Role Selection */}
-                            <div className="grid grid-cols-2 gap-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setRole("student")}
-                                    className={cn(
-                                        "relative flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 transition-all duration-300 group overflow-hidden",
-                                        formData.role === "student"
-                                            ? "border-indigo-600 bg-indigo-50/50 text-indigo-700 shadow-sm"
-                                            : "border-gray-50 bg-gray-50/50 text-gray-400 hover:border-indigo-100 hover:bg-white"
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
-                                        formData.role === "student" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "bg-white border border-gray-100 text-gray-400 group-hover:text-indigo-600"
-                                    )}>
-                                        <GraduationCap className="h-5 w-5" />
-                                    </div>
-                                    <span className="text-sm font-black uppercase tracking-tight">Student</span>
-                                    {formData.role === "student" && (
-                                        <div className="absolute top-2 right-2 w-2 h-2 bg-indigo-600 rounded-full" />
-                                    )}
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setRole("supervisor")}
-                                    className={cn(
-                                        "relative flex flex-col items-center justify-center gap-2 p-5 rounded-2xl border-2 transition-all duration-300 group overflow-hidden",
-                                        formData.role === "supervisor"
-                                            ? "border-indigo-600 bg-indigo-50/50 text-indigo-700 shadow-sm"
-                                            : "border-gray-50 bg-gray-50/50 text-gray-400 hover:border-indigo-100 hover:bg-white"
-                                    )}
-                                >
-                                    <div className={cn(
-                                        "w-10 h-10 rounded-xl flex items-center justify-center transition-all duration-300",
-                                        formData.role === "supervisor" ? "bg-indigo-600 text-white shadow-lg shadow-indigo-100" : "bg-white border border-gray-100 text-gray-400 group-hover:text-indigo-600"
-                                    )}>
-                                        <UserCheck className="h-5 w-5" />
-                                    </div>
-                                    <span className="text-sm font-black uppercase tracking-tight">Supervisor</span>
-                                    {formData.role === "supervisor" && (
-                                        <div className="absolute top-2 right-2 w-2 h-2 bg-indigo-600 rounded-full" />
-                                    )}
-                                </button>
+                            <div className="flex flex-col gap-3">
+                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
+                                    I am a...
+                                </label>
+                                <div className="flex gap-6">
+                                    <label className="flex items-center gap-3 cursor-pointer group select-none">
+                                        <div className={cn(
+                                            "w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
+                                            formData.role === 'student' ? "bg-indigo-600 border-indigo-600" : "border-gray-300 bg-white group-hover:border-indigo-400"
+                                        )}>
+                                            {formData.role === 'student' && <Check className="w-3.5 h-3.5 text-white" strokeWidth={4} />}
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.role === 'student'}
+                                            onChange={() => setRole('student')}
+                                            className="hidden"
+                                        />
+                                        <span className={cn(
+                                            "text-sm font-bold transition-colors",
+                                            formData.role === 'student' ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700"
+                                        )}>Student</span>
+                                    </label>
+
+                                    <label className="flex items-center gap-3 cursor-pointer group select-none">
+                                        <div className={cn(
+                                            "w-5 h-5 rounded border-2 flex items-center justify-center transition-all",
+                                            formData.role === 'supervisor' ? "bg-indigo-600 border-indigo-600" : "border-gray-300 bg-white group-hover:border-indigo-400"
+                                        )}>
+                                            {formData.role === 'supervisor' && <Check className="w-3.5 h-3.5 text-white" strokeWidth={4} />}
+                                        </div>
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.role === 'supervisor'}
+                                            onChange={() => setRole('supervisor')}
+                                            className="hidden"
+                                        />
+                                        <span className={cn(
+                                            "text-sm font-bold transition-colors",
+                                            formData.role === 'supervisor' ? "text-gray-900" : "text-gray-500 group-hover:text-gray-700"
+                                        )}>Supervisor</span>
+                                    </label>
+                                </div>
                             </div>
 
                             <div className="space-y-4 pt-2">
@@ -266,15 +275,24 @@ export default function SignupPage() {
                                     <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1" htmlFor="password">
                                         Password
                                     </label>
-                                    <input
-                                        className="flex h-12 w-full rounded-2xl border-2 border-gray-50 bg-gray-50/50 px-5 py-3 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
-                                        id="password"
-                                        onChange={handleChange}
-                                        required
-                                        placeholder="Create password"
-                                        type="password"
-                                        autoComplete="new-password"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            className="flex h-12 w-full rounded-2xl border-2 border-gray-50 bg-gray-50/50 px-5 py-3 pr-12 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all"
+                                            id="password"
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Create password"
+                                            type={showPassword ? "text" : "password"}
+                                            autoComplete="new-password"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 

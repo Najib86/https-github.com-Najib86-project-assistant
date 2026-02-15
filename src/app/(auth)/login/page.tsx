@@ -4,7 +4,7 @@
 import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Loader2, Bot, FileCheck, ArrowRight } from "lucide-react"
+import { Loader2, Bot, FileCheck, ArrowRight, Eye, EyeOff } from "lucide-react"
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -22,6 +22,7 @@ function LoginForm() {
     const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [formData, setFormData] = useState({
         email: "",
         password: ""
@@ -37,6 +38,14 @@ function LoginForm() {
         e.preventDefault();
         setIsLoading(true);
         setError("");
+
+        // Email validation
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(formData.email)) {
+            setError("Please enter a valid email address");
+            setIsLoading(false);
+            return;
+        }
 
         try {
             const result = await signIn("credentials", {
@@ -228,15 +237,24 @@ function LoginForm() {
                                             Forgot?
                                         </a>
                                     </div>
-                                    <input
-                                        className="flex h-12 w-full rounded-2xl border-2 border-gray-50 bg-gray-50/50 px-5 py-3 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all text-gray-900"
-                                        id="password"
-                                        onChange={handleChange}
-                                        required
-                                        placeholder="Enter password"
-                                        type="password"
-                                        autoComplete="current-password"
-                                    />
+                                    <div className="relative">
+                                        <input
+                                            className="flex h-12 w-full rounded-2xl border-2 border-gray-50 bg-gray-50/50 px-5 py-3 pr-12 text-sm font-medium placeholder:text-gray-400 focus:outline-none focus:border-indigo-600 focus:bg-white transition-all text-gray-900"
+                                            id="password"
+                                            onChange={handleChange}
+                                            required
+                                            placeholder="Enter password"
+                                            type={showPassword ? "text" : "password"}
+                                            autoComplete="current-password"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowPassword(!showPassword)}
+                                            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        >
+                                            {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
 

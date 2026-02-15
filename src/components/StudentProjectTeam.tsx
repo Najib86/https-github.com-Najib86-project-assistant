@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus, X, Users, Loader2, UserPlus, Mail, Trash2, Crown, CheckCircle, Clock } from "lucide-react";
+import { Plus, X, Users, Loader2, UserPlus, Mail, Trash2, Crown, CheckCircle, Clock, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface User {
@@ -144,6 +144,34 @@ export default function StudentProjectTeam({ projectId, ownerId, ownerName, owne
             } else {
                 const data = await res.json();
                 setError(data.error || "Failed to cancel invite");
+            }
+        } catch (error) {
+            console.error(error);
+            setError("Failed to connect to server");
+        }
+    };
+
+    const handleResendInvite = async (token: string, email: string) => {
+        setSuccessMessage(null);
+        setError(null);
+
+        try {
+            const res = await fetch(`/api/member-invite/${token}/resend`, {
+                method: "POST"
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                // Update expiry date in state
+                setPendingInvites(pendingInvites.map(i =>
+                    i.token === token
+                        ? { ...i, expiresAt: data.expiresAt }
+                        : i
+                ));
+                setSuccessMessage(`Invitation resent to ${email}`);
+                setTimeout(() => setSuccessMessage(null), 3000);
+            } else {
+                setError(data.error || "Failed to resend invite");
             }
         } catch (error) {
             console.error(error);
@@ -293,15 +321,26 @@ export default function StudentProjectTeam({ projectId, ownerId, ownerName, owne
                                         <p className="text-sm font-bold text-gray-900 truncate">{invite.email}</p>
                                         <p className="text-xs text-gray-500 font-medium">Invitation sent • Expires {new Date(invite.expiresAt).toLocaleDateString()}</p>
                                     </div>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={() => handleCancelInvite(invite.token)}
-                                        className="h-8 w-8 text-yellow-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
-                                        title="Cancel Invite"
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </Button>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleResendInvite(invite.token, invite.email)}
+                                            className="h-8 w-8 text-yellow-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                                            title="Resend Invite"
+                                        >
+                                            <RefreshCw className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => handleCancelInvite(invite.token)}
+                                            className="h-8 w-8 text-yellow-600 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
+                                            title="Cancel Invite"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             ))}
                         </div>
