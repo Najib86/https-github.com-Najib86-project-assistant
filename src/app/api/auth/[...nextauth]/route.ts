@@ -4,6 +4,8 @@ import GoogleProvider from "next-auth/providers/google";
 import { db } from "@/lib/db";
 import prisma from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { checkRateLimit, getRateLimitKey } from "@/lib/auth/rateLimit";
+import { isAccountLocked, incrementFailedLogin, resetFailedLogin } from "@/lib/auth/lockout";
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -20,25 +22,44 @@ export const authOptions: NextAuthOptions = {
             async authorize(credentials) {
                 if (!credentials?.email || !credentials?.password) return null;
 
+                // Rate limiting by email
+                const rateLimitKey = getRateLimitKey("login", credentials.email);
+                const rateLimit = checkRateLimit(rateLimitKey, 5, 15 * 60 * 1000); // 5 attempts per 15 min
+
+                if (!rateLimit.allowed) {
+                    throw new Error("Too many login attempts. Please try again later.");
+                }
+
                 const user = await prisma.user.findUnique({
                     where: { email: credentials.email }
                 });
 
                 if (!user || !user.password) return null;
 
+                // Check if account is locked
+                if (await isAccountLocked(user)) {
+                    throw new Error("Account temporarily locked due to too many failed attempts. Try again in 30 minutes.");
+                }
+
                 // Compare hashed password
                 const isValidPassword = await bcrypt.compare(credentials.password, user.password);
 
-                if (isValidPassword) {
-                    return {
-                        id: user.id.toString(),
-                        name: user.name,
-                        email: user.email,
-                        role: user.role,
-                        emailVerified: user.email_verified,
-                    };
+                if (!isValidPassword) {
+                    // Increment failed attempts
+                    await incrementFailedLogin(user.id);
+                    return null;
                 }
-                return null;
+
+                // Reset failed login attempts on successful login
+                await resetFailedLogin(user.id);
+
+                return {
+                    id: user.id.toString(),
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    emailVerified: user.email_verified,
+                };
             }
         })
     ],

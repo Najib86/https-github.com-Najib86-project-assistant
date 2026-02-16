@@ -400,3 +400,137 @@ export async function sendMemberAddedEmail({
         text,
     });
 }
+
+// Email Verification Template
+export function getVerificationEmailTemplate({
+    name,
+    verificationUrl
+}: {
+    name: string;
+    verificationUrl: string;
+}): string {
+    return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+      .content { background: #f9fafb; padding: 20px; border-radius: 0 0 8px 8px; }
+      .button { display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; text-align: center; }
+      .footer { color: #666; font-size: 12px; margin-top: 20px; }
+      .code { background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; word-break: break-all; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Welcome to Project Assistant</h1>
+      </div>
+      <div class="content">
+        <p>Hi ${name},</p>
+        <p>Thank you for signing up! Please verify your email address to get started.</p>
+        <div style="text-align: center;">
+          <a href="${verificationUrl}" class="button" style="width: 200px;">Verify Email</a>
+        </div>
+        <p style="color: #666; font-size: 14px;">Or copy this link:<br><div class="code">${verificationUrl}</div></p>
+        <p style="color: #999; font-size: 12px;">This link expires in 1 hour.</p>
+      </div>
+      <div class="footer">
+        <p>If you didn't sign up, you can ignore this email.</p>
+      </div>
+    </div>
+  </body>
+</html>
+    `;
+}
+
+export async function sendVerificationEmail({
+    to,
+    name,
+    verificationUrl
+}: {
+    to: string;
+    name: string;
+    verificationUrl: string;
+}): Promise<void> {
+    const html = getVerificationEmailTemplate({ name, verificationUrl });
+
+    await sendEmail({
+        to,
+        subject: "Verify Your Email - Project Assistant",
+        html,
+        text: `Verify your email: ${verificationUrl}`
+    });
+}
+
+// Password Reset Email Template
+export function getPasswordResetEmailTemplate({
+    name,
+    resetUrl
+}: {
+    name: string;
+    resetUrl: string;
+}): string {
+    return `
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <style>
+      body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+      .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+      .header { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }
+      .content { background: #f9fafb; padding: 20px; border-radius: 0 0 8px 8px; }
+      .button { display: inline-block; background: #4f46e5; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; text-align: center; }
+      .warning { background: #fef2f2; color: #991b1b; padding: 12px; border-radius: 6px; margin: 15px 0; font-size: 14px; border-left: 4px solid #dc2626; }
+      .footer { color: #666; font-size: 12px; margin-top: 20px; }
+      .code { background: #fff; padding: 15px; border: 1px solid #ddd; border-radius: 4px; font-family: monospace; word-break: break-all; }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Password Reset Request</h1>
+      </div>
+      <div class="content">
+        <p>Hi ${name},</p>
+        <p>We received a request to reset your password. Click the button below to create a new password.</p>
+        <div style="text-align: center;">
+          <a href="${resetUrl}" class="button" style="width: 200px;">Reset Password</a>
+        </div>
+        <p style="color: #666; font-size: 14px;">Or copy this link:<br><div class="code">${resetUrl}</div></p>
+        <div class="warning">
+          <strong>⚠️ Security Note:</strong> This link expires in 1 hour and can only be used once.
+        </div>
+        <p style="color: #999; font-size: 12px;">If you didn't request this, ignore this email. Your password won't change.</p>
+      </div>
+      <div class="footer">
+        <p>© ${new Date().getFullYear()} Project Assistant. All rights reserved.</p>
+      </div>
+    </div>
+  </body>
+</html>
+    `;
+}
+
+export async function sendPasswordResetEmail({
+    to,
+    name,
+    resetUrl
+}: {
+    to: string;
+    name: string;
+    resetUrl: string;
+}): Promise<void> {
+    const html = getPasswordResetEmailTemplate({ name, resetUrl });
+
+    await sendEmail({
+        to,
+        subject: "Password Reset - Project Assistant",
+        html,
+        text: `Reset your password: ${resetUrl}`
+    });
+}
