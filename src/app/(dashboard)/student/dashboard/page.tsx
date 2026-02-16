@@ -8,6 +8,7 @@ import { PlusCircle, Loader2, X } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { LoadingLogo } from "@/components/ui/LoadingLogo";
 
 interface Project {
     project_id: number;
@@ -133,7 +134,7 @@ export default function StudentDashboard() {
     };
 
     if (loading && projects.length === 0) {
-        return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin text-indigo-600" /></div>;
+        return <div className="flex justify-center items-center h-[80vh] bg-gray-50/50 backdrop-blur-sm"><LoadingLogo size={120} /></div>;
     }
 
     return (

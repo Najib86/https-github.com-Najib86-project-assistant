@@ -4,7 +4,8 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Users, FileText, Clock, Loader2 } from "lucide-react"
+import { Users, FileText, Clock } from "lucide-react"
+import { LoadingLogo } from "@/components/ui/LoadingLogo";
 
 interface Student {
     name: string;
@@ -41,7 +42,7 @@ export default function SupervisorDashboard() {
     }, []);
 
     if (loading) {
-        return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin" /></div>;
+        return <div className="flex justify-center items-center h-[80vh] bg-gray-50/50 backdrop-blur-sm"><LoadingLogo size={120} /></div>;
     }
 
     return (

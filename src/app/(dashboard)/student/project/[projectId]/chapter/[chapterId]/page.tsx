@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { Loader2, ArrowLeft } from "lucide-react"
+import { ArrowLeft } from "lucide-react"
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import ChapterEditor from "@/components/ChapterEditor";
+import { LoadingLogo } from "@/components/ui/LoadingLogo";
 
 export default function StudentChapterPage() {
     const params = useParams();
@@ -57,7 +58,7 @@ export default function StudentChapterPage() {
     }, [chapterId, projectId, fetchChapter]);
 
     if (loading || !user) {
-        return <div className="flex justify-center items-center h-screen"><Loader2 className="animate-spin text-indigo-600" /></div>;
+        return <div className="flex justify-center items-center h-[80vh] bg-gray-50/50 backdrop-blur-sm"><LoadingLogo size={120} /></div>;
     }
 
     if (!chapter) {
