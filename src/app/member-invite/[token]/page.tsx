@@ -176,7 +176,7 @@ export default function MemberInvitePage({ params }: { params: Promise<{ token: 
                             Sign Up to Join
                         </Button>
                         <p className="text-xs text-gray-400">
-                            Already have an account? <Link href={`/auth/login?redirect=/member-invite/${token}`} className="text-indigo-600 font-bold">Log in</Link>
+                            Already have an account? <Link href={`/auth/login?callbackUrl=/member-invite/${token}`} className="text-indigo-600 font-bold">Log in</Link>
                         </p>
                     </div>
                 ) : currentUser.email !== invite?.email ? (
@@ -191,7 +191,7 @@ export default function MemberInvitePage({ params }: { params: Promise<{ token: 
                         </div>
                         <Button onClick={() => {
                             localStorage.removeItem("user");
-                            router.push(`/auth/login?redirect=/member-invite/${token}`);
+                            router.push(`/auth/login?callbackUrl=/member-invite/${token}`);
                         }} size="lg" variant="outline" className="w-full rounded-xl font-bold h-12">
                             Log in with {invite?.email}
                         </Button>

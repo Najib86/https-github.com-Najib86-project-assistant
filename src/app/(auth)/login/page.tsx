@@ -66,7 +66,10 @@ function LoginForm() {
                 // Critical: Set user in localStorage for client-side checks on dashboard
                 localStorage.setItem("user", JSON.stringify(session.user));
 
-                if (session.user.role === "supervisor") {
+                const callbackUrl = searchParams.get("callbackUrl");
+                if (callbackUrl) {
+                    router.push(callbackUrl);
+                } else if (session.user.role === "supervisor") {
                     router.push("/supervisor");
                 } else {
                     router.push("/student");
@@ -82,7 +85,8 @@ function LoginForm() {
     };
 
     const handleGoogleSignIn = () => {
-        signIn("google", { callbackUrl: "/student" });
+        const callbackUrl = searchParams.get("callbackUrl") || "/student";
+        signIn("google", { callbackUrl });
     };
 
     const features = [
