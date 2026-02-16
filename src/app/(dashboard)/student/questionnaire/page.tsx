@@ -20,6 +20,7 @@ export default function ProjectQuestionnaire() {
     const [objectives, setObjectives] = useState<string[]>([""]);
     const [methodology, setMethodology] = useState("");
 
+    // Start useEffects immediately
     useEffect(() => {
         if (!projectId) return;
 
@@ -85,7 +86,7 @@ export default function ProjectQuestionnaire() {
         }
     };
 
-    if (loading) return <div className="p-10 text-center"><Loader2 className="animate-spin inline mr-2" /> Loading...</div>;
+
 
     // Redirect if no project ID for Interview Bot
     useEffect(() => {
@@ -115,33 +116,34 @@ export default function ProjectQuestionnaire() {
         }
     }, [projectId, router]);
 
-    if (!projectId) return <div className="p-10 text-center flex items-center justify-center h-screen"><Loader2 className="animate-spin text-indigo-600 mr-2" /> Loading Project Context...</div>;
+    if (loading) return <div className="p-10 text-center flex items-center justify-center h-screen"><Loader2 className="animate-spin text-indigo-600 mr-2" /> Loading Project Context...</div>;
+    if (!projectId) return <div className="p-10 text-center flex items-center justify-center h-screen"><Loader2 className="animate-spin text-indigo-600 mr-2" /> Redirecting...</div>;
 
 
     return (
-        <div className="max-w-3xl mx-auto space-y-8 pb-20">
+        <div className="max-w-3xl mx-auto space-y-6 md:space-y-8 pb-20 px-4 md:px-0">
             {/* Header */}
-            <div className="flex items-center gap-4 mb-6">
-                <Button variant="ghost" size="icon" asChild>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+                <Button variant="ghost" size="icon" asChild className="shrink-0 -ml-2 sm:ml-0">
                     <Link href={`/student/project/${projectId}`}>
                         <ArrowLeft className="h-5 w-5" />
                     </Link>
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-900">Project Context Questionnaire</h1>
-                    <p className="text-gray-500">Answer these key questions to help AI write better chapters for you.</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-900 leading-tight">Project Context Questionnaire</h1>
+                    <p className="text-sm text-gray-500 mt-1">Answer these key questions to help AI write better chapters for you.</p>
                 </div>
             </div>
 
             {/* Problem Statement */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border space-y-4">
+            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
                 <div className="flex justify-between items-start">
-                    <h2 className="text-lg font-semibold text-gray-800">1. Problem Statement</h2>
+                    <h2 className="text-base md:text-lg font-bold text-gray-800">1. Problem Statement</h2>
                     <Wand2 className="h-5 w-5 text-indigo-400" />
                 </div>
-                <p className="text-sm text-gray-500">Describe the core issue your project aims to solve. Be specific.</p>
+                <p className="text-xs md:text-sm text-gray-500">Describe the core issue your project aims to solve. Be specific.</p>
                 <textarea
-                    className="w-full h-32 p-3 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full h-32 p-3 md:p-4 border border-gray-200 bg-gray-50/50 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none text-base transition-all placeholder:text-gray-300"
                     placeholder="E.g. Traditional manual attendance systems are prone to errors and time-consuming..."
                     value={problemStatement}
                     onChange={(e) => setProblemStatement(e.target.value)}
@@ -149,39 +151,46 @@ export default function ProjectQuestionnaire() {
             </div>
 
             {/* Research Objectives */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border space-y-4">
-                <h2 className="text-lg font-semibold text-gray-800">2. Research Objectives</h2>
-                <p className="text-sm text-gray-500">List the specific goals of your project.</p>
+            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                <h2 className="text-base md:text-lg font-bold text-gray-800">2. Research Objectives</h2>
+                <p className="text-xs md:text-sm text-gray-500">List the specific goals of your project.</p>
 
                 <div className="space-y-3">
                     {objectives.map((obj, index) => (
                         <div key={index} className="flex gap-2">
-                            <span className="py-2 text-gray-400 font-medium">{index + 1}.</span>
-                            <input
-                                className="flex-1 p-2 border rounded-md focus:ring-2 focus:ring-indigo-500"
-                                placeholder={`Objective ${index + 1}`}
-                                value={obj}
-                                onChange={(e) => handleObjectiveChange(index, e.target.value)}
-                            />
-                            {objectives.length > 1 && (
-                                <Button size="icon" variant="ghost" onClick={() => handleRemoveObjective(index)} className="text-red-400 hover:text-red-600">
-                                    <Trash className="h-4 w-4" />
-                                </Button>
-                            )}
+                            <span className="py-3 text-gray-400 font-bold text-sm w-6">{index + 1}.</span>
+                            <div className="flex-1 relative">
+                                <input
+                                    className="w-full p-3 border border-gray-200 bg-gray-50/50 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none text-base transition-all placeholder:text-gray-300"
+                                    placeholder={`Objective ${index + 1}`}
+                                    value={obj}
+                                    onChange={(e) => handleObjectiveChange(index, e.target.value)}
+                                />
+                                {objectives.length > 1 && (
+                                    <Button
+                                        size="icon"
+                                        variant="ghost"
+                                        onClick={() => handleRemoveObjective(index)}
+                                        className="absolute right-2 top-2 h-8 w-8 text-red-300 hover:text-red-500 hover:bg-red-50 rounded-lg"
+                                    >
+                                        <Trash className="h-4 w-4" />
+                                    </Button>
+                                )}
+                            </div>
                         </div>
                     ))}
-                    <Button variant="outline" size="sm" onClick={handleAddObjective} className="mt-2 text-indigo-600">
+                    <Button variant="outline" size="sm" onClick={handleAddObjective} className="mt-2 text-indigo-600 border-indigo-100 hover:bg-indigo-50 font-bold rounded-xl w-full sm:w-auto h-11 sm:h-9">
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Objective
                     </Button>
                 </div>
             </div>
 
             {/* Methodology */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border space-y-4">
-                <h2 className="text-lg font-semibold text-gray-800">3. Methodology (Brief)</h2>
-                <p className="text-sm text-gray-500">What approach or tools will you use? (e.g. Agile, Waterfall, Python/Django, Survey Research)</p>
+            <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 space-y-4">
+                <h2 className="text-base md:text-lg font-bold text-gray-800">3. Methodology (Brief)</h2>
+                <p className="text-xs md:text-sm text-gray-500">What approach or tools will you use? (e.g. Agile, Waterfall, Python/Django, Survey Research)</p>
                 <textarea
-                    className="w-full h-32 p-3 border rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                    className="w-full h-32 p-3 md:p-4 border border-gray-200 bg-gray-50/50 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none text-base transition-all placeholder:text-gray-300"
                     placeholder="E.g. We will use the Agile development methodology. The backend will be built with Node.js..."
                     value={methodology}
                     onChange={(e) => setMethodology(e.target.value)}
@@ -189,8 +198,8 @@ export default function ProjectQuestionnaire() {
             </div>
 
             {/* Save Action */}
-            <div className="flex justify-end pt-4">
-                <Button size="lg" onClick={handleSave} disabled={saving}>
+            <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-100 md:static md:bg-transparent md:border-0 md:flex md:justify-end md:pt-4 z-10">
+                <Button size="lg" onClick={handleSave} disabled={saving} className="w-full md:w-auto rounded-xl shadow-lg shadow-indigo-200 bg-indigo-600 font-bold h-12 md:h-11">
                     {saving ? <Loader2 className="animate-spin mr-2" /> : <Save className="mr-2 h-4 w-4" />}
                     Save Project Context
                 </Button>

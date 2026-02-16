@@ -1,10 +1,9 @@
-
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { ArrowRight, Sparkles, MessageSquare, LayoutDashboard, FileText, CheckCircle, Users } from "lucide-react";
+import { ArrowRight, Sparkles, MessageSquare, CheckCircle } from "lucide-react";
 import { HeroCarousel } from "@/components/HeroCarousel";
+import { Navbar } from "@/components/Navbar";
 
 export default function Home() {
   return (
@@ -19,72 +18,52 @@ export default function Home() {
         <div className="absolute inset-0 opacity-[0.015]" style={{ backgroundImage: `radial-gradient(#4f46e5 0.5px, transparent 0.5px)`, backgroundSize: '24px 24px' }} />
       </div>
 
-      {/* Header */}
-      <header className="px-6 md:px-12 h-16 md:h-18 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-xl z-50 border-b border-gray-100/50">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-3 group">
-            <Image
-              src="/logo.png"
-              alt="Logo"
-              width={32}
-              height={32}
-              className="rounded-lg transition-transform group-hover:scale-110"
-            />
-            <span className="font-black text-xl tracking-tighter text-gray-900">
-              ProjectAssistantAI
-            </span>
-          </Link>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link href="/login" className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors hidden md:block">
-            Sign In
-          </Link>
-          <Button asChild className="rounded-xl px-6 font-bold shadow-lg shadow-indigo-100 h-11">
-            <Link href="/signup">Get Started</Link>
-          </Button>
-        </div>
-      </header>
+      {/* Header / Navbar */}
+      <Navbar />
 
       <main className="flex-1 relative z-10 w-full">
         {/* Hero Section */}
-        <section className="relative pt-12 pb-20 md:pt-24 md:pb-32 px-6 overflow-hidden min-h-[85vh] flex items-center">
+        <section className="relative py-12 md:py-24 px-4 md:px-6 overflow-hidden min-h-[85vh] flex items-center">
           <HeroCarousel />
 
-          <div className="max-w-[1440px] mx-auto w-full relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 xl:gap-20 items-center">
-              <div className="lg:col-span-7 space-y-8 md:space-y-10 animate-in fade-in slide-in-from-left-12 duration-1000">
-                <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/80 backdrop-blur-md border border-indigo-100 text-indigo-600 text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-indigo-50/20">
+          <div className="w-full max-w-7xl mx-auto relative z-10">
+            {/* Mobile: Stacked (flex-col), Desktop: Grid */}
+            <div className="flex flex-col lg:grid lg:grid-cols-12 gap-12 lg:gap-20 items-center">
+
+              {/* Text Content */}
+              <div className="w-full lg:col-span-7 space-y-6 md:space-y-8 animate-in fade-in slide-in-from-left-6 duration-1000">
+                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/80 backdrop-blur-md border border-indigo-100 text-indigo-600 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] shadow-lg shadow-indigo-50/20">
                   <div className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
-                  AI for Final Year Projects and Academic Research
+                  AI for Final Year Projects
                 </div>
 
-                <h1 className="text-6xl md:text-7xl xl:text-8xl font-black tracking-tighter text-gray-900 leading-[0.85]">
+                <h1 className="text-[2rem] md:text-[3rem] lg:text-[4rem] font-black tracking-tighter text-gray-900 leading-[1.1] md:leading-tight">
                   Academic projects <br />
                   <span className="text-indigo-600">reimagined.</span>
                 </h1>
 
-                <p className="text-xl md:text-2xl text-gray-600 max-w-2xl font-medium leading-relaxed">
+                <p className="text-base md:text-xl text-gray-600 max-w-xl font-medium leading-relaxed">
                   Transform complex research topics into structured, university-grade documents in minutes. Smart outlines, citations, and full chapters generated instantly.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-5 pt-8">
-                  <Button size="lg" asChild className="w-full sm:w-auto rounded-2xl px-12 py-10 text-xl font-black shadow-2xl shadow-indigo-300 transition-all hover:-translate-y-1 hover:shadow-indigo-400 group h-auto">
-                    <Link href="/signup" className="flex items-center gap-3">
+                <div className="flex flex-col sm:flex-row gap-4 pt-6">
+                  <Button size="lg" asChild className="w-full sm:w-auto rounded-xl md:rounded-2xl px-8 py-6 text-lg font-bold shadow-xl shadow-indigo-300 transition-all hover:-translate-y-1 hover:shadow-indigo-400 group h-auto">
+                    <Link href="/signup" className="flex items-center justify-center gap-3">
                       Start Your Project Free
-                      <ArrowRight className="h-6 w-6 transition-transform group-hover:translate-x-2" />
+                      <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
                     </Link>
                   </Button>
                 </div>
 
-                <div className="flex items-center gap-6 pt-12 border-t border-gray-200/60 max-w-md">
+                <div className="flex flex-wrap items-center gap-6 pt-10 border-t border-gray-200/60 max-w-md">
                   <div className="flex -space-x-4">
                     {[10, 15, 20, 25].map((u) => (
-                      <div key={u} className="h-14 w-14 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-xl">
+                      <div key={u} className="h-12 w-12 rounded-full border-4 border-white bg-gray-200 overflow-hidden shadow-lg">
                         <Image
                           src={`https://i.pravatar.cc/100?u=${u}`}
                           alt="User"
-                          width={56}
-                          height={56}
+                          width={48}
+                          height={48}
                           className="grayscale hover:grayscale-0 transition-all duration-500"
                         />
                       </div>
@@ -97,129 +76,75 @@ export default function Home() {
                       ))}
                     </div>
                     <p className="text-sm font-black text-gray-900">2,000+ Students</p>
-                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Nigeria&apos;s #1 AI Tool</p>
                   </div>
                 </div>
               </div>
 
-              {/* Desktop Desktop Visual Column */}
-              <div className="hidden lg:block lg:col-span-5 relative animate-in zoom-in-95 fade-in duration-1000 delay-300">
-                <div className="relative">
-                  {/* Floating Notification */}
-                  <div className="absolute -top-12 -left-8 z-20 animate-bounce transition-all duration-[3000ms]">
-                    <div className="bg-white p-4 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-4">
-                      <div className="w-10 h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white relative">
-                        <MessageSquare className="w-5 h-5" />
-                        <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border-2 border-white" />
+              {/* Visual Content - Stacked on Mobile, Col-span-5 on Desktop */}
+              {/* Simplified for mobile: visible but adjusted scaling/padding */}
+              <div className="w-full lg:col-span-5 relative animate-in zoom-in-95 fade-in duration-1000 delay-300">
+                <div className="relative transform scale-95 md:scale-100">
+                  {/* Floating Notification - Hidden on very small screens to simplify */}
+                  <div className="hidden sm:block absolute -top-8 -left-4 md:-top-12 md:-left-8 z-20 animate-bounce transition-all duration-[3000ms]">
+                    <div className="bg-white p-3 md:p-4 rounded-2xl shadow-2xl border border-gray-100 flex items-center gap-4">
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-indigo-500 rounded-xl flex items-center justify-center text-white relative">
+                        <MessageSquare className="w-4 h-4 md:w-5 md:h-5" />
+                        <div className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white" />
                       </div>
                       <div>
                         <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none">New Comment</p>
-                        <p className="text-xs font-bold text-gray-900 mt-1">Supervisor: &quot;Great progress on Ch. 3!&quot;</p>
+                        <p className="text-xs font-bold text-gray-900 mt-1">Supervisor: &quot;Great progress!&quot;</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Main Dashboard Card */}
-                  <div className="bg-white/90 backdrop-blur-2xl rounded-[2.5rem] border border-white shadow-2xl shadow-indigo-100/50 p-6 transform rotate-1 hover:rotate-0 transition-all duration-700">
-                    {/* Fake Browser/App Header */}
-                    <div className="flex items-center justify-between border-b border-gray-100/80 pb-6 mb-6">
-                      <div className="flex items-center gap-4">
-                        <div className="flex -space-x-3">
-                          {[1, 2, 3].map((i) => (
-                            <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-gray-200 overflow-hidden relative">
-                              <Image
-                                src={`https://i.pravatar.cc/100?u=${i + 25}`}
-                                width={32}
-                                height={32}
-                                alt="Collaborator"
-                                className="object-cover"
-                              />
-                            </div>
-                          ))}
-                          <div className="w-8 h-8 rounded-full border-2 border-white bg-indigo-50 flex items-center justify-center text-[10px] font-bold text-indigo-600">+2</div>
-                        </div>
-                        <div className="h-8 w-[1px] bg-gray-200" />
+                  <div className="bg-white/90 backdrop-blur-2xl rounded-3xl md:rounded-[2.5rem] border border-white shadow-2xl shadow-indigo-100/50 p-4 md:p-6 lg:transform lg:rotate-1 lg:hover:rotate-0 transition-all duration-700">
+                    {/* Header */}
+                    <div className="flex items-center justify-between border-b border-gray-100/80 pb-4 mb-4 md:pb-6 md:mb-6">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center font-bold text-indigo-600 text-xs">AI</div>
                         <div>
                           <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Project</p>
-                          <p className="text-sm font-bold text-gray-900">Thesis: AI in Healthcare</p>
+                          <p className="text-sm font-bold text-gray-900 line-clamp-1">Thesis: AI in Healthcare</p>
                         </div>
                       </div>
-                      <div className="flex gap-2">
-                        <div className="px-3 py-1.5 bg-green-50 text-green-600 rounded-lg text-[10px] font-bold uppercase tracking-wide flex items-center gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                          Live
-                        </div>
+                      <div className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-[10px] font-bold uppercase tracking-wide flex items-center gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        Live
                       </div>
                     </div>
 
-                    {/* Dashboard Grid */}
-                    <div className="grid grid-cols-12 gap-6">
-                      {/* Left Sidebar (Mini) */}
-                      <div className="col-span-3 space-y-3">
-                        {[
-                          { icon: LayoutDashboard, label: 'Overview', active: true },
-                          { icon: FileText, label: 'Drafts', active: false },
-                          { icon: Users, label: 'Team', active: false },
-                        ].map((item, i) => (
-                          <div key={i} className={cn("p-3 rounded-xl flex items-center gap-3 transition-colors", item.active ? 'bg-indigo-50 text-indigo-600' : 'text-gray-400')}>
-                            <item.icon className="w-4 h-4" />
-                            <div className={cn("h-2 w-12 rounded-full", item.active ? 'bg-indigo-200' : 'bg-gray-100')} />
-                          </div>
-                        ))}
+                    {/* Dashboard Grid Simulation */}
+                    <div className="grid grid-cols-1 gap-4">
+                      {/* Progress Bar */}
+                      <div className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-gray-50/50 border border-gray-100 space-y-2">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[10px] font-black uppercase tracking-wider text-gray-500">Methodology</span>
+                          <span className="text-[10px] font-bold text-indigo-600">85%</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                          <div className="h-full w-[85%] bg-indigo-500 rounded-full" />
+                        </div>
                       </div>
 
-                      {/* Content Area */}
-                      <div className="col-span-9 space-y-5">
-                        {/* Progress Section */}
-                        <div className="p-4 rounded-2xl bg-gray-50/50 border border-gray-100 space-y-3">
-                          <div className="flex justify-between items-center">
-                            <span className="text-[10px] font-black uppercase tracking-wider text-gray-500">Chapter 4: Methodology</span>
-                            <span className="text-[10px] font-bold text-indigo-600">85%</span>
-                          </div>
-                          <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
-                            <div className="h-full w-[85%] bg-indigo-500 rounded-full" />
-                          </div>
-                          <div className="flex gap-2 mt-2">
-                            <div className="px-2 py-1 bg-white rounded-md text-[8px] font-bold text-gray-400 shadow-sm border border-gray-100">Research Design</div>
-                            <div className="px-2 py-1 bg-white rounded-md text-[8px] font-bold text-gray-400 shadow-sm border border-gray-100">Data Collection</div>
+                      {/* Active Task */}
+                      <div className="flex gap-3">
+                        <div className="flex-1 p-4 rounded-xl md:rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 relative overflow-hidden">
+                          <div className="relative z-10">
+                            <p className="text-[10px] font-medium opacity-80 uppercase tracking-widest mb-1">Current Task</p>
+                            <p className="text-sm font-bold truncate">Reviewing Citations</p>
                           </div>
                         </div>
-
-                        {/* Active Task / Collab */}
-                        <div className="flex gap-4">
-                          <div className="flex-1 p-4 rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 relative overflow-hidden">
-                            <div className="relative z-10">
-                              <p className="text-[10px] font-medium opacity-80 uppercase tracking-widest mb-1">Current Task</p>
-                              <p className="text-sm font-bold">Reviewing Citations</p>
-                              <div className="flex items-center gap-2 mt-3">
-                                <div className="w-5 h-5 rounded-full border border-white/30 overflow-hidden relative">
-                                  <Image
-                                    src="https://i.pravatar.cc/100?u=30"
-                                    width={20}
-                                    height={20}
-                                    alt="User"
-                                    className="object-cover"
-                                  />
-                                </div>
-                                <span className="text-[10px] opacity-80">Sarah is editing...</span>
-                              </div>
-                            </div>
-                            <div className="absolute right-0 bottom-0 w-20 h-20 bg-white/10 rounded-full blur-xl transform translate-x-1/2 translate-y-1/2" />
+                        <div className="w-1/3 p-4 rounded-xl md:rounded-2xl border border-gray-100 flex flex-col items-center justify-center gap-1">
+                          <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center text-green-600">
+                            <CheckCircle className="w-3 h-3" />
                           </div>
-
-                          <div className="w-1/3 p-4 rounded-2xl border border-gray-100 flex flex-col items-center justify-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                              <CheckCircle className="w-4 h-4" />
-                            </div>
-                            <span className="text-[10px] font-bold text-gray-400 uppercase text-center">3 Done</span>
-                          </div>
+                          <span className="text-[10px] font-bold text-gray-400 uppercase text-center">Done</span>
                         </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* Glass Card Underneath */}
-                  <div className="absolute -bottom-16 -right-8 w-64 h-64 bg-white/40 backdrop-blur-md rounded-[3rem] -z-10 border border-white/50" />
                 </div>
               </div>
             </div>
@@ -227,43 +152,32 @@ export default function Home() {
         </section>
 
         {/* Features Section */}
-        <section id="features" className="py-20 md:py-28 bg-gray-50/80 backdrop-blur-sm relative border-y border-gray-100/50">
-          <div className="container px-6 mx-auto">
-            <div className="text-center mb-16 space-y-3">
+        <section id="features" className="py-16 md:py-28 bg-gray-50/80 backdrop-blur-sm relative border-y border-gray-100/50">
+          <div className="container px-4 md:px-6 mx-auto">
+            <div className="text-center mb-12 space-y-3">
               <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 opacity-80">The Powerhouse</h2>
-              <p className="text-3xl md:text-5xl font-black text-gray-900 leading-tight">Everything you need to <br className="hidden md:block" /> finish your degree.</p>
+              <p className="text-2xl md:text-3xl lg:text-5xl font-black text-gray-900 leading-tight">Everything you need to <br className="hidden md:block" /> finish your degree.</p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            {/* Grid: 1 col (mobile) -> 2 cols (tablet) -> 3 cols (desktop) */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
               {[
                 {
-                  //  icon: GraduationCap,
                   title: "Academic Fidelity",
                   desc: "Drafts generated follow strict university standards for Chapters 1-5, ensuring your project structure is always perfect.",
-                  color: "bg-indigo-50",
-                  textColor: "text-indigo-600"
                 },
                 {
-                  //   icon: Brain,
                   title: "Smart Synthesis",
                   desc: "Our AI doesn't just write; it synthesizes complex information to provide logical arguments and literature connections.",
-                  color: "bg-purple-50",
-                  textColor: "text-purple-600"
                 },
                 {
-                  //   icon: Shield,
                   title: "Supervisor Ready",
                   desc: "Build credibility with your supervisor using our review interface for inline comments and direct feedback.",
-                  color: "bg-green-50",
-                  textColor: "text-green-600"
                 }
               ].map((feature, i) => (
-                <div key={i} className="flex flex-col p-8 rounded-[2rem] bg-white border border-gray-100 hover:border-indigo-200 hover:shadow-2xl hover:shadow-indigo-100/40 transition-all duration-500 group">
-                  {/* <div className={cn(feature.color, "p-5 rounded-2xl w-fit mb-8 transition-transform group-hover:scale-110 shadow-sm")}>
-                    <feature.icon className={cn(feature.textColor, "h-8 w-8")} />
-                  </div> */}
-                  <h3 className="text-2xl font-black mb-4 text-gray-900">{feature.title}</h3>
-                  <p className="text-gray-500 font-medium leading-relaxed">
+                <div key={i} className="flex flex-col p-6 md:p-8 rounded-2xl md:rounded-[2rem] bg-white border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all duration-500 group">
+                  <h3 className="text-xl md:text-2xl font-black mb-3 md:mb-4 text-gray-900">{feature.title}</h3>
+                  <p className="text-gray-500 font-medium leading-relaxed text-sm md:text-base">
                     {feature.desc}
                   </p>
                 </div>
@@ -273,8 +187,6 @@ export default function Home() {
         </section>
 
       </main>
-
-
     </div >
   );
 }

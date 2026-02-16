@@ -4,6 +4,7 @@ import { generateAIResponse } from "@/lib/ai-service";
 import { redis } from "@/lib/redis";
 import { rateLimit } from "@/lib/rate-limit";
 import crypto from "crypto";
+import { RESEARCH_GUIDELINES } from "@/lib/guidelines";
 
 export async function POST(req: Request) {
   try {
@@ -31,6 +32,11 @@ export async function POST(req: Request) {
     const prompt = `
 You are an expert university academic research assistant. 
 Your task is to automatically generate **full university-standard project content** for Chapters 1–5, including outlines, detailed drafts, project status tracking, plagiarism awareness notes, and full report preparation. Follow formal academic writing standards.
+
+=== STRICT GUIDELINES ===
+The following content guidelines MUST be followed for every chapter.
+${RESEARCH_GUIDELINES}
+=========================
 
 Inputs:
 - Project Topic: ${topic}
@@ -107,7 +113,7 @@ JSON Output Format:
     try {
       parsedData = JSON.parse(jsonString);
     } catch (e) {
-      console.error("Failed to parse AI response as JSON:", responseText);
+      console.error("Failed to parse AI response as JSON:", e, responseText);
       return NextResponse.json(
         { error: "Failed to generate structured content", raw: responseText },
         { status: 500 }
@@ -119,10 +125,12 @@ JSON Output Format:
 
     return NextResponse.json({ result: parsedData });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Error generating chapter content:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : undefined;
     return NextResponse.json(
-      { error: "Internal Server Error", details: error.message, stack: error.stack },
+      { error: "Internal Server Error", details: errorMessage, stack: errorStack },
       { status: 500 }
     );
   }

@@ -17,13 +17,11 @@ export async function middleware(req: NextRequest) {
         }
 
         // Check email verification
-        // @ts-ignore
         if (!token.emailVerified) {
             return NextResponse.redirect(new URL("/verify-email", req.url));
         }
 
         // Check if user has student role
-        // @ts-ignore
         if (token.role !== "student") {
             return NextResponse.redirect(new URL("/auth/login?error=unauthorized", req.url));
         }
@@ -36,13 +34,11 @@ export async function middleware(req: NextRequest) {
         }
 
         // Check email verification
-        // @ts-ignore
         if (!token.emailVerified) {
             return NextResponse.redirect(new URL("/verify-email", req.url));
         }
 
         // Check if user has supervisor role
-        // @ts-ignore
         if (token.role !== "supervisor") {
             return NextResponse.redirect(new URL("/auth/login?error=unauthorized", req.url));
         }

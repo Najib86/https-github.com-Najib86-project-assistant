@@ -32,14 +32,14 @@ export function Footer() {
                     </div>
 
                     {/* Center Links - Optimized for space */}
-                    <div className="flex flex-wrap justify-center items-center gap-x-6 gap-y-3 md:gap-x-8 text-xs font-medium text-indigo-200/80">
+                    <div className="flex flex-col md:flex-row justify-center items-center gap-y-4 gap-x-8 text-sm font-medium text-indigo-200/80">
                         <span className="flex items-center gap-2">
-                            <span className="w-1 h-1 rounded-full bg-indigo-500"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
                             Powered by <span className="text-indigo-100 font-bold">Synapse Engineering</span>
                         </span>
 
-                        <a href="tel:08028110448" className="flex items-center gap-2 hover:text-white transition-colors group">
-                            <span className="w-1 h-1 rounded-full bg-indigo-500 group-hover:bg-indigo-400 transition-colors"></span>
+                        <a href="tel:08028110448" className="flex items-center gap-2 hover:text-white transition-colors group py-2 md:py-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:bg-indigo-400 transition-colors"></span>
                             08028110448
                         </a>
 
@@ -47,20 +47,20 @@ export function Footer() {
                             href="https://www.synapseengineering.com.ng/"
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="flex items-center gap-2 hover:text-white transition-colors group"
+                            className="flex items-center gap-2 hover:text-white transition-colors group py-2 md:py-0"
                         >
-                            <span className="w-1 h-1 rounded-full bg-indigo-500 group-hover:bg-indigo-400 transition-colors"></span>
+                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 group-hover:bg-indigo-400 transition-colors"></span>
                             synapseengineering.com.ng
                         </a>
                     </div>
 
                     {/* Legal / Copyright */}
-                    <div className="flex items-center gap-6 text-xs text-indigo-300/60 font-medium">
+                    <div className="flex items-center gap-6 text-sm text-indigo-300/60 font-medium mt-4 md:mt-0">
                         <div className="flex gap-4">
-                            <Link href="#" className="hover:text-indigo-100 transition-colors">Terms</Link>
-                            <Link href="#" className="hover:text-indigo-100 transition-colors">Privacy</Link>
+                            <Link href="#" className="hover:text-indigo-100 transition-colors p-2">Terms</Link>
+                            <Link href="#" className="hover:text-indigo-100 transition-colors p-2">Privacy</Link>
                         </div>
-                        <div className="w-px h-3 bg-indigo-800"></div>
+                        <div className="w-px h-4 bg-indigo-800 hidden md:block"></div>
                         <p>© 2026</p>
                     </div>
                 </div>

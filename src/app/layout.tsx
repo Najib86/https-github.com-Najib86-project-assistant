@@ -7,6 +7,12 @@ export const metadata: Metadata = {
   description: "AI-powered platform for university project writing and supervision.",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Footer } from "@/components/Footer";

@@ -195,7 +195,7 @@ export default function SignupPage() {
 
                             {/* Role Selection */}
                             <div className="flex flex-col gap-3">
-                                <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
+                                <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1">
                                     I am a...
                                 </label>
                                 <div className="flex gap-6">
@@ -241,7 +241,7 @@ export default function SignupPage() {
 
                             <div className="space-y-4 pt-2">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1" htmlFor="name">
+                                    <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1" htmlFor="name">
                                         Full Name
                                     </label>
                                     <input
@@ -256,7 +256,7 @@ export default function SignupPage() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1" htmlFor="email">
+                                    <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1" htmlFor="email">
                                         Email Address
                                     </label>
                                     <input
@@ -272,7 +272,7 @@ export default function SignupPage() {
                                 </div>
 
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1" htmlFor="password">
+                                    <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1" htmlFor="password">
                                         Password
                                     </label>
                                     <div className="relative">

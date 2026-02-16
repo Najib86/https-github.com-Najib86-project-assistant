@@ -3,6 +3,7 @@ import prisma from "@/lib/prisma";
 import { GEMINI_API_ENDPOINT } from "./constants";
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
+import { RESEARCH_GUIDELINES } from "@/lib/guidelines";
 
 const geminiApiKey = process.env.GEMINI_API_KEY;
 const groqApiKey = process.env.GROQ_API_KEY;
@@ -261,32 +262,32 @@ export async function generateAIResponse(prompt: string, mode: string = "text"):
     try {
         console.log("Attempting Gemini...");
         return await generateWithGemini(prompt, mode);
-    } catch (err: any) {
-        console.warn("Gemini failed:", err.message);
+    } catch (err: unknown) {
+        console.warn("Gemini failed:", err instanceof Error ? err.message : String(err));
     }
 
     // 2. Groq
     try {
         console.log("Attempting Groq...");
         return await generateWithGroq(prompt, mode);
-    } catch (err: any) {
-        console.warn("Groq failed:", err.message);
+    } catch (err: unknown) {
+        console.warn("Groq failed:", err instanceof Error ? err.message : String(err));
     }
 
     // 3. OpenRouter
     try {
         console.log("Attempting OpenRouter...");
         return await generateWithOpenRouter(prompt, mode);
-    } catch (err: any) {
-        console.warn("OpenRouter failed:", err.message);
+    } catch (err: unknown) {
+        console.warn("OpenRouter failed:", err instanceof Error ? err.message : String(err));
     }
 
     // 4. Hugging Face
     try {
         console.log("Attempting Hugging Face...");
         return await generateWithHuggingFace(prompt, mode);
-    } catch (err: any) {
-        console.warn("Hugging Face failed:", err.message);
+    } catch (err: unknown) {
+        console.warn("Hugging Face failed:", err instanceof Error ? err.message : String(err));
     }
 
     // 5. Mock
@@ -299,6 +300,11 @@ export async function generateChapterContent(projectId: number, chapterNumber: n
         Context: Writing an academic project report for a ${level || "University"} level requirement.
             Chapter: ${chapterTitle}
     Topic / Focus: "${topic}"
+
+    === STRICT UNIVERSITY GUIDELINES ===
+    You must strictly adhere to the following guidelines:
+    ${RESEARCH_GUIDELINES}
+    ====================================
 
     Instructions:
     1. Write a comprehensive, high - quality academic draft for this specific chapter.

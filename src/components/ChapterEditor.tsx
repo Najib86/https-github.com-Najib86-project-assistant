@@ -218,16 +218,16 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
     if (!editor) return <div className="flex justify-center items-center h-full"><Loader2 className="animate-spin text-indigo-600" /></div>;
 
     return (
-        <div className="flex h-full gap-6 relative overflow-hidden bg-gray-50/20 dark:bg-gray-950">
+        <div className="flex h-full gap-0 lg:gap-6 relative overflow-hidden bg-gray-50/20 dark:bg-gray-950">
             {/* Main Editor Area */}
-            <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900 rounded-3xl shadow-xl shadow-indigo-50/50 border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300">
+            <div className="flex-1 flex flex-col h-full bg-white dark:bg-gray-900 rounded-none lg:rounded-3xl shadow-none lg:shadow-xl lg:shadow-indigo-50/50 border-x-0 border-y-0 lg:border border-gray-100 dark:border-gray-800 overflow-hidden transition-all duration-300">
                 {/* Formatting Toolbar */}
                 <div className="flex flex-col border-b border-gray-100 dark:border-gray-800 bg-gray-50/30 dark:bg-gray-900/50">
-                    <div className="flex items-center justify-between p-2 px-4 gap-2 overflow-x-auto">
-                        <div className="flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 shadow-sm">
+                    <div className="flex items-center justify-between p-2 px-4 gap-2 overflow-x-auto no-scrollbar">
+                        <div className="flex items-center gap-1 bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700 shadow-sm flex-shrink-0">
                             <select
                                 onChange={(e) => editor.chain().focus().setFontFamily(e.target.value).run()}
-                                className="h-8 text-[11px] font-bold uppercase tracking-wider bg-transparent outline-none px-2 w-32 cursor-pointer"
+                                className="h-11 text-[11px] font-bold uppercase tracking-wider bg-transparent outline-none px-2 w-32 cursor-pointer"
                             >
                                 <option value="Inter">Default</option>
                                 <option value="Times New Roman">Times New Roman</option>
@@ -236,68 +236,68 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                             </select>
                         </div>
 
-                        <div className="h-6 w-px bg-gray-200 dark:bg-gray-700" />
+                        <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-2 flex-shrink-0" />
 
-                        <div className="flex items-center gap-0.5">
-                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('bold')} className={cn("h-8 w-8 rounded-lg", editor.isActive('bold') && "bg-indigo-100 text-indigo-700")}>
-                                <Bold className="h-4 w-4" />
+                        <div className="flex items-center gap-0.5 flex-shrink-0">
+                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('bold')} className={cn("h-11 w-11 rounded-xl", editor.isActive('bold') && "bg-indigo-100 text-indigo-700")}>
+                                <Bold className="h-5 w-5" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('italic')} className={cn("h-8 w-8 rounded-lg", editor.isActive('italic') && "bg-indigo-100 text-indigo-700")}>
-                                <Italic className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('italic')} className={cn("h-11 w-11 rounded-xl", editor.isActive('italic') && "bg-indigo-100 text-indigo-700")}>
+                                <Italic className="h-5 w-5" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('underline')} className={cn("h-8 w-8 rounded-lg", editor.isActive('underline') && "bg-indigo-100 text-indigo-700")}>
-                                <UnderlineIcon className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('underline')} className={cn("h-11 w-11 rounded-xl", editor.isActive('underline') && "bg-indigo-100 text-indigo-700")}>
+                                <UnderlineIcon className="h-5 w-5" />
                             </Button>
                         </div>
 
-                        <div className="h-6 w-px bg-gray-200 dark:bg-gray-700" />
+                        <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-2 flex-shrink-0" />
 
-                        <div className="flex items-center gap-0.5">
-                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('left')} className={cn("h-8 w-8 rounded-lg", editor.isActive({ textAlign: 'left' }) && "bg-indigo-100 text-indigo-700")}>
-                                <AlignLeft className="h-4 w-4" />
+                        <div className="flex items-center gap-0.5 flex-shrink-0">
+                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('left')} className={cn("h-11 w-11 rounded-xl", editor.isActive({ textAlign: 'left' }) && "bg-indigo-100 text-indigo-700")}>
+                                <AlignLeft className="h-5 w-5" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('center')} className={cn("h-8 w-8 rounded-lg", editor.isActive({ textAlign: 'center' }) && "bg-indigo-100 text-indigo-700")}>
-                                <AlignCenter className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('center')} className={cn("h-11 w-11 rounded-xl", editor.isActive({ textAlign: 'center' }) && "bg-indigo-100 text-indigo-700")}>
+                                <AlignCenter className="h-5 w-5" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('right')} className={cn("h-8 w-8 rounded-lg", editor.isActive({ textAlign: 'right' }) && "bg-indigo-100 text-indigo-700")}>
-                                <AlignRight className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('right')} className={cn("h-11 w-11 rounded-xl", editor.isActive({ textAlign: 'right' }) && "bg-indigo-100 text-indigo-700")}>
+                                <AlignRight className="h-5 w-5" />
                             </Button>
                         </div>
 
-                        <div className="h-6 w-px bg-gray-200 dark:bg-gray-700" />
+                        <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-2 flex-shrink-0" />
 
-                        <div className="flex items-center gap-0.5">
-                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('h1')} className={cn("h-8 w-8 rounded-lg", editor.isActive('heading', { level: 1 }) && "bg-indigo-100 text-indigo-700")}>
-                                <Heading1 className="h-4 w-4" />
+                        <div className="flex items-center gap-0.5 flex-shrink-0">
+                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('h1')} className={cn("h-11 w-11 rounded-xl", editor.isActive('heading', { level: 1 }) && "bg-indigo-100 text-indigo-700")}>
+                                <Heading1 className="h-5 w-5" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('h2')} className={cn("h-8 w-8 rounded-lg", editor.isActive('heading', { level: 2 }) && "bg-indigo-100 text-indigo-700")}>
-                                <Heading2 className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('h2')} className={cn("h-11 w-11 rounded-xl", editor.isActive('heading', { level: 2 }) && "bg-indigo-100 text-indigo-700")}>
+                                <Heading2 className="h-5 w-5" />
                             </Button>
-                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('bullet')} className={cn("h-8 w-8 rounded-lg", editor.isActive('bulletList') && "bg-indigo-100 text-indigo-700")}>
-                                <List className="h-4 w-4" />
+                            <Button variant="ghost" size="icon" onClick={() => toggleFormat('bullet')} className={cn("h-11 w-11 rounded-xl", editor.isActive('bulletList') && "bg-indigo-100 text-indigo-700")}>
+                                <List className="h-5 w-5" />
                             </Button>
                         </div>
 
-                        <div className="flex-1" />
+                        <div className="flex-1 min-w-[20px]" />
 
                         {/* Status & Save */}
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                             {isAIWriting && (
-                                <div className="flex items-center gap-2 mr-2">
+                                <div className="hidden sm:flex items-center gap-2 mr-2">
                                     <Loader2 className="h-3 w-3 animate-spin text-indigo-600" />
                                     <span className="text-[10px] font-black text-indigo-600 uppercase animate-pulse">Writing...</span>
                                 </div>
                             )}
-                            <Button size="sm" onClick={() => handleSave()} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 font-black uppercase text-[10px] tracking-widest shadow-lg shadow-indigo-100 dark:shadow-none h-8">
-                                {saving ? <Loader2 className="animate-spin h-3.5 w-3.5 mr-2" /> : <Save className="h-3.5 w-3.5 mr-2" />}
-                                Save
+                            <Button size="sm" onClick={() => handleSave()} disabled={saving} className="bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl px-4 font-black uppercase text-[10px] tracking-widest shadow-lg shadow-indigo-100 dark:shadow-none h-11 sm:h-8">
+                                {saving ? <Loader2 className="animate-spin h-3.5 w-3.5 sm:mr-2" /> : <Save className="h-3.5 w-3.5 sm:mr-2" />}
+                                <span className="hidden sm:inline">Save</span>
                             </Button>
                         </div>
                     </div>
 
                     {/* Secondary Actions Bar */}
-                    <div className="flex items-center justify-between p-2 px-4 border-t border-gray-100 dark:border-gray-800 bg-white/50 backdrop-blur-sm">
-                        <div className="flex items-center gap-3">
+                    <div className="flex items-center justify-between p-2 px-4 border-t border-gray-100 dark:border-gray-800 bg-white/50 backdrop-blur-sm overflow-x-auto no-scrollbar gap-4">
+                        <div className="flex items-center gap-3 flex-shrink-0">
                             <span className={cn(
                                 "px-2 py-0.5 text-[10px] font-black rounded-full uppercase tracking-[0.15em]",
                                 status === 'Approved' ? "bg-emerald-100 text-emerald-700" :
@@ -307,31 +307,31 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                                 {status}
                             </span>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-shrink-0">
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={handleAIAssist}
                                 disabled={isAIWriting}
-                                className="text-indigo-600 font-bold text-[10px] uppercase h-7"
+                                className="text-indigo-600 font-bold text-[10px] uppercase h-9 px-3"
                             >
-                                <Zap className="h-3 w-3 mr-1.5" />
+                                <Zap className="h-3.5 w-3.5 mr-1.5" />
                                 AI Continue
                             </Button>
                             <Button
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => { setShowVersions(!showVersions); fetchVersions(); }}
-                                className="text-gray-500 font-bold text-[10px] uppercase h-7"
+                                className="text-gray-500 font-bold text-[10px] uppercase h-9 px-3"
                             >
-                                <History className="h-3 w-3 mr-1.5" />
+                                <History className="h-3.5 w-3.5 mr-1.5" />
                                 History
                             </Button>
                             <button
                                 onClick={handleCheckPlagiarism}
                                 disabled={checkingPlagiarism}
                                 className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all h-7",
+                                    "flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all h-9",
                                     plagiarismResult
                                         ? plagiarismResult.similarityScore > 20 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
                                         : "bg-gray-50 text-gray-400 hover:text-indigo-600"
@@ -344,7 +344,7 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                     </div>
                 </div>
 
-                <div className="flex-1 overflow-auto relative p-8 lg:p-12 scroll-smooth">
+                <div className="flex-1 overflow-auto relative p-4 md:p-8 lg:p-12 scroll-smooth">
                     {showVersions ? (
                         <div className="max-w-2xl mx-auto space-y-6">
                             <h3 className="text-xl font-black text-gray-900 dark:text-white mb-8">Version History</h3>
@@ -365,9 +365,17 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                 </div>
             </div>
 
+            {/* Mobile Backdrop for Sidebar */}
+            {isCommentsOpen && (
+                <div
+                    className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 lg:hidden"
+                    onClick={() => setIsCommentsOpen(false)}
+                />
+            )}
+
             {/* Premium Comments Sidebar */}
             <div className={cn(
-                "fixed lg:relative inset-y-0 right-0 z-40 w-80 bg-white dark:bg-gray-900 rounded-l-3xl lg:rounded-3xl shadow-2xl lg:shadow-xl shadow-indigo-50/50 border border-gray-100 dark:border-gray-800 flex flex-col h-full transform transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
+                "fixed lg:relative inset-y-0 right-0 z-40 w-[85vw] max-w-sm lg:w-80 bg-white dark:bg-gray-900 rounded-l-3xl lg:rounded-3xl shadow-2xl lg:shadow-xl shadow-indigo-50/50 border-l lg:border border-gray-100 dark:border-gray-800 flex flex-col h-full transform transition-all duration-500 ease-[cubic-bezier(0.23,1,0.32,1)]",
                 isCommentsOpen ? "translate-x-0" : "translate-x-full lg:translate-x-0 lg:w-20"
             )}>
                 <div className="p-6 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
@@ -376,7 +384,7 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                         Feedback
                     </h3>
                     <Button variant="ghost" size="icon" onClick={() => setIsCommentsOpen(!isCommentsOpen)} className="rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800">
-                        {isCommentsOpen ? <X className="h-4 w-4" /> : <MessageSquare className="h-4 w-4" />}
+                        {isCommentsOpen ? <X className="h-5 w-5" /> : <MessageSquare className="h-5 w-5" />}
                     </Button>
                 </div>
 
@@ -433,9 +441,9 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                                     type="submit"
                                     size="icon"
                                     disabled={!newComment.trim()}
-                                    className="absolute bottom-3 right-3 h-8 w-8 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 dark:shadow-none"
+                                    className="absolute bottom-3 right-3 h-10 w-10 rounded-xl bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-100 dark:shadow-none"
                                 >
-                                    <Send className="h-4 w-4" />
+                                    <Send className="h-5 w-5" />
                                 </Button>
                             </form>
                         </div>
@@ -445,6 +453,9 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                         <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center">
                             <AlertCircle className="h-5 w-5 text-indigo-400" />
                         </div>
+                        {/* Mobile: when collapsed, maybe hidden completely? or mini bar? */
+                            /* On mobile it should be hidden offscreen. On desktop it shows mini. */
+                        }
                     </div>
                 )}
             </div>

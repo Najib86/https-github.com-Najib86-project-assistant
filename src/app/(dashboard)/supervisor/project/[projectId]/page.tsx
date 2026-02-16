@@ -4,8 +4,8 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { useParams, useRouter } from "next/navigation";
-import { Loader2, ChevronRight, CheckCircle, AlertCircle, FileText } from "lucide-react"
+import { useParams } from "next/navigation";
+import { Loader2, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils";
 
 interface Chapter {
@@ -41,7 +41,6 @@ interface Project {
 
 export default function SupervisorProjectDetails() {
     const params = useParams();
-    const router = useRouter();
     const projectId = params.projectId;
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
@@ -91,21 +90,21 @@ export default function SupervisorProjectDetails() {
     return (
         <div className="space-y-8 px-1">
             {/* Header */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-gray-100 pb-6">
+            <div className="flex flex-col gap-4 border-b border-gray-100 pb-6">
                 <div>
-                    <div className="flex items-center gap-3 mb-2">
-                        <Link href="/supervisor/dashboard" className="text-sm font-medium text-gray-400 hover:text-indigo-600 transition-colors">
+                    <div className="flex items-center gap-2 mb-3 text-sm text-gray-500">
+                        <Link href="/supervisor" className="hover:text-indigo-600 transition-colors">
                             Dashboard
                         </Link>
                         <ChevronRight className="h-4 w-4 text-gray-300" />
-                        <span className="text-sm font-bold text-gray-900 line-clamp-1">{project.title}</span>
+                        <span className="font-bold text-gray-900 truncate max-w-[150px] sm:max-w-xs">{project.title}</span>
                     </div>
-                    <h1 className="text-3xl font-black text-gray-900 leading-tight">{project.title}</h1>
-                    <div className="flex items-center gap-3 mt-3">
-                        <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-indigo-50 text-indigo-700 uppercase tracking-wider">
+                    <h1 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight break-words">{project.title}</h1>
+                    <div className="flex flex-wrap items-center gap-2 mt-3">
+                        <span className="px-3 py-1 text-xs font-bold rounded-full bg-indigo-50 text-indigo-700 uppercase tracking-wider">
                             Student: {project.student?.name}
                         </span>
-                        <span className="px-2.5 py-1 text-xs font-bold rounded-full bg-gray-100 text-gray-600 uppercase tracking-wider">
+                        <span className="px-3 py-1 text-xs font-bold rounded-full bg-gray-100 text-gray-600 uppercase tracking-wider">
                             {project.level}
                         </span>
                     </div>

@@ -486,6 +486,3 @@ is recommended that as is usual external examiners should moderate the scores
 returned by the in-house project supervisors.
 
 **Thank You.**
-
-
-for GUIDELINES FOR RESEARCH PROJECT EXECUTION AND GRADING SPECIFICATIONS only AI use this ducument hence do not edit current implimentation C:\Users\Synapse Engineering\Desktop\projects\project-assistant\GUIDELINES FOR RESEARCH PROJECT EXECUTION AND GRADING SPECIFICATIONS.md

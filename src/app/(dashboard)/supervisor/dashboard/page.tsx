@@ -102,15 +102,15 @@ export default function SupervisorDashboard() {
     }
 
     return (
-        <div className="space-y-8 px-1">
+        <div className="space-y-6 md:space-y-8 px-1">
             {/* Header */}
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Supervisor Dashboard</h1>
-                    <p className="text-gray-500 mt-1">Monitor student progress and review chapters.</p>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Supervisor Dashboard</h1>
+                    <p className="text-sm md:text-base text-gray-500 mt-1">Monitor student progress and review chapters.</p>
                 </div>
-                <div className="flex gap-3">
-                    <Button onClick={generateInviteCode} disabled={generatingCode} className="bg-indigo-600 hover:bg-indigo-700 text-white shadow-md rounded-xl">
+                <div className="flex gap-3 w-full sm:w-auto">
+                    <Button onClick={generateInviteCode} disabled={generatingCode} className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white shadow-md rounded-xl font-bold">
                         {generatingCode ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <FileText className="mr-2 h-4 w-4" />}
                         Generate Invite Code
                     </Button>
@@ -119,45 +119,48 @@ export default function SupervisorDashboard() {
 
             {/* Invite Code Display */}
             {inviteCode && (
-                <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2">
-                    <div className="flex items-center gap-3">
-                        <div className="bg-white p-2 rounded-lg shadow-sm">
+                <div className="bg-indigo-50 border border-indigo-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 shadow-sm">
+                    <div className="flex items-center gap-3 w-full sm:w-auto">
+                        <div className="bg-white p-2 rounded-lg shadow-sm shrink-0">
                             <Users className="h-6 w-6 text-indigo-600" />
                         </div>
                         <div>
                             <p className="text-sm font-bold text-indigo-900">Invite Code Generated</p>
-                            <p className="text-xs text-indigo-600">Share this code with your students to link them to your supervision.</p>
+                            <p className="text-xs text-indigo-600">Share this code with your students.</p>
                         </div>
                     </div>
-                    <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <code className="bg-white px-4 py-2 rounded-lg text-lg font-mono font-bold text-indigo-700 tracking-widest border border-indigo-100 shadow-sm w-full sm:w-auto text-center">
+                    <div className="flex items-center gap-2 w-full sm:w-auto bg-white p-1.5 rounded-lg border border-indigo-100 shadow-sm">
+                        <code className="flex-1 text-center px-3 py-1.5 text-lg font-mono font-bold text-indigo-700 tracking-widest">
                             {inviteCode}
                         </code>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => navigator.clipboard.writeText(inviteCode)}
-                            className="bg-white hover:bg-indigo-100 text-indigo-600 hover:text-indigo-800"
-                        >
-                            Copy
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => setInviteCode(null)}
-                            className="text-indigo-400 hover:text-indigo-600 hover:bg-indigo-100 rounded-full"
-                        >
-                            <span className="sr-only">Dismiss</span>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-x h-4 w-4"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
-                        </Button>
+                        <div className="flex shrink-0">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => navigator.clipboard.writeText(inviteCode)}
+                                className="h-8 w-8 p-0 rounded-md hover:bg-indigo-50 text-indigo-600"
+                            >
+                                <span className="sr-only">Copy</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-copy"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setInviteCode(null)}
+                                className="h-8 w-8 p-0 rounded-md hover:bg-red-50 text-gray-400 hover:text-red-500"
+                            >
+                                <span className="sr-only">Dismiss</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6 6 18" /><path d="m6 6 12 12" /></svg>
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}
 
-            {/* Stats Overview (Mock data for now) */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="bg-blue-50 p-3 rounded-xl">
+            {/* Stats Overview */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div className="bg-blue-50 p-3 rounded-xl shrink-0">
                         <Users className="h-6 w-6 text-blue-600" />
                     </div>
                     <div>
@@ -165,8 +168,8 @@ export default function SupervisorDashboard() {
                         <p className="text-2xl font-bold text-gray-900">{projects.length}</p>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="bg-orange-50 p-3 rounded-xl">
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div className="bg-orange-50 p-3 rounded-xl shrink-0">
                         <Clock className="h-6 w-6 text-orange-600" />
                     </div>
                     <div>
@@ -176,8 +179,8 @@ export default function SupervisorDashboard() {
                         </p>
                     </div>
                 </div>
-                <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
-                    <div className="bg-green-50 p-3 rounded-xl">
+                <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4">
+                    <div className="bg-green-50 p-3 rounded-xl shrink-0">
                         <CheckCircle className="h-6 w-6 text-green-600" />
                     </div>
                     <div>
@@ -194,8 +197,8 @@ export default function SupervisorDashboard() {
                 <h2 className="text-xl font-bold text-gray-900">Student Projects</h2>
 
                 {projects.length === 0 ? (
-                    <div className="text-center py-12 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                        <p className="text-gray-500">No projects assigned yet.</p>
+                    <div className="text-center py-12 px-4 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                        <p className="text-gray-500 text-sm md:text-base">No projects assigned yet.</p>
                         <div className="mt-4">
                             <Button variant="link" onClick={generateInviteCode} className="text-indigo-600 font-bold hover:underline">
                                 Generate Invite Code
@@ -203,18 +206,18 @@ export default function SupervisorDashboard() {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 md:gap-6">
                         {projects.map((project) => (
-                            <div key={project.project_id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-                                <div className="flex justify-between items-start mb-4">
+                            <div key={project.project_id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 md:p-6 hover:shadow-md transition-shadow">
+                                <div className="flex flex-col sm:flex-row justify-between items-start mb-4 gap-2">
                                     <div>
-                                        <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1">{project.title}</h3>
+                                        <h3 className="text-lg font-bold text-gray-900 leading-tight mb-1 line-clamp-1">{project.title}</h3>
                                         {project.student && (
                                             <p className="text-sm text-gray-500">Student: <span className="font-medium text-gray-700">{project.student.name}</span></p>
                                         )}
                                     </div>
                                     <span className={cn(
-                                        "px-2.5 py-1 text-[11px] font-bold rounded-full uppercase tracking-wider",
+                                        "px-2.5 py-1 text-[11px] font-bold rounded-full uppercase tracking-wider shrink-0",
                                         project.status === 'Completed' ? 'bg-green-50 text-green-700 border border-green-100' :
                                             project.status === 'In Progress' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
                                                 'bg-gray-50 text-gray-600 border border-gray-200'
@@ -229,6 +232,7 @@ export default function SupervisorDashboard() {
                                         {[1, 2, 3, 4, 5].map((num) => {
                                             const chapter = project.chapters.find(c => c.chapterNumber === num);
                                             const status = chapter?.status || 'Not Started';
+                                            // Mock data fix: Ensure chapters exist
                                             return (
                                                 <div key={num} className="flex flex-col gap-1 items-center">
                                                     <div className={cn(
@@ -245,11 +249,11 @@ export default function SupervisorDashboard() {
                                     </div>
                                 </div>
 
-                                <div className="flex items-center justify-between pt-4 border-t border-gray-50">
+                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between pt-4 border-t border-gray-50 gap-4">
                                     <div className="text-xs text-gray-400">
                                         Last active: {new Date(project.updatedAt).toLocaleDateString()}
                                     </div>
-                                    <Button size="sm" asChild className="rounded-lg font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 shadow-none">
+                                    <Button size="sm" asChild className="w-full sm:w-auto rounded-lg font-bold bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 shadow-none">
                                         <Link href={`/supervisor/project/${project.project_id}`}>
                                             Review Project
                                         </Link>

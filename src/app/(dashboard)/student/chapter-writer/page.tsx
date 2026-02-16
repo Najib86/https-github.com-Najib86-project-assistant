@@ -3,7 +3,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import { Button } from "@/components/ui/button";
-import { Save, Wand2, Loader2, UploadCloud, RefreshCcw, ArrowLeft, CheckCircle, X } from "lucide-react";
+import { Save, Wand2, Loader2, UploadCloud, RefreshCcw, ArrowLeft, CheckCircle, X, List } from "lucide-react";
 import ChapterEditor from "@/components/ChapterEditor";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -46,6 +46,7 @@ function ChapterWriterContent() {
     const [topic, setTopic] = useState("");
     const [sampleText, setSampleText] = useState("");
     const [showAiPanel, setShowAiPanel] = useState(true);
+    const [showMobileSidebar, setShowMobileSidebar] = useState(false);
 
     // Fetch existing content when chapter changes
     useEffect(() => {
@@ -206,23 +207,38 @@ function ChapterWriterContent() {
     const activeChapter = CHAPTERS_LIST.find(c => c.id === activeChapterId) || CHAPTERS_LIST[0];
 
     return (
-        <div className="flex flex-col h-[calc(100vh-4rem)] lg:h-[calc(100vh-0rem)] bg-white overflow-hidden relative">
+        <div className="flex flex-col h-[100dvh] lg:h-[calc(100vh-theme(spacing.0))] bg-white overflow-hidden relative">
             {/* Toolbar */}
-            <header className="bg-white border-b px-4 md:px-6 py-3 flex justify-between items-center shadow-sm z-30 sticky top-0">
-                <div className="flex items-center gap-2 md:gap-4 overflow-hidden">
-                    <Button variant="ghost" size="icon" asChild className="shrink-0 rounded-full hover:bg-indigo-50">
+            <header className="bg-white border-b px-4 py-3 flex justify-between items-center shadow-sm z-30 shrink-0">
+                <div className="flex items-center gap-2 md:gap-4 overflow-hidden flex-1">
+                    <Button variant="ghost" size="icon" asChild className="shrink-0 rounded-full h-10 w-10 hover:bg-indigo-50 -ml-2">
                         <Link href={`/student/project/${projectId}`}>
                             <ArrowLeft className="h-5 w-5 text-gray-600" />
                         </Link>
                     </Button>
-                    <div className="min-w-0 pr-2">
-                        <h1 className="font-black text-gray-900 flex items-center gap-2 text-sm md:text-base truncate">
+
+                    {/* Mobile Chapter Select Trigger */}
+                    <div className="lg:hidden flex-1 min-w-0" onClick={() => setShowMobileSidebar(true)}>
+                        <div className="flex flex-col">
+                            <h1 className="font-black text-gray-900 text-sm truncate flex items-center gap-2">
+                                {activeChapter.title}
+                                <span className="text-[10px] bg-indigo-50 text-indigo-600 px-1.5 py-0.5 rounded-md">Ch.{activeChapter.id}</span>
+                            </h1>
+                            <p className="text-[10px] text-gray-400 font-medium truncate flex items-center gap-1">
+                                Tap to change chapter <List className="h-3 w-3" />
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Desktop Title */}
+                    <div className="hidden lg:block min-w-0 pr-2">
+                        <h1 className="font-black text-gray-900 flex items-center gap-2 text-base truncate">
                             {activeChapter.title}
-                            <span className="hidden sm:inline-block text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-tighter">
+                            <span className="text-[10px] font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full uppercase tracking-tighter">
                                 Ch. {activeChapter.id}
                             </span>
                         </h1>
-                        <p className="text-[10px] md:text-xs text-gray-400 font-medium truncate">
+                        <p className="text-xs text-gray-400 font-medium truncate">
                             {lastSaved ? `Saved ${lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : "Draft unsaved"}
                         </p>
                     </div>
@@ -234,28 +250,28 @@ function ChapterWriterContent() {
                         size="sm"
                         onClick={() => setShowAiPanel(!showAiPanel)}
                         className={cn(
-                            "rounded-xl font-bold text-xs h-9 transition-all",
+                            "rounded-xl font-bold text-xs h-10 px-3 transition-all",
                             showAiPanel ? "bg-indigo-50 text-indigo-700" : "text-gray-500 hover:text-indigo-600"
                         )}
                     >
-                        <Wand2 className={cn("h-4 w-4 sm:mr-2 transition-transform", showAiPanel && "rotate-12")} />
+                        <Wand2 className={cn("h-5 w-5 sm:mr-2 transition-transform", showAiPanel && "rotate-12")} />
                         <span className="hidden sm:inline font-black tracking-tight uppercase">Copilot</span>
                     </Button>
                     <Button
                         onClick={handleSave}
                         disabled={isSaving}
                         size="sm"
-                        className="rounded-xl shadow-md shadow-indigo-100 font-black text-xs uppercase tracking-tight h-9 px-4 hidden sm:flex"
+                        className="rounded-xl shadow-md shadow-indigo-100 font-black text-xs uppercase tracking-tight h-10 px-4 flex"
                     >
-                        {isSaving ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <Save className="mr-2 h-4 w-4" />}
-                        Save
+                        {isSaving ? <Loader2 className="animate-spin md:mr-2 h-4 w-4" /> : <Save className="md:mr-2 h-4 w-4" />}
+                        <span className="hidden md:inline">Save</span>
                     </Button>
                 </div>
             </header>
 
             <div className="flex flex-1 overflow-hidden relative">
-                {/* Chapter Navigation Sidebar - Hidden on mobile, sticky on desktop */}
-                <aside className="w-64 bg-gray-50/50 border-r overflow-y-auto hidden lg:block shrink-0">
+                {/* Desktop Chapter Sidebar */}
+                <aside className="w-64 bg-gray-50/50 border-r overflow-y-auto hidden lg:block shrink-0 h-full">
                     <div className="p-6">
                         <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] mb-4">Structure</h3>
                         <nav className="space-y-1">
@@ -264,14 +280,14 @@ function ChapterWriterContent() {
                                     key={chap.id}
                                     onClick={() => setActiveChapterId(chap.id)}
                                     className={cn(
-                                        "w-full text-left px-4 py-3 text-sm rounded-xl transition-all duration-200 flex items-center gap-3",
+                                        "w-full text-left px-3 py-3 text-sm rounded-xl transition-all duration-200 flex items-center gap-3",
                                         activeChapterId === chap.id
                                             ? "bg-white text-indigo-700 shadow-sm border border-gray-100 font-black translate-x-1"
                                             : "text-gray-500 hover:bg-white/80 hover:text-gray-900 font-medium"
                                     )}
                                 >
                                     <span className={cn(
-                                        "h-6 w-6 rounded-lg flex items-center justify-center text-[10px] font-black",
+                                        "h-6 w-6 rounded-lg flex items-center justify-center text-[10px] font-black shrink-0",
                                         activeChapterId === chap.id ? "bg-indigo-600 text-white" : "bg-gray-200 text-gray-400"
                                     )}>
                                         {chap.id}
@@ -283,8 +299,52 @@ function ChapterWriterContent() {
                     </div>
                 </aside>
 
-                {/* Main Editor */}
-                <main className="flex-1 flex flex-col relative bg-white dark:bg-gray-950 z-10 overflow-hidden">
+                {/* Mobile Chapter Sidebar Overlay */}
+                {showMobileSidebar && (
+                    <div className="fixed inset-0 z-50 lg:hidden flex">
+                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowMobileSidebar(false)} />
+                        <aside className="relative w-[80%] max-w-sm bg-white h-full shadow-2xl animate-in slide-in-from-left duration-300 flex flex-col">
+                            <div className="p-4 border-b flex items-center justify-between bg-indigo-50/50">
+                                <h2 className="font-bold text-gray-900">Select Chapter</h2>
+                                <Button variant="ghost" size="icon" onClick={() => setShowMobileSidebar(false)} className="h-8 w-8 rounded-full">
+                                    <X className="h-5 w-5" />
+                                </Button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+                                {CHAPTERS_LIST.map((chap) => (
+                                    <button
+                                        key={chap.id}
+                                        onClick={() => {
+                                            setActiveChapterId(chap.id);
+                                            setShowMobileSidebar(false);
+                                        }}
+                                        className={cn(
+                                            "w-full text-left p-4 rounded-xl transition-all duration-200 flex items-center gap-4 border",
+                                            activeChapterId === chap.id
+                                                ? "bg-indigo-50 text-indigo-700 border-indigo-200 shadow-sm font-bold"
+                                                : "bg-white text-gray-600 border-gray-100 hover:bg-gray-50"
+                                        )}
+                                    >
+                                        <span className={cn(
+                                            "h-8 w-8 rounded-full flex items-center justify-center text-xs font-black shrink-0",
+                                            activeChapterId === chap.id ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-500"
+                                        )}>
+                                            {chap.id}
+                                        </span>
+                                        <div>
+                                            <div className="font-bold text-base leading-tight">{chap.title}</div>
+                                            <div className="text-[10px] text-gray-400 mt-1 line-clamp-1">{chap.hint}</div>
+                                        </div>
+                                        {activeChapterId === chap.id && <CheckCircle className="h-5 w-5 text-indigo-600 ml-auto" />}
+                                    </button>
+                                ))}
+                            </div>
+                        </aside>
+                    </div>
+                )}
+
+                {/* Main Editor Area */}
+                <main className="flex-1 flex flex-col relative bg-white z-10 overflow-hidden h-full">
                     <ChapterEditor
                         chapterId={activeChapterId}
                         projectId={parseInt(projectId)}
@@ -296,14 +356,14 @@ function ChapterWriterContent() {
                     />
                 </main>
 
-                {/* AI Assistant Panel - Full height on desktop, Bottom/Top drawer on mobile */}
+                {/* AI Assistant Panel - Mobile Overlay / Desktop Sidebar */}
                 {showAiPanel && (
                     <aside className={cn(
                         "bg-white flex flex-col z-40 transition-all duration-300 ease-in-out border-l shadow-2xl",
-                        "static w-full lg:w-96 fixed inset-0 lg:inset-auto lg:h-full lg:right-0",
-                        "animate-in slide-in-from-right-full lg:slide-in-from-right"
+                        "fixed inset-0 lg:static lg:h-full lg:w-96 lg:border-l lg:border-gray-200",
+                        "animate-in slide-in-from-right duration-300"
                     )}>
-                        <div className="p-5 border-b bg-indigo-600 flex justify-between items-center lg:rounded-none">
+                        <div className="p-4 md:p-5 border-b bg-indigo-600 flex justify-between items-center shrink-0">
                             <div className="flex items-center gap-3">
                                 <div className="bg-white rounded-xl p-1.5 shadow-sm">
                                     <Image
@@ -319,13 +379,13 @@ function ChapterWriterContent() {
                                     <p className="text-[10px] text-indigo-100 font-medium">ProjectAssistantAI</p>
                                 </div>
                             </div>
-                            <Button variant="ghost" size="icon" onClick={() => setShowAiPanel(false)} className="text-white hover:bg-white/10 rounded-full">
-                                <X className="h-6 w-6" />
+                            <Button variant="ghost" size="icon" onClick={() => setShowAiPanel(false)} className="text-white hover:bg-white/10 rounded-full h-8 w-8">
+                                <X className="h-5 w-5" />
                             </Button>
                         </div>
 
-                        <div className="p-6 flex-1 overflow-y-auto space-y-6">
-                            <div className="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
+                        <div className="p-4 md:p-6 flex-1 overflow-y-auto space-y-4 md:space-y-6">
+                            <div className="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 shadow-sm">
                                 <p className="text-xs text-indigo-700 font-bold leading-relaxed italic">
                                     &quot;{activeChapter.hint}&quot;
                                 </p>
@@ -336,14 +396,14 @@ function ChapterWriterContent() {
                                     User Guidance
                                 </label>
                                 <textarea
-                                    className="w-full text-sm p-4 bg-gray-50 border border-gray-100 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none min-h-[140px] font-medium transition-all placeholder:text-gray-300"
+                                    className="w-full text-base md:text-sm p-4 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 outline-none min-h-[140px] font-medium transition-all placeholder:text-gray-300 resize-none"
                                     placeholder="Tell the AI what to focus on... (e.g., Explain the core architecture)"
                                     value={topic}
                                     onChange={(e) => setTopic(e.target.value)}
                                 />
                             </div>
 
-                            <div className="space-y-4 pt-2">
+                            <div className="space-y-2 pt-2">
                                 <div className="flex items-center justify-between">
                                     <label className="text-[11px] font-black text-gray-400 uppercase tracking-widest uppercase">Style Guide</label>
                                 </div>
@@ -359,7 +419,7 @@ function ChapterWriterContent() {
                                         htmlFor="style-upload"
                                         className={cn(
                                             "flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300",
-                                            sampleText ? "bg-green-50 border-green-200" : "bg-gray-50 border-gray-100 hover:border-indigo-300 hover:bg-gray-100"
+                                            sampleText ? "bg-green-50 border-green-200" : "bg-white border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
                                         )}
                                     >
                                         <UploadCloud className={cn("h-8 w-8 mb-2 transition-colors", sampleText ? "text-green-600" : "text-gray-300 group-hover:text-indigo-400")} />
@@ -370,7 +430,7 @@ function ChapterWriterContent() {
                                 </div>
                             </div>
 
-                            <div className="pt-4 space-y-3">
+                            <div className="pt-2 space-y-3">
                                 <Button
                                     className="w-full bg-indigo-600 hover:bg-indigo-700 h-14 rounded-2xl shadow-xl shadow-indigo-200 font-black text-xs uppercase tracking-widest transition-all hover:scale-[1.02] active:scale-95"
                                     onClick={handleGenerate}
@@ -388,18 +448,17 @@ function ChapterWriterContent() {
                                         </>
                                     )}
                                 </Button>
-                                <p className="text-[10px] text-center text-gray-400 font-medium">AI generated content may require human verification.</p>
+                                <p className="text-[10px] text-center text-gray-400 font-medium">AI generated content may require verification.</p>
                             </div>
 
-                            <div className="pt-8 border-t border-gray-100 space-y-4">
-                                <h4 className="text-[10px] font-black text-gray-300 uppercase tracking-[0.2em]">Editing Tools</h4>
-                                <div className="grid grid-cols-2 gap-2">
-                                    <Button variant="outline" size="sm" className="rounded-xl border-gray-100 font-bold text-[10px] uppercase h-10 hover:bg-indigo-50 hover:text-indigo-600 transition-all">
-                                        <RefreshCcw className="mr-2 h-3 w-3" />
+                            <div className="pt-6 border-t border-gray-100 space-y-4">
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Button variant="outline" size="sm" className="rounded-xl border-gray-200 font-bold text-[10px] uppercase h-11 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all">
+                                        <RefreshCcw className="mr-2 h-4 w-4" />
                                         Rephrase
                                     </Button>
-                                    <Button variant="outline" size="sm" className="rounded-xl border-gray-100 font-bold text-[10px] uppercase h-10 hover:bg-indigo-50 hover:text-indigo-600 transition-all">
-                                        <CheckCircle className="mr-2 h-3 w-3" />
+                                    <Button variant="outline" size="sm" className="rounded-xl border-gray-200 font-bold text-[10px] uppercase h-11 hover:bg-indigo-50 hover:text-indigo-600 hover:border-indigo-200 transition-all">
+                                        <CheckCircle className="mr-2 h-4 w-4" />
                                         Grammar
                                     </Button>
                                 </div>

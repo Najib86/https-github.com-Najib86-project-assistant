@@ -213,7 +213,7 @@ function LoginForm() {
 
                             <div className="space-y-4">
                                 <div className="space-y-1.5">
-                                    <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] ml-1" htmlFor="email">
+                                    <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em] ml-1" htmlFor="email">
                                         Email Address
                                     </label>
                                     <input
@@ -230,10 +230,10 @@ function LoginForm() {
 
                                 <div className="space-y-1.5">
                                     <div className="flex justify-between items-center ml-1">
-                                        <label className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]" htmlFor="password">
+                                        <label className="text-xs font-black text-gray-500 uppercase tracking-[0.2em]" htmlFor="password">
                                             Password
                                         </label>
-                                        <Link href="/forgot-password" className="text-[10px] font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-wider">
+                                        <Link href="/forgot-password" className="text-xs font-black text-indigo-600 hover:text-indigo-800 uppercase tracking-wider">
                                             Forgot?
                                         </Link>
                                     </div>

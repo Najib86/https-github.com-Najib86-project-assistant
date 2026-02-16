@@ -1,5 +1,20 @@
 @import "tailwindcss";
 
+@layer base {
+  html {
+    font-size: 100%; /* 16px */
+    box-sizing: border-box;
+  }
+  
+  *, *::before, *::after {
+    box-sizing: inherit;
+  }
+
+  body {
+    @apply text-base; /* 1rem default */
+  }
+}
+
 /* @plugin "tailwindcss-animate"; */
 
 @custom-variant dark (&:where(.dark, .dark *));
