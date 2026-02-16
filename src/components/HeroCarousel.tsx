@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -8,13 +7,13 @@ import { cn } from "@/lib/utils";
 const carouselItems = [
     {
         id: 1,
-        image: "/hero-bg-1.png",
-        alt: "Student focused on digital research",
+        image: "/nigerian_students_research_1771008711650.png",
+        alt: "Nigerian students focused on digital research",
     },
     {
         id: 2,
-        image: "/hero-bg-2.png",
-        alt: "Modern academic workspace",
+        image: "/nigerian_students_research_1771013673435.png",
+        alt: "Modern Nigerian academic workspace",
     },
     {
         id: 3,

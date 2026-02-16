@@ -47,7 +47,7 @@ export default function Home() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                  <Button size="lg" asChild className="w-full sm:w-auto rounded-xl md:rounded-2xl px-8 py-6 text-lg font-bold shadow-xl shadow-indigo-300 transition-all hover:-translate-y-1 hover:shadow-indigo-400 group h-auto">
+                  <Button size="lg" asChild className="w-full sm:w-auto rounded-xl md:rounded-2xl px-6 py-4 text-lg font-bold shadow-xl shadow-indigo-300 transition-all hover:-translate-y-1 hover:shadow-indigo-400 group h-auto">
                     <Link href="/signup" className="flex items-center justify-center gap-3">
                       Start Your Project Free
                       <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
