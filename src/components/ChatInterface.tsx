@@ -65,7 +65,7 @@ export default function ChatInterface({ projectId, userId, userName, userRole }:
 
         // Connect to socket
         // Note: connecting to port 3001 as per our server script
-        const SOCKET_URL = "http://localhost:3001";
+        const SOCKET_URL = process.env.NEXT_PUBLIC_SOCKET_URL || "http://localhost:3001";
         socket = io(SOCKET_URL);
 
         socket.on("connect", () => {
