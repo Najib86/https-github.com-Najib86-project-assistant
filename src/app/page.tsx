@@ -163,19 +163,34 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
               {[
                 {
-                  title: "Academic Fidelity",
-                  desc: "Drafts generated follow strict university standards for Chapters 1-5, ensuring your project structure is always perfect.",
+                  title: "AI Research Assistant",
+                  desc: "Instantly generate structured outlines and full drafts for Chapters 1-5, tailored specifically to your research topic and academic level.",
+                },
+                {
+                  title: "Academic Compliance",
+                  desc: "Built-in guidelines ensure strict adherence to university standards for formatting, structure, and content flow automatically.",
                 },
                 {
                   title: "Smart Synthesis",
-                  desc: "Our AI doesn't just write; it synthesizes complex information to provide logical arguments and literature connections.",
+                  desc: "Our AI synthesizes complex information to construct logical arguments, integrating relevant literature for a robust theoretical framework.",
                 },
                 {
-                  title: "Supervisor Ready",
-                  desc: "Build credibility with your supervisor using our review interface for inline comments and direct feedback.",
+                  title: "Collaboration Hub",
+                  desc: "Invite supervisors to review your work directly. Receive inline comments and approvals in real-time to fast-track your progress.",
+                },
+                {
+                  title: "Progress Tracking",
+                  desc: "Visual dashboards for both students and supervisors to monitor milestones, chapter status, and overall project completion rates.",
+                },
+                {
+                  title: "Plagiarism Awareness",
+                  desc: "Integrated tools to highlight potential originality issues and manage citations managed in APA, MLA, or Harvard styles.",
                 }
               ].map((feature, i) => (
                 <div key={i} className="flex flex-col p-6 md:p-8 rounded-2xl md:rounded-[2rem] bg-white border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all duration-500 group">
+                  <div className="mb-4 w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
+                    <span className="font-bold text-lg">{i + 1}</span>
+                  </div>
                   <h3 className="text-xl md:text-2xl font-black mb-3 md:mb-4 text-gray-900">{feature.title}</h3>
                   <p className="text-gray-500 font-medium leading-relaxed text-sm md:text-base">
                     {feature.desc}

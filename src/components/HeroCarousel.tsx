@@ -8,18 +8,28 @@ import { cn } from "@/lib/utils";
 const carouselItems = [
     {
         id: 1,
-        image: "/nigerian_students_collaborating_1771014595962.png",
-        alt: "Nigerian students collaborating on research",
+        image: "/hero-bg-1.png",
+        alt: "Student focused on digital research",
     },
     {
         id: 2,
-        image: "/nigerian_research_students_library_1771014722629.png",
-        alt: "Modern academic research environment",
+        image: "/hero-bg-2.png",
+        alt: "Modern academic workspace",
     },
     {
         id: 3,
-        image: "/nigerian_students_research_1_1771014692177.png",
-        alt: "Student working on academic project",
+        image: "/hero-bg-3.png",
+        alt: "Academic transformation and success",
+    },
+    {
+        id: 4,
+        image: "/nigerian_students_collaborating_1771014595962.png",
+        alt: "Collaborative research session",
+    },
+    {
+        id: 5,
+        image: "/nigerian_research_students_library_1771014722629.png",
+        alt: "Library research and study",
     }
 ];
 
