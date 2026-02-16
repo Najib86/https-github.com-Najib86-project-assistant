@@ -19,7 +19,7 @@ export function Footer() {
 
                     {/* Logo & Brand */}
                     <div className="flex items-center gap-3 group transition-opacity hover:opacity-100 opacity-90">
-                        <div className="p-1.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20 shadow-inner group-hover:bg-indigo-500/20 transition-colors">
+                        <div className="p-1.5 bg-white rounded-lg border border-indigo-500/20 shadow-inner group-hover:bg-indigo-500/20 transition-colors">
                             <Image
                                 src="/logo.png"
                                 alt="Logo"
