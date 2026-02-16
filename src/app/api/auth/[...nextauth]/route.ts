@@ -100,14 +100,30 @@ export const authOptions: NextAuthOptions = {
             }
             return true;
         },
-        async jwt({ token, user }) {
+        async jwt({ token, user, account }) {
             if (user) {
                 token.id = user.id;
                 token.email = user.email;
-                // @ts-ignore
-                token.role = user.role;
-                // @ts-ignore
-                token.emailVerified = user.emailVerified;
+
+                // Fetch latest user data for Google login to get role
+                if (account?.provider === "google") {
+                    const dbUser = await prisma.user.findUnique({
+                        where: { email: user.email! }
+                    });
+                    if (dbUser) {
+                        token.id = dbUser.id.toString();
+                        // @ts-ignore
+                        token.role = dbUser.role;
+                        // @ts-ignore
+                        token.emailVerified = dbUser.email_verified;
+                    }
+                } else {
+                    // Credentials login already has these fields
+                    // @ts-ignore
+                    token.role = user.role;
+                    // @ts-ignore
+                    token.emailVerified = user.emailVerified;
+                }
             }
             return token;
         },

@@ -207,6 +207,13 @@ function LoginForm() {
                             </div>
                         )}
 
+                        {searchParams.get("verified") === "true" && (
+                            <div className="mb-6 p-4 text-sm text-green-600 bg-green-50 rounded-2xl border border-green-100 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
+                                <div className="w-2 h-2 rounded-full bg-green-500 flex-shrink-0" />
+                                Email verified successfully! Please log in.
+                            </div>
+                        )}
+
                         <form onSubmit={handleSubmit} className="space-y-6">
                             {error && (
                                 <div className="p-4 text-sm text-red-600 bg-red-50 rounded-2xl border border-red-100 flex items-center gap-3 animate-in fade-in slide-in-from-top-2">
