@@ -3,6 +3,16 @@ import { google } from "@ai-sdk/google";
 import { z } from "zod";
 import prisma from "@/lib/prisma";
 import { RESEARCH_GUIDELINES } from "@/lib/guidelines";
+import { rateLimit } from "@/lib/rate-limit";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+interface SessionUser {
+    id?: string | number;
+    name?: string | null;
+    email?: string | null;
+    role?: string;
+}
 
 const generateSchema = z.object({
     projectId: z.coerce.number(),
@@ -16,6 +26,13 @@ const generateSchema = z.object({
 
 export async function POST(req: Request) {
     try {
+        const session = await getServerSession(authOptions);
+        const user = session?.user as SessionUser;
+
+        if (user?.id) {
+            await rateLimit(`chapter-gen:${user.id}`);
+        }
+
         const body = await req.json();
         const validated = generateSchema.safeParse(body);
 

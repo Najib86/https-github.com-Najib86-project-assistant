@@ -85,7 +85,7 @@ function LoginForm() {
     };
 
     const handleGoogleSignIn = () => {
-        const callbackUrl = searchParams.get("callbackUrl") || "/student";
+        const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
         signIn("google", { callbackUrl });
     };
 

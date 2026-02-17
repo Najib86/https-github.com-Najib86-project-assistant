@@ -16,13 +16,29 @@ export const CHAPTERS_LIST = [
     { id: 9, title: "References" }
 ];
 
+import { redis } from "./redis";
+import crypto from "crypto";
+
 const orchestrator = new AIOrchestrator();
 
 export async function generateAIResponse(prompt: string, mode: string = "text"): Promise<string> {
-    console.log("[AI-DEBUG] New generateAIResponse called with mode:", mode);
     const finalPrompt = mode === "json"
         ? `${prompt}\n\nIMPORTANT: Output ONLY valid JSON code. No markdown formatting.`
         : prompt;
+
+    // Redis Caching Logic
+    const promptHash = crypto.createHash("md5").update(finalPrompt).digest("hex");
+    const cacheKey = `ai:gen:${promptHash}`;
+
+    try {
+        const cached = await redis.get<string>(cacheKey);
+        if (cached) {
+            console.log("[AI-REDIS] Serving cached AI response");
+            return cached;
+        }
+    } catch (e) {
+        console.error("[AI-REDIS] Cache read error:", e);
+    }
 
     // Use our new production-grade orchestrator
     const response = await orchestrator.generate(finalPrompt);
@@ -33,6 +49,14 @@ export async function generateAIResponse(prompt: string, mode: string = "text"):
             // Clean up potential markdown code blocks
             text = text.replace(/```json/g, "").replace(/```/g, "").trim();
         }
+
+        // Cache for 1 hour
+        try {
+            await redis.set(cacheKey, text, { ex: 3600 });
+        } catch (e) {
+            console.error("[AI-REDIS] Cache write error:", e);
+        }
+
         return text;
     }
 
