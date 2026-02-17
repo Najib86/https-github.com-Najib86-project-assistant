@@ -37,6 +37,23 @@ export async function GET(_: Request, { params }: { params: Promise<{ projectId:
     }
 }
 
-export async function POST() {
-    return new Response("Method Not Allowed", { status: 405 });
+export async function DELETE(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
+    try {
+        const { projectId } = await params;
+        const projectIdInt = parseInt(projectId);
+
+        if (isNaN(projectIdInt)) {
+            return NextResponse.json({ error: "Invalid Project ID" }, { status: 400 });
+        }
+
+        // Delete project (cascade will handle related records if configured in DB, otherwise Prisma schema relations will handle it)
+        await prisma.project.delete({
+            where: { project_id: projectIdInt }
+        });
+
+        return NextResponse.json({ message: "Project deleted successfully" });
+    } catch (error) {
+        console.error("Error deleting project:", error);
+        return NextResponse.json({ error: "Failed to delete project" }, { status: 500 });
+    }
 }

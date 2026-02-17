@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { PlusCircle, Loader2, X } from "lucide-react"
+import { PlusCircle, Loader2, X, ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -17,27 +17,51 @@ interface Project {
     type: string;
     status: string;
     updatedAt: string;
-    chapters: { chapter_id: number; title: string; chapterNumber: number; status: string }[];
+    chapters: { chapter_id: number; title: string; chapterNumber: number; status: string; content?: string }[];
 }
+
 
 export default function StudentDashboard() {
     const router = useRouter();
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [showCreateModal, setShowCreateModal] = useState(false);
+
+    // Multi-step form state
+    const [currentStep, setCurrentStep] = useState(1);
+
     const [formData, setFormData] = useState({
+        // Step 1: Project Basics
         title: "",
-        level: "UG", // Undergraduate default
-        type: "System-Based", // Default
-        department: "Computer Science",
+        level: "BSc",
+        type: "System-Based",
+
+        // Step 2: Student Personal Info
+        fullName: "",
+        studentIdNo: "",
+        email: "",
+        phone: "",
+
+        // Step 3: Institutional Details
+        institutionName: "",
+        faculty: "",
+        department: "",
+        programme: "",
+        graduationYear: new Date().getFullYear().toString(),
+
+        // Step 4: Supervisor & Research Metadata
+        supervisorTitle: "",
+        supervisorName: "",
+        supervisorEmail: "",
+        researchArea: "",
+        keywords: "", // Comma separated
         inviteCode: ""
     });
+
     const [file, setFile] = useState<File | null>(null);
     const [generatingStatus, setGeneratingStatus] = useState("");
-
-
-
     const [studentId, setStudentId] = useState<number | null>(null);
+    const [regeneratingId, setRegeneratingId] = useState<number | null>(null);
 
     useEffect(() => {
         const userStr = localStorage.getItem("user");
@@ -45,6 +69,12 @@ export default function StudentDashboard() {
             try {
                 const user = JSON.parse(userStr);
                 setStudentId(user.id);
+                // Pre-fill user data
+                setFormData(prev => ({
+                    ...prev,
+                    fullName: user.name || "",
+                    email: user.email || ""
+                }));
             } catch (e) {
                 console.error("Failed to parse user", e);
                 router.push("/auth/login");
@@ -90,7 +120,35 @@ export default function StudentDashboard() {
             data.append("title", formData.title);
             data.append("level", formData.level);
             data.append("type", formData.type);
-            data.append("department", formData.department);
+
+            // Construct Academic Metadata JSON
+            const academicMetadata = {
+                student: {
+                    fullName: formData.fullName,
+                    studentIdNo: formData.studentIdNo,
+                    email: formData.email,
+                    phone: formData.phone
+                },
+                institution: {
+                    name: formData.institutionName,
+                    faculty: formData.faculty,
+                    department: formData.department,
+                    programme: formData.programme,
+                    graduationYear: formData.graduationYear
+                },
+                supervisor: {
+                    title: formData.supervisorTitle,
+                    name: formData.supervisorName,
+                    email: formData.supervisorEmail
+                },
+                research: {
+                    area: formData.researchArea,
+                    keywords: formData.keywords.split(',').map(k => k.trim()).filter(k => k)
+                }
+            };
+
+            data.append("academicMetadata", JSON.stringify(academicMetadata));
+
             if (formData.inviteCode) {
                 data.append("inviteCode", formData.inviteCode);
             }
@@ -110,8 +168,8 @@ export default function StudentDashboard() {
                 alert("Session expired. Please log in again.");
                 localStorage.removeItem("user");
                 router.push("/auth/login");
-                setGeneratingStatus(""); // Clear status
-                return; // Stop execution
+                setGeneratingStatus("");
+                return;
             }
 
             if (!res.ok) throw new Error("Failed to create project");
@@ -120,7 +178,9 @@ export default function StudentDashboard() {
             setProjects([newProject, ...projects]);
             setShowCreateModal(false);
             setFile(null);
+            setFormData(prev => ({ ...prev, title: "", inviteCode: "" })); // Reset basics
             setGeneratingStatus("");
+            setCurrentStep(1);
 
             // navigate to project details
             router.push(`/student/project/${newProject.project_id}`);
@@ -132,6 +192,66 @@ export default function StudentDashboard() {
             setLoading(false);
         }
     };
+
+    const handleRegenerate = async (projectId: number) => {
+        try {
+            setRegeneratingId(projectId);
+            const res = await fetch(`/api/projects/${projectId}/regenerate`, { method: "POST" });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || "Failed");
+            }
+
+            const data = await res.json();
+            alert(data.message || "Regeneration complete.");
+            fetchProjects(); // Refresh list to see updates
+        } catch (error) {
+            console.error(error);
+            alert("Failed to regenerate chapters.");
+        } finally {
+            setRegeneratingId(null);
+        }
+    };
+
+    const handleDeleteProject = async (projectId: number) => {
+        if (!confirm("Are you sure you want to delete this project? This action cannot be undone.")) return;
+
+        try {
+            const res = await fetch(`/api/projects/${projectId}`, { method: "DELETE" });
+            if (!res.ok) throw new Error("Failed to delete");
+
+            fetchProjects();
+        } catch (error) {
+            console.error("Delete failed:", error);
+            alert("Could not delete project");
+        }
+    };
+
+    // Navigation handlers
+    const nextStep = () => {
+        if (currentStep === 1) {
+            if (!formData.title || !formData.level || !formData.type) {
+                alert("Please fill in all project basics.");
+                return;
+            }
+        }
+        if (currentStep === 2) {
+            if (!formData.fullName || !formData.studentIdNo || !formData.email) {
+                alert("Please fill in required student information.");
+                return;
+            }
+        }
+        if (currentStep === 3) {
+            if (!formData.institutionName || !formData.faculty || !formData.department || !formData.programme) {
+                alert("Please fill in required institution details.");
+                return;
+            }
+        }
+        setCurrentStep(prev => Math.min(prev + 1, 4));
+    };
+
+    const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
     if (loading && projects.length === 0) {
         return <div className="flex justify-center items-center h-[80vh] bg-gray-50/50 backdrop-blur-sm"><LoadingLogo size={120} /></div>;
@@ -186,6 +306,14 @@ export default function StudentDashboard() {
                                     )}>
                                         {project.status?.replace("_", " ") || "Draft"}
                                     </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-6 w-6 text-gray-400 hover:text-red-500 hover:bg-red-50 -mr-2"
+                                        onClick={() => handleDeleteProject(project.project_id)}
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </Button>
                                 </div>
                                 <Link href={`/student/project/${project.project_id}`} className="block">
                                     <h3 className="text-lg font-bold text-gray-900 group-hover:text-indigo-600 transition-colors line-clamp-2 mb-2 leading-tight">
@@ -197,6 +325,34 @@ export default function StudentDashboard() {
                                         <span>{project.type}</span>
                                     </div>
                                 </Link>
+
+
+                                {project.chapters.some(ch => ch.content?.includes("[MOCK GENERATED CONTENT]")) && (
+                                    <div className="mt-3 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                                        <div className="flex items-start gap-2">
+                                            <div className="text-amber-600 mt-0.5">
+                                                <Loader2 className={cn("h-4 w-4", regeneratingId === project.project_id ? "animate-spin" : "")} />
+                                            </div>
+                                            <div className="flex-1">
+                                                <p className="text-xs font-medium text-amber-800 mb-1">
+                                                    Generation Interrupted
+                                                </p>
+                                                <p className="text-[10px] text-amber-600 mb-2">
+                                                    Network instability prevented full content generation. Please retry.
+                                                </p>
+                                                <Button
+                                                    onClick={() => handleRegenerate(project.project_id)}
+                                                    disabled={regeneratingId === project.project_id}
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="w-full h-7 text-xs border-amber-300 bg-white hover:bg-amber-100 text-amber-700"
+                                                >
+                                                    {regeneratingId === project.project_id ? "Regenerating..." : "Retry Generation"}
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
 
                             <div className="mt-6 pt-4 border-t border-gray-50 flex flex-col sm:flex-row gap-3 sm:items-center justify-between">
@@ -210,138 +366,349 @@ export default function StudentDashboard() {
                                 </Button>
                             </div>
                         </div>
-                    ))}
+                    ))
+                    }
                 </div>
             )}
 
             {/* Create Project Modal Overlay */}
-            {showCreateModal && (
-                <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm">
-                    <div className="bg-white rounded-t-[2.5rem] sm:rounded-2xl shadow-2xl w-full max-w-lg mb-0 sm:mb-8 overflow-hidden animate-in slide-in-from-bottom duration-300">
-                        <div className="p-6 md:p-8">
-                            <div className="flex justify-between items-center mb-6">
-                                <h2 className="text-2xl font-black tracking-tight text-gray-900">New Project</h2>
-                                <Button variant="ghost" size="icon" onClick={() => setShowCreateModal(false)} className="rounded-full h-8 w-8 -mr-2">
-                                    <X className="h-5 w-5" />
-                                </Button>
-                            </div>
-                            <form onSubmit={handleCreateProject} className="space-y-4 md:space-y-5">
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Project Title</label>
-                                    <input
-                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
-                                        placeholder="e.g. Impact of AI on Healthcare..."
-                                        value={formData.title}
-                                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                        required
-                                        autoFocus
-                                    />
-                                </div>
-                                <div className="space-y-1.5">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Department</label>
-                                    <input
-                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
-                                        placeholder="e.g. Computer Science"
-                                        value={formData.department}
-                                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                                    />
-                                </div>
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Academic Level</label>
-                                        <select
-                                            className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none bg-white font-medium cursor-pointer"
-                                            value={formData.level}
-                                            onChange={(e) => setFormData({ ...formData, level: e.target.value })}
-                                        >
-                                            <option value="UG">Undergraduate (B.Sc.)</option>
-                                            <option value="PG">Postgraduate (M.Sc./PhD)</option>
-                                            <option value="Diploma">Diploma/HND</option>
-                                        </select>
+            {
+                showCreateModal && (
+                    <div className="fixed inset-0 bg-black/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 backdrop-blur-sm">
+                        <div className="bg-white rounded-t-[2.5rem] sm:rounded-2xl shadow-2xl w-full max-w-2xl mb-0 sm:mb-8 overflow-hidden animate-in slide-in-from-bottom duration-300 max-h-[90vh] overflow-y-auto">
+                            <div className="p-6 md:p-8">
+                                <div className="flex justify-between items-center mb-6">
+                                    <div>
+                                        <h2 className="text-2xl font-black tracking-tight text-gray-900">New Project Setup</h2>
+                                        <p className="text-sm text-gray-500">Step {currentStep} of 4</p>
                                     </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Project Type</label>
-                                        <select
-                                            className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none bg-white font-medium cursor-pointer"
-                                            value={formData.type}
-                                            onChange={(e) => setFormData({ ...formData, type: e.target.value })}
-                                        >
-                                            <option value="System-Based">Technical / Implementation</option>
-                                            <option value="Survey">Research / Survey</option>
-                                            <option value="Case-Study">Analytical Case Study</option>
-                                            <option value="Theoretical">Theoretical Review</option>
-                                        </select>
-                                    </div>
-                                    <div className="space-y-1.5">
-                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Supervisor Invite Code (Optional)</label>
-                                        <input
-                                            className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 uppercase tracking-widest"
-                                            placeholder="e.g. A1B2C3"
-                                            value={formData.inviteCode || ""}
-                                            onChange={(e) => setFormData({ ...formData, inviteCode: e.target.value })}
-                                        />
-                                    </div>
+                                    <Button variant="ghost" size="icon" onClick={() => setShowCreateModal(false)} className="rounded-full h-8 w-8 -mr-2">
+                                        <X className="h-5 w-5" />
+                                    </Button>
                                 </div>
 
-                                <div className="space-y-2 pt-2">
-                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Reference Material (Optional)</label>
-                                    <div className="relative group">
-                                        <input
-                                            type="file"
-                                            id="project-file"
-                                            className="hidden"
-                                            accept=".pdf,.docx,.txt"
-                                            onChange={(e) => setFile(e.target.files?.[0] || null)}
-                                        />
-                                        <label
-                                            htmlFor="project-file"
-                                            className={cn(
-                                                "flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300",
-                                                file ? "bg-indigo-50 border-indigo-300" : "bg-gray-50/50 border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
-                                            )}
-                                        >
-                                            {file ? (
-                                                <div className="flex items-center gap-3 text-indigo-700">
-                                                    <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                                        <PlusCircle className="h-5 w-5 rotate-45" />
+                                {/* Progress Bar */}
+                                <div className="w-full bg-gray-100 h-1.5 rounded-full mb-8 overflow-hidden">
+                                    <div
+                                        className="bg-indigo-600 h-full transition-all duration-300 ease-out"
+                                        style={{ width: `${(currentStep / 4) * 100}%` }}
+                                    />
+                                </div>
+
+                                <form onSubmit={handleCreateProject} className="space-y-6">
+
+                                    {currentStep === 1 && (
+                                        <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
+                                            <h3 className="text-lg font-bold text-gray-800">Project Basics</h3>
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Project Title</label>
+                                                <input
+                                                    className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                    placeholder="e.g. Impact of AI on Healthcare..."
+                                                    value={formData.title}
+                                                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                                    required
+                                                    autoFocus
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Academic Level</label>
+                                                    <select
+                                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none bg-white font-medium cursor-pointer"
+                                                        value={formData.level}
+                                                        onChange={(e) => setFormData({ ...formData, level: e.target.value })}
+                                                    >
+                                                        <option value="Diploma">Diploma / OND</option>
+                                                        <option value="HND">HND</option>
+                                                        <option value="BSc">BSc / BEng / BA</option>
+                                                        <option value="MSc">MSc / MEng / MA</option>
+                                                        <option value="PhD">PhD / Doctorate</option>
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Project Type</label>
+                                                    <select
+                                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none bg-white font-medium cursor-pointer"
+                                                        value={formData.type}
+                                                        onChange={(e) => setFormData({ ...formData, type: e.target.value })}
+                                                    >
+                                                        <option value="System-Based">Technical / Implementation</option>
+                                                        <option value="Survey">Research / Survey</option>
+                                                        <option value="Case-Study">Analytical Case Study</option>
+                                                        <option value="Theoretical">Theoretical Review</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-2 pt-2">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Reference Material (Optional)</label>
+                                                <div className="relative group">
+                                                    <input
+                                                        type="file"
+                                                        id="project-file"
+                                                        className="hidden"
+                                                        accept=".pdf,.docx,.txt"
+                                                        onChange={(e) => setFile(e.target.files?.[0] || null)}
+                                                    />
+                                                    <label
+                                                        htmlFor="project-file"
+                                                        className={cn(
+                                                            "flex flex-col items-center justify-center p-6 border-2 border-dashed rounded-2xl cursor-pointer transition-all duration-300",
+                                                            file ? "bg-indigo-50 border-indigo-300" : "bg-gray-50/50 border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
+                                                        )}
+                                                    >
+                                                        {file ? (
+                                                            <div className="flex items-center gap-3 text-indigo-700">
+                                                                <div className="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                                                                    <CheckCircle2 className="h-5 w-5" />
+                                                                </div>
+                                                                <div className="flex-1 min-w-0 text-left">
+                                                                    <p className="text-sm font-bold truncate max-w-[200px]">{file.name}</p>
+                                                                    <p className="text-[10px] opacity-70">Click to change file</p>
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <>
+                                                                <PlusCircle className="h-8 w-8 text-gray-300 mb-2 group-hover:text-indigo-400 transition-colors" />
+                                                                <p className="text-sm font-bold text-gray-500">Attach context file</p>
+                                                                <p className="text-[10px] text-gray-400">PDF, DOCX, TXT up to 10MB</p>
+                                                            </>
+                                                        )}
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {currentStep === 2 && (
+                                        <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
+                                            <h3 className="text-lg font-bold text-gray-800">Student Information</h3>
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Full Name</label>
+                                                <input
+                                                    className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                    value={formData.fullName}
+                                                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                                    placeholder="Your full legal name"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Student ID / Matric No</label>
+                                                    <input
+                                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                        value={formData.studentIdNo}
+                                                        onChange={(e) => setFormData({ ...formData, studentIdNo: e.target.value })}
+                                                        placeholder="e.g. ENG/2023/001"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Phone Number</label>
+                                                    <input
+                                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                        value={formData.phone}
+                                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                                        placeholder="+234..."
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Email Address</label>
+                                                <input
+                                                    type="email"
+                                                    className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                    value={formData.email}
+                                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                    placeholder="student@university.edu"
+                                                    required
+                                                />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {currentStep === 3 && (
+                                        <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
+                                            <h3 className="text-lg font-bold text-gray-800">Institution Details</h3>
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Institution Name</label>
+                                                <input
+                                                    className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                    value={formData.institutionName}
+                                                    onChange={(e) => setFormData({ ...formData, institutionName: e.target.value })}
+                                                    placeholder="e.g. University of Lagos"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Faculty / School</label>
+                                                    <input
+                                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                        value={formData.faculty}
+                                                        onChange={(e) => setFormData({ ...formData, faculty: e.target.value })}
+                                                        placeholder="e.g. Faculty of Engineering"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Department</label>
+                                                    <input
+                                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                        value={formData.department}
+                                                        onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                                                        placeholder="e.g. Computer Engineering"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Programme / Degree</label>
+                                                    <input
+                                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                        value={formData.programme}
+                                                        onChange={(e) => setFormData({ ...formData, programme: e.target.value })}
+                                                        placeholder="e.g. B.Sc. Computer Science"
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Graduation Year</label>
+                                                    <input
+                                                        className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                        value={formData.graduationYear}
+                                                        onChange={(e) => setFormData({ ...formData, graduationYear: e.target.value })}
+                                                        placeholder="202X"
+                                                        required
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {currentStep === 4 && (
+                                        <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
+                                            <h3 className="text-lg font-bold text-gray-800">Supervisor & Research Info</h3>
+
+                                            <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 mb-2">
+                                                <h4 className="text-sm font-bold text-blue-800 mb-2">Primary Supervisor</h4>
+                                                <div className="grid grid-cols-3 gap-3 mb-3">
+                                                    <div className="col-span-1 space-y-1.5">
+                                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Title</label>
+                                                        <select
+                                                            className="w-full border border-blue-200 bg-white p-2.5 rounded-lg text-sm font-medium outline-none"
+                                                            value={formData.supervisorTitle}
+                                                            onChange={(e) => setFormData({ ...formData, supervisorTitle: e.target.value })}
+                                                        >
+                                                            <option value="">Select...</option>
+                                                            <option value="Mr.">Mr.</option>
+                                                            <option value="Mrs.">Mrs.</option>
+                                                            <option value="Dr.">Dr.</option>
+                                                            <option value="Prof.">Prof.</option>
+                                                            <option value="Engr.">Engr.</option>
+                                                        </select>
                                                     </div>
-                                                    <div className="flex-1 min-w-0 text-left">
-                                                        <p className="text-sm font-bold truncate max-w-[200px]">{file.name}</p>
-                                                        <p className="text-[10px] opacity-70">Click to change file</p>
+                                                    <div className="col-span-2 space-y-1.5">
+                                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Name</label>
+                                                        <input
+                                                            className="w-full border border-blue-200 bg-white p-2.5 rounded-lg text-sm font-medium outline-none"
+                                                            value={formData.supervisorName}
+                                                            onChange={(e) => setFormData({ ...formData, supervisorName: e.target.value })}
+                                                            placeholder="e.g. John Doe"
+                                                        />
                                                     </div>
                                                 </div>
-                                            ) : (
-                                                <>
-                                                    <PlusCircle className="h-8 w-8 text-gray-300 mb-2 group-hover:text-indigo-400 transition-colors" />
-                                                    <p className="text-sm font-bold text-gray-500">Attach context file</p>
-                                                    <p className="text-[10px] text-gray-400">PDF, DOCX, TXT up to 10MB</p>
-                                                </>
-                                            )}
-                                        </label>
-                                    </div>
-                                </div>
+                                                <div className="space-y-1.5">
+                                                    <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Supervisor Email (Optional)</label>
+                                                    <input
+                                                        type="email"
+                                                        className="w-full border border-blue-200 bg-white p-2.5 rounded-lg text-sm font-medium outline-none"
+                                                        value={formData.supervisorEmail}
+                                                        onChange={(e) => setFormData({ ...formData, supervisorEmail: e.target.value })}
+                                                        placeholder="supervisor@university.edu"
+                                                    />
+                                                </div>
+                                            </div>
 
-                                {generatingStatus && (
-                                    <div className="bg-indigo-600 p-4 rounded-xl flex items-center gap-4 animate-in fade-in slide-in-from-top-4">
-                                        <Loader2 className="h-5 w-5 text-white animate-spin" />
-                                        <p className="text-xs text-white font-bold leading-tight">{generatingStatus}</p>
-                                    </div>
-                                )}
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Research Area</label>
+                                                <input
+                                                    className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                    value={formData.researchArea}
+                                                    onChange={(e) => setFormData({ ...formData, researchArea: e.target.value })}
+                                                    placeholder="e.g. Machine Learning in Healthcare"
+                                                />
+                                            </div>
 
-                                <div className="flex flex-col sm:flex-row gap-3 pt-4 pb-2 sm:pb-0">
-                                    <Button type="button" variant="ghost" onClick={() => setShowCreateModal(false)} disabled={loading} className="w-full sm:w-auto rounded-xl font-bold order-2 sm:order-1">
-                                        Cancel
-                                    </Button>
-                                    <Button type="submit" disabled={loading} className="w-full flex-1 rounded-xl h-12 shadow-lg shadow-indigo-200 font-bold order-1 sm:order-2">
-                                        {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
-                                        {loading ? "Generating..." : "Create Full Project"}
-                                    </Button>
-                                </div>
-                            </form>
+                                            <div className="space-y-1.5">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Keywords</label>
+                                                <input
+                                                    className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
+                                                    value={formData.keywords}
+                                                    onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
+                                                    placeholder="Comma separated e.g. AI, Diagnostics, Automation"
+                                                />
+                                            </div>
+
+                                            <div className="space-y-1.5 pt-2">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Project Access Code (If applicable)</label>
+                                                <input
+                                                    className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 uppercase tracking-widest"
+                                                    placeholder="e.g. A1B2C3"
+                                                    value={formData.inviteCode || ""}
+                                                    onChange={(e) => setFormData({ ...formData, inviteCode: e.target.value })}
+                                                />
+                                            </div>
+
+                                        </div>
+                                    )}
+
+                                    {generatingStatus && (
+                                        <div className="bg-indigo-600 p-4 rounded-xl flex items-center gap-4 animate-in fade-in slide-in-from-top-4">
+                                            <Loader2 className="h-5 w-5 text-white animate-spin" />
+                                            <p className="text-xs text-white font-bold leading-tight">{generatingStatus}</p>
+                                        </div>
+                                    )}
+
+                                    <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100 mt-6">
+                                        {currentStep > 1 && (
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={prevStep}
+                                                disabled={loading}
+                                                className="rounded-xl font-bold border-gray-200 bg-white"
+                                            >
+                                                <ChevronLeft className="mr-1 h-4 w-4" /> Back
+                                            </Button>
+                                        )}
+
+                                        <div className="flex-1" />
+
+                                        <Button type="button" variant="ghost" onClick={() => setShowCreateModal(false)} disabled={loading} className="rounded-xl font-bold">
+                                            Cancel
+                                        </Button>
+
+                                        {currentStep < 4 ? (
+                                            <Button type="button" onClick={nextStep} className="rounded-xl font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200 px-6">
+                                                Next <ChevronRight className="ml-1 h-4 w-4" />
+                                            </Button>
+                                        ) : (
+                                            <Button type="submit" disabled={loading} className="rounded-xl h-10 font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200 px-6">
+                                                {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                                                {loading ? "Generating..." : "Finish & Create"}
+                                            </Button>
+                                        )}
+                                    </div>
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
-        </div>
+                )
+            }
+        </div >
     );
 }

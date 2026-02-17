@@ -264,7 +264,7 @@ export default function SignupPage() {
                                         id="email"
                                         onChange={handleChange}
                                         required
-                                        placeholder="university.edu"
+                                        placeholder="example@domain.com"
                                         type="email"
                                         autoCapitalize="none"
                                         autoComplete="email"

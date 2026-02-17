@@ -1,15 +1,8 @@
-import Groq from "groq-sdk";
 import prisma from "@/lib/prisma";
-import { GEMINI_API_ENDPOINT } from "./constants";
 import { google } from "@ai-sdk/google";
 import { streamText } from "ai";
 import { RESEARCH_GUIDELINES } from "@/lib/guidelines";
-
-const geminiApiKey = process.env.GEMINI_API_KEY;
-const groqApiKey = process.env.GROQ_API_KEY;
-const openRouterApiKey = process.env.OPENROUTER_API_KEY;
-const hfApiKey = process.env.HUGGINGFACE_API_TOKEN;
-
+import { AIOrchestrator } from "./ai/ai.orchestrator";
 
 export const CHAPTERS_LIST = [
     { id: 1, title: "Abstract" },
@@ -23,300 +16,88 @@ export const CHAPTERS_LIST = [
     { id: 9, title: "References" }
 ];
 
-async function fetchWithTimeout(resource: RequestInfo, options: RequestInit & { timeout?: number } = {}) {
-    const { timeout = 15000, ...rest } = options;
-    const controller = new AbortController();
-    const id = setTimeout(() => controller.abort(), timeout);
-    try {
-        const response = await fetch(resource, {
-            ...rest,
-            signal: controller.signal
-        });
-        clearTimeout(id);
-        return response;
-    } catch (err) {
-        clearTimeout(id);
-        throw err;
-    }
-}
+const orchestrator = new AIOrchestrator();
 
-async function generateWithGemini(prompt: string, mode: string = "text"): Promise<string> {
-    if (!geminiApiKey) throw new Error("Gemini API key missing");
-
-    const endpoint = `${GEMINI_API_ENDPOINT}?key=${geminiApiKey}`;
-
-    // Append JSON instruction if needed
+export async function generateAIResponse(prompt: string, mode: string = "text"): Promise<string> {
+    console.log("[AI-DEBUG] New generateAIResponse called with mode:", mode);
     const finalPrompt = mode === "json"
         ? `${prompt}\n\nIMPORTANT: Output ONLY valid JSON code. No markdown formatting.`
         : prompt;
 
-    try {
-        const response = await fetchWithTimeout(endpoint, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: finalPrompt }] }]
-            }),
-            timeout: 20000 // 20s timeout for Gemini
-        });
+    // Use our new production-grade orchestrator
+    const response = await orchestrator.generate(finalPrompt);
 
-        if (!response.ok) {
-            if (response.status === 429) throw new Error("Gemini Quota Exceeded");
-            if (response.status === 401) throw new Error("Gemini Invalid Key");
-            throw new Error(`Gemini API Error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-            let text = data.candidates[0].content.parts[0].text;
-            if (mode === "json") {
-                // Clean up potential markdown code blocks
-                text = text.replace(/```json/g, "").replace(/```/g, "").trim();
-            }
-            return text;
-        }
-
-        throw new Error("Gemini response format invalid");
-    } catch (error: any) {
-        if (error.name === 'AbortError') throw new Error("Gemini Request Timed Out");
-        throw error;
-    }
-}
-
-async function generateWithGroq(prompt: string, mode: string = "text"): Promise<string> {
-    if (!groqApiKey) throw new Error("Groq API key missing");
-
-    const groq = new Groq({ apiKey: groqApiKey });
-
-    const finalPrompt = mode === "json"
-        ? `${prompt}\n\nIMPORTANT: Output ONLY valid JSON code. No markdown formatting.`
-        : prompt;
-
-    try {
-        const completion = await groq.chat.completions.create({
-            messages: [
-                { role: "user", content: finalPrompt }
-            ],
-            model: "llama3-70b-8192",
-            response_format: mode === "json" ? { type: "json_object" } : undefined,
-        }, {
-            timeout: 20000 // 20s timeout
-        });
-
-        const content = completion.choices[0]?.message?.content || "";
-        return content;
-    } catch (error: any) {
-        throw error;
-    }
-}
-
-async function generateWithOpenRouter(prompt: string, mode: string = "text"): Promise<string> {
-    if (!openRouterApiKey) throw new Error("OpenRouter API key missing");
-
-    const finalPrompt = mode === "json"
-        ? `${prompt}\n\nIMPORTANT: Output ONLY valid JSON code. No markdown formatting.`
-        : prompt;
-
-    try {
-        const response = await fetchWithTimeout("https://openrouter.ai/api/v1/chat/completions", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${openRouterApiKey}`,
-                "HTTP-Referer": "ProjectAssistant", // Site URL for rankings on openrouter.ai
-                "X-Title": "ProjectAssistant", // Site title for rankings on openrouter.ai
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                model: "mistralai/mixtral-8x7b-instruct",
-                messages: [
-                    { role: "user", content: finalPrompt }
-                ]
-            }),
-            timeout: 20000
-        });
-
-        if (!response.ok) {
-            throw new Error(`OpenRouter API Error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        let content = data.choices[0]?.message?.content || "";
-
+    if (response.success) {
+        let text = response.content;
         if (mode === "json") {
-            content = content.replace(/```json/g, "").replace(/```/g, "").trim();
+            // Clean up potential markdown code blocks
+            text = text.replace(/```json/g, "").replace(/```/g, "").trim();
         }
-
-        return content;
-    } catch (error: any) {
-        if (error.name === 'AbortError') throw new Error("OpenRouter Request Timed Out");
-        throw error;
-    }
-}
-
-async function generateWithHuggingFace(prompt: string, mode: string = "text"): Promise<string> {
-    if (!hfApiKey) throw new Error("Hugging Face API key missing");
-
-    const finalPrompt = mode === "json"
-        ? `${prompt}\n\nIMPORTANT: Output ONLY valid JSON code. No markdown formatting.`
-        : prompt;
-
-    try {
-        const response = await fetchWithTimeout("https://api-inference.huggingface.co/models/meta-llama/Llama-3.1-8B-Instruct", {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${hfApiKey}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                inputs: finalPrompt,
-                parameters: {
-                    max_new_tokens: 4000,
-                    return_full_text: false
-                }
-            }),
-            timeout: 25000 // HF can be slow
-        });
-
-        if (!response.ok) {
-            throw new Error(`Hugging Face API Error: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-
-        // HF Inference usually returns an array of objects
-        if (Array.isArray(data) && data[0]?.generated_text) {
-            let content = data[0].generated_text;
-            if (mode === "json") {
-                content = content.replace(/```json/g, "").replace(/```/g, "").trim();
-            }
-            return content;
-        }
-
-        throw new Error("Hugging Face response format invalid");
-    } catch (error: any) {
-        if (error.name === 'AbortError') throw new Error("Hugging Face Request Timed Out");
-        throw error;
-    }
-}
-
-async function generateMock(prompt: string, mode: string = "text"): Promise<string> {
-    console.warn("Using Mock Generator for prompt:", prompt.substring(0, 50));
-
-    // Simulate delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    if (mode === "json" || prompt.includes("JSON")) {
-        return JSON.stringify({
-            status: {
-                chapter1: "Draft",
-                chapter2: "Draft",
-                chapter3: "Draft",
-                chapter4: "Draft",
-                chapter5: "Draft",
-                full_report: "Draft"
-            },
-            plagiarism_notes: {
-                chapter1: "Mock plagiarism note 1",
-                chapter2: "Mock plagiarism note 2",
-                chapter3: "Mock plagiarism note 3",
-                chapter4: "Mock plagiarism note 4",
-                chapter5: "Mock plagiarism note 5"
-            },
-            outline: {
-                chapter1: "Mock Outline 1",
-                chapter2: "Mock Outline 2",
-                chapter3: "Mock Outline 3",
-                chapter4: "Mock Outline 4",
-                chapter5: "Mock Outline 5"
-            },
-            draft: {
-                chapter1: "Mock Chapter 1 Content...",
-                chapter2: "Mock Chapter 2 Content...",
-                chapter3: "Mock Chapter 3 Content...",
-                chapter4: "Mock Chapter 4 Content...",
-                chapter5: "Mock Chapter 5 Content..."
-            },
-            full_report: "Mock Full Report Content..."
-        });
+        return text;
     }
 
-    return `[MOCK GENERATED CONTENT]
-            
-This is a mock generated content because AI APIs are unavailable.
-            
-Original Prompt: ${prompt.substring(0, 100)}...`;
+    // Comprehensive error logging has already happened in the orchestrator
+    throw new Error(response.error || "AI Service Unavailable");
 }
 
 export async function streamAIResponse(prompt: string) {
+    // Keeping this for streaming UI components, using gemini as preferred streamer
     return streamText({
         model: google("gemini-1.5-flash"),
         prompt: prompt,
     });
 }
 
-export async function generateAIResponse(prompt: string, mode: string = "text"): Promise<string> {
-    // 1. Gemini
-    try {
-        console.log("Attempting Gemini...");
-        return await generateWithGemini(prompt, mode);
-    } catch (err: unknown) {
-        console.warn("Gemini failed:", err instanceof Error ? err.message : String(err));
+export async function generateChapterContent(
+    projectId: number,
+    chapterNumber: number,
+    chapterTitle: string,
+    topic: string,
+    level: string,
+    sampleText?: string,
+    academicMetadata?: any
+) {
+    let contextStr = "";
+    if (academicMetadata) {
+        contextStr += `
+    Student Context:
+    - Programme: ${academicMetadata.institution?.programme || "N/A"}
+    - Faculty: ${academicMetadata.institution?.faculty || "N/A"}
+    - Research Area: ${academicMetadata.research?.area || "N/A"}
+    - Keywords: ${Array.isArray(academicMetadata.research?.keywords) ? academicMetadata.research.keywords.join(", ") : academicMetadata.research?.keywords || ""}
+        `;
     }
 
-    // 2. Groq
-    try {
-        console.log("Attempting Groq...");
-        return await generateWithGroq(prompt, mode);
-    } catch (err: unknown) {
-        console.warn("Groq failed:", err instanceof Error ? err.message : String(err));
-    }
-
-    // 3. OpenRouter
-    try {
-        console.log("Attempting OpenRouter...");
-        return await generateWithOpenRouter(prompt, mode);
-    } catch (err: unknown) {
-        console.warn("OpenRouter failed:", err instanceof Error ? err.message : String(err));
-    }
-
-    // 4. Hugging Face
-    try {
-        console.log("Attempting Hugging Face...");
-        return await generateWithHuggingFace(prompt, mode);
-    } catch (err: unknown) {
-        console.warn("Hugging Face failed:", err instanceof Error ? err.message : String(err));
-    }
-
-    // 5. Mock
-    console.warn("All AI providers failed. Falling back to Mock.");
-    return await generateMock(prompt, mode);
-}
-
-export async function generateChapterContent(projectId: number, chapterNumber: number, chapterTitle: string, topic: string, level: string, sampleText?: string) {
     const prompt = `
-        Context: Writing an academic project report for a ${level || "University"} level requirement.
-            Chapter: ${chapterTitle}
-    Topic / Focus: "${topic}"
+        Context: You are an expert academic writer and researcher. You are writing a specific chapter for a final year project report (Level: ${level || "University"}).
+        
+        Project Topic: "${topic}"
+        Current Chapter: ${chapterTitle} (Chapter ${chapterNumber})
+        ${contextStr}
 
-    === STRICT UNIVERSITY GUIDELINES ===
-    You must strictly adhere to the following guidelines:
-    ${RESEARCH_GUIDELINES}
-    ====================================
+        === STRICT UNIVERSITY GUIDELINES ===
+        You must strictly adhere to the following guidelines:
+        ${RESEARCH_GUIDELINES}
+        ====================================
 
-    Instructions:
-    1. Write a comprehensive, high - quality academic draft for this specific chapter.
-    2. Use formal, objective academic tone.
-    3. Organize with clear headings(## Heading 2) and subheadings(### Heading 3).
-    4. Include placeholder citations in APA / MLA format where appropriate(e.g., [Author, Year]).
-    5. Ensure logical flow and coherence.
+        CRITICAL INSTRUCTIONS:
+        1. **ELABORATE & DETAILED**: This must be a full, comprehensive academic chapter. Do NOT write a summary or an outline. Write the actual full content.
+        2. **LENGTH**: Aim for substantial depth (minimum 1500-2000 words if possible for major chapters like Literature Review or Methodology).
+        3. **STRUCTURE**: Use the guidelines above to structure this specific chapter correctly. Ensure all required sub-sections for this chapter are present.
+        4. **TONE**: Use a formal, objective, and scholarly tone.
+        5. **CITATIONS**: You MUST include in-text citations in APA style (Author, Year) to support arguments. Invent plausible citations if real ones are not accessible, but prioritize accuracy if the model usually provides it.
+        6. **FORMAT**: Use Markdown for headings (## for main sections, ### for subsections).
+        7. **CONTENT**:
+           - If this is Chapter 1 (Introduction): Include Background, Problem Statement, Research Questions, Objectives, Significance, Scope, and Operational Definitions.
+           - If this is Chapter 2 (Lit Review): Cover Conceptual Review, Theoretical Framework, and Empirical Review.
+           - If this is Chapter 3 (Methodology): detailed Research Design, Population, Sample/Sampling, Instruments, Validity/Reliability, and Data Analysis.
+           - If this is Chapter 4 (Results): Present mock data analysis and findings clearly linked to research questions.
+           - If this is Chapter 5: Summary, Conclusion, and Recommendations.
 
         ${sampleText ? `Style Reference (Mimic this writing style/tone and incorporate relevant data if any): \n"${sampleText.substring(0, 4000)}..."` : ""}
 
-    Task: Generate the content for this chapter now.Do not include introductory conversational text, just the chapter content.
-`;
+        TASK: Write the COMPLETE content for ${chapterTitle} now. Do not start with "Here is the chapter" or "Sure". specific content only.
+    `;
 
     const content = await generateAIResponse(prompt, "text");
 

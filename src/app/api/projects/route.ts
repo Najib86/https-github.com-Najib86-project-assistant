@@ -66,6 +66,7 @@ export async function POST(req: Request) {
         const supervisorIdStr = formData.get("supervisorId") as string;
         const file = formData.get("file") as File | null;
         const inviteCode = formData.get("inviteCode") as string;
+        const academicMetadataStr = formData.get("academicMetadata") as string; // NEW
 
         if (!studentIdStr || !title || !level || !type) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -121,6 +122,16 @@ export async function POST(req: Request) {
             }
         }
 
+        // Parse academic metadata safely
+        let parsedMetadata = undefined;
+        if (academicMetadataStr) {
+            try {
+                parsedMetadata = JSON.parse(academicMetadataStr);
+            } catch (e) {
+                console.warn("Failed to parse academicMetadata JSON", e);
+            }
+        }
+
         const project = await prisma.project.create({
             data: {
                 title,
@@ -129,19 +140,28 @@ export async function POST(req: Request) {
                 studentId,
                 supervisorId: finalSupervisorId,
                 referenceText: extractedText,
+                academicMetadata: parsedMetadata // Save the metadata
             },
         });
 
-        // Trigger AI chapter generation in parallel
-        const chapterPromises = CHAPTERS_LIST.map(chapter =>
-            generateChapterContent(project.project_id, chapter.id, chapter.title, project.title, project.level, extractedText)
-                .catch(e => {
-                    console.error("AI Error for chapter:", chapter.title, e);
-                    return null;
-                })
-        );
+        // Trigger AI chapter generation in batches to prevent rate limits
+        const { runInBatches } = await import("@/lib/utils");
 
-        await Promise.all(chapterPromises);
+        await runInBatches(CHAPTERS_LIST, 2, async (chapter) => {
+            try {
+                await generateChapterContent(
+                    project.project_id,
+                    chapter.id,
+                    chapter.title,
+                    project.title,
+                    project.level,
+                    extractedText,
+                    parsedMetadata
+                );
+            } catch (e) {
+                console.error("AI Error for chapter:", chapter.title, e);
+            }
+        });
 
         return NextResponse.json(project, { status: 201 });
     } catch (error: unknown) {

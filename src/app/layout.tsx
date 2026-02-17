@@ -14,7 +14,6 @@ export const viewport = {
 };
 
 import { AuthProvider } from "@/components/providers/AuthProvider";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
 import { Footer } from "@/components/Footer";
 
 export default function RootLayout({
@@ -23,25 +22,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en">
       <body
         className={`antialiased font-sans`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <AuthProvider>
-            <div className="flex flex-col min-h-screen">
-              <div className="flex-1">
-                {children}
-              </div>
-              <Footer />
+        <AuthProvider>
+          <div className="flex flex-col min-h-screen">
+            <div className="flex-1">
+              {children}
             </div>
-          </AuthProvider>
-        </ThemeProvider>
+            <Footer />
+          </div>
+        </AuthProvider>
       </body>
     </html>
   );

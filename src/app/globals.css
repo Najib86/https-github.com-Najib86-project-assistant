@@ -17,7 +17,7 @@
 
 /* @plugin "tailwindcss-animate"; */
 
-@custom-variant dark (&:where(.dark, .dark *));
+@custom-variant dark (&:where(.force-light-mode-only));
 
 :root {
   /* Simple, Flat, Consistent Base */
@@ -77,49 +77,7 @@
   /* Blue */
 }
 
-.dark {
-  --background: #020617;
-  /* Slate-950 */
-  --foreground: #f8fafc;
-  /* Slate-50 */
 
-  --card: #0f172a;
-  /* Slate-900 */
-  --card-foreground: #f8fafc;
-
-  --popover: #0f172a;
-  --popover-foreground: #f8fafc;
-
-  --primary: #6366f1;
-  /* Indigo-500 */
-  --primary-foreground: #FFFFFF;
-
-  --secondary: #1e293b;
-  /* Slate-800 */
-  --secondary-foreground: #f8fafc;
-
-  --muted: #1e293b;
-  /* Slate-800 */
-  --muted-foreground: #94a3b8;
-  /* Slate-400 */
-
-  --accent: #1e293b;
-  /* Slate-800 */
-  --accent-foreground: #f8fafc;
-
-  --destructive: #ef4444;
-  --destructive-foreground: #FFFFFF;
-
-  --border: #1e293b;
-  --input: #1e293b;
-  --ring: #6366f1;
-
-  --chart-1: #6366f1;
-  --chart-2: #34d399;
-  --chart-3: #fbbf24;
-  --chart-4: #a78bfa;
-  --chart-5: #60a5fa;
-}
 
 @theme inline {
   --font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";

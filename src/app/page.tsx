@@ -156,7 +156,7 @@ export default function Home() {
           <div className="container px-4 md:px-6 mx-auto">
             <div className="text-center mb-12 space-y-3">
               <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 opacity-80">The Powerhouse</h2>
-              <p className="text-2xl md:text-3xl lg:text-5xl font-black text-gray-900 leading-tight">Everything you need to <br className="hidden md:block" /> finish your degree.</p>
+              <p className="text-2xl md:text-3xl lg:text-5xl font-black text-gray-900 leading-tight">Everything you need to <br className="hidden md:block" /> finish your research project.</p>
             </div>
 
             {/* Grid: 1 col (mobile) -> 2 cols (tablet) -> 3 cols (desktop) */}
