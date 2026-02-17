@@ -17,7 +17,7 @@ interface Project {
     type: string;
     status: string;
     updatedAt: string;
-    chapters: { chapter_id: number; title: string; chapterNumber: number; status: string; content?: string }[];
+    chapters: { chapter_id: number; title: string | null; chapterNumber: number; status: string; content?: string }[];
 }
 
 

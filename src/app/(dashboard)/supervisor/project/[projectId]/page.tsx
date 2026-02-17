@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 
 interface Chapter {
     chapter_id: number;
-    title: string;
+    title: string | null;
     chapterNumber: number;
     status: string;
 }

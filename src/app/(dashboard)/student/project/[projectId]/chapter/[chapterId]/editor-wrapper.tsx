@@ -7,8 +7,8 @@ import { Loader2 } from "lucide-react";
 
 interface Chapter {
     chapter_id: number;
-    title: string;
-    content: string;
+    title: string | null;
+    content: string | null;
     status: string;
 }
 

@@ -15,7 +15,7 @@ import StudentProjectTeam from "@/components/StudentProjectTeam";
 
 interface Chapter {
     chapter_id: number;
-    title: string;
+    title: string | null;
     chapterNumber: number;
     status: string;
 }

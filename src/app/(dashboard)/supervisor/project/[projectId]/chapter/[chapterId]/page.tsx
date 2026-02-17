@@ -15,8 +15,8 @@ export default function SupervisorChapterPage() {
 
     interface ChapterData {
         chapter_id: number;
-        title: string;
-        content: string;
+        title: string | null;
+        content: string | null;
         status: string;
     }
 
