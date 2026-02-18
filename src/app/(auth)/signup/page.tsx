@@ -1,15 +1,23 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Loader2, Bot, FileCheck, Smartphone, ShieldCheck, ArrowRight, Check, Eye, EyeOff } from "lucide-react"
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 export default function SignupPage() {
+    return (
+        <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin h-8 w-8 text-indigo-600" /></div>}>
+            <SignupForm />
+        </Suspense>
+    );
+}
+
+function SignupForm() {
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
@@ -20,6 +28,9 @@ export default function SignupPage() {
         password: "",
         role: "student"
     });
+
+    const searchParams = useSearchParams();
+    const callbackUrl = searchParams.get("callbackUrl");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -56,7 +67,11 @@ export default function SignupPage() {
 
             // In a real app, you'd save the token/session here
             // For now, redirect to login
-            router.push("/login?signup=success");
+            const loginUrl = callbackUrl
+                ? `/login?signup=success&callbackUrl=${encodeURIComponent(callbackUrl)}`
+                : "/login?signup=success";
+
+            router.push(loginUrl);
         } catch (err) {
             setError(err instanceof Error ? err.message : "An unexpected error occurred");
         } finally {

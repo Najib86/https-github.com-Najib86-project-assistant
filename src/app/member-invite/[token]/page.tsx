@@ -71,6 +71,15 @@ export default function MemberInvitePage({ params }: { params: Promise<{ token: 
         fetchInvite();
     }, [token]);
 
+    // Auto-accept if emails match
+    useEffect(() => {
+        if (!loading && invite && currentUser && !accepting && !error) {
+            if (currentUser.email?.toLowerCase() === invite.email.toLowerCase()) {
+                handleAccept();
+            }
+        }
+    }, [loading, invite, currentUser]);
+
     const handleAccept = async () => {
         if (!currentUser) {
             // Redirect to sign in, preserving the flow
@@ -78,11 +87,7 @@ export default function MemberInvitePage({ params }: { params: Promise<{ token: 
             return;
         }
 
-        // Check if email matches (case insensitive)
-        if (currentUser.email?.toLowerCase() !== invite?.email.toLowerCase()) {
-            setError(`This invitation was sent to ${invite?.email}. Please log in with that email.`);
-            return;
-        }
+        // Removed strict email check to allow "share or allow same project" behavior
 
         setAccepting(true);
         try {
@@ -111,11 +116,13 @@ export default function MemberInvitePage({ params }: { params: Promise<{ token: 
         }
     };
 
-    if (loading) {
+    if (loading || (currentUser && invite && currentUser.email?.toLowerCase() === invite.email.toLowerCase() && !error)) {
         return (
             <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-4">
                 <Loader2 className="h-8 w-8 text-indigo-600 animate-spin mb-4" />
-                <p className="text-gray-500 font-medium">Verifying invitation...</p>
+                <p className="text-gray-500 font-medium">
+                    {accepting ? "Joining team..." : "Verifying invitation..."}
+                </p>
             </div>
         );
     }
@@ -179,33 +186,38 @@ export default function MemberInvitePage({ params }: { params: Promise<{ token: 
                             Already have an account? <Link href={`/auth/login?callbackUrl=/member-invite/${token}`} className="text-indigo-600 font-bold">Log in</Link>
                         </p>
                     </div>
-                ) : currentUser.email !== invite?.email ? (
-                    <div className="space-y-3">
-                        <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
-                            <p className="text-sm text-yellow-800">
-                                This invitation was sent to <span className="font-bold">{invite?.email}</span>
-                            </p>
-                            <p className="text-xs text-yellow-700 mt-1">
-                                You&apos;re logged in as {currentUser.email}
-                            </p>
-                        </div>
-                        <Button onClick={() => {
-                            localStorage.removeItem("user");
-                            router.push(`/auth/login?callbackUrl=/member-invite/${token}`);
-                        }} size="lg" variant="outline" className="w-full rounded-xl font-bold h-12">
-                            Log in with {invite?.email}
-                        </Button>
-                    </div>
                 ) : (
-                    <Button
-                        onClick={handleAccept}
-                        disabled={accepting}
-                        size="lg"
-                        className="w-full rounded-xl font-bold h-12 shadow-lg shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700"
-                    >
-                        {accepting ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : <CheckCircle className="mr-2 h-5 w-5" />}
-                        {accepting ? "Joining Project..." : "Accept & Join Team"}
-                    </Button>
+                    <div className="space-y-3">
+                        {currentUser.email !== invite?.email && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-4">
+                                <p className="text-sm text-yellow-800">
+                                    This invitation was sent to <span className="font-bold">{invite?.email}</span>
+                                </p>
+                                <p className="text-xs text-yellow-700 mt-1">
+                                    You&apos;re logged in as <span className="font-bold">{currentUser.email}</span>
+                                </p>
+                            </div>
+                        )}
+
+                        <Button
+                            onClick={handleAccept}
+                            disabled={accepting}
+                            size="lg"
+                            className="w-full rounded-xl font-bold h-12 shadow-lg shadow-indigo-200 bg-indigo-600 hover:bg-indigo-700"
+                        >
+                            {accepting ? <Loader2 className="animate-spin mr-2 h-5 w-5" /> : <CheckCircle className="mr-2 h-5 w-5" />}
+                            {accepting ? "Joining Project..." : "Accept & Join Team"}
+                        </Button>
+
+                        {currentUser.email !== invite?.email && (
+                            <Button onClick={() => {
+                                localStorage.removeItem("user");
+                                router.push(`/auth/login?callbackUrl=/member-invite/${token}`);
+                            }} size="sm" variant="ghost" className="w-full text-gray-500">
+                                Switch Account
+                            </Button>
+                        )}
+                    </div>
                 )}
 
                 <div className="mt-6 pt-6 border-t border-gray-100">

@@ -86,11 +86,10 @@ export async function POST(
             return NextResponse.json({ error: "Invite already used" }, { status: 409 });
         }
 
-        // Verify email match (case insensitive)
+        // Verify email match (case insensitive) - RELAXED for user request "share or allow same project"
+        // We log a warning but allow the user to proceed if they have the valid token
         if (user.email?.toLowerCase() !== invite.email.toLowerCase()) {
-            return NextResponse.json({
-                error: `This invitation is for ${invite.email}. You are logged in as ${user.email}`
-            }, { status: 403 });
+            console.warn(`Invite for ${invite.email} accepted by ${user.email}`);
         }
 
         if (user.role !== "student") {
