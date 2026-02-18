@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useParams } from "next/navigation";
-import { Loader2, Plus, Users, ChevronRight, FileText, X } from "lucide-react"
+import { Loader2, Plus, Users, ChevronRight, FileText, X, ChevronDown } from "lucide-react"
 import { cn } from "@/lib/utils";
 import ChatInterface from "@/components/ChatInterface";
 import LiteratureDiscovery from "@/components/LiteratureDiscovery";
@@ -71,6 +71,7 @@ export default function StudentProjectDetails() {
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [inviteLink, setInviteLink] = useState("");
     const [creatingInvite, setCreatingInvite] = useState(false);
+    const [showActivity, setShowActivity] = useState(false);
 
     const handleCreateInvite = async () => {
         setCreatingInvite(true);
@@ -376,10 +377,7 @@ export default function StudentProjectDetails() {
                         />
                     )}
 
-                    {/* Activity Feed (New) */}
-                    <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                        <ProjectActivityFeed projectId={project.project_id} />
-                    </div>
+
 
                     {/* Team Section */}
                     {project && (
@@ -394,7 +392,7 @@ export default function StudentProjectDetails() {
 
                     {/* Citations Section */}
                     <div className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-                        {/* ... (Citations content same as before) ... */}
+                        {/* Header */}
                         <div className="flex items-center justify-between mb-4">
                             <h2 className="text-lg font-bold text-gray-900">References</h2>
                             <Button variant="ghost" size="sm" onClick={() => setShowAddCitation(!showAddCitation)} className="h-8 w-8 p-0 rounded-full bg-indigo-50 text-indigo-600 hover:bg-indigo-100">
@@ -429,6 +427,23 @@ export default function StudentProjectDetails() {
                                 </div>
                             ))}
                         </div>
+                    </div>
+
+                    {/* Activity Feed (Dropdown) */}
+                    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                        <button
+                            onClick={() => setShowActivity(!showActivity)}
+                            className="w-full flex items-center justify-between p-4 text-left font-bold text-gray-900 hover:bg-gray-50 transition-colors"
+                        >
+                            <span>Recent Activity</span>
+                            <ChevronDown className={cn("h-5 w-5 text-gray-400 transition-transform duration-200", showActivity && "rotate-180")} />
+                        </button>
+
+                        {showActivity && (
+                            <div className="p-4 pt-0 border-t border-gray-50 animate-in slide-in-from-top-2">
+                                <ProjectActivityFeed projectId={project.project_id} />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
