@@ -57,6 +57,8 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
     const [plagiarismResult, setPlagiarismResult] = useState<PlagiarismResult | null>(null);
     const [checkingPlagiarism, setCheckingPlagiarism] = useState(false);
     const [isCommentsOpen, setIsCommentsOpen] = useState(true);
+    const [showAIModal, setShowAIModal] = useState(false);
+    const [aiInstruction, setAiInstruction] = useState("");
 
     const editor = useEditor({
         extensions: [
@@ -137,11 +139,22 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
         }
     };
 
-    const handleAIAssist = async () => {
+    const handleAIAssist = () => {
+        setShowAIModal(true);
+    };
+
+    const runAI = async () => {
         if (!editor) return;
-        // Get last 500 characters for context, or selection
-        const context = editor.getText().slice(-1000);
-        await complete(context);
+        const context = editor.getText().slice(-3000); // Send larger context
+
+        await complete(context, {
+            body: {
+                instruction: aiInstruction
+            }
+        });
+
+        setShowAIModal(false);
+        setAiInstruction("");
     };
 
     const handlePostComment = async (e: React.FormEvent) => {
@@ -458,7 +471,55 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                         }
                     </div>
                 )}
+
             </div>
+
+            {/* AI Assistant Modal */}
+            {showAIModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+                        onClick={() => setShowAIModal(false)}
+                    />
+                    <div className="relative w-full max-w-lg bg-white rounded-3xl p-6 shadow-2xl animate-in fade-in zoom-in-95 duration-200 border border-indigo-100">
+                        <div className="flex items-center justify-center w-16 h-16 bg-indigo-50 rounded-2xl mb-6 mx-auto">
+                            <Zap className="h-8 w-8 text-indigo-600 animate-pulse" />
+                        </div>
+
+                        <h3 className="text-xl font-black text-center text-gray-900 mb-2">AI Writing Assistant</h3>
+                        <p className="text-center text-sm text-gray-500 mb-6 max-w-xs mx-auto">
+                            Provide specific instructions or let the AI continue writing based on context.
+                        </p>
+
+                        <div className="space-y-4">
+                            <textarea
+                                value={aiInstruction}
+                                onChange={(e) => setAiInstruction(e.target.value)}
+                                placeholder="E.g., 'Elaborate on the methodology used...', or paste feedback from the report."
+                                className="w-full text-sm font-medium border-2 border-gray-100 rounded-2xl p-4 min-h-[120px] focus:border-indigo-600 focus:bg-indigo-50/10 outline-none resize-none transition-all placeholder:text-gray-300"
+                                autoFocus
+                            />
+
+                            <div className="flex gap-3">
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => setShowAIModal(false)}
+                                    className="flex-1 rounded-xl h-12 font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-100"
+                                >
+                                    Cancel
+                                </Button>
+                                <Button
+                                    onClick={runAI}
+                                    className="flex-1 rounded-xl h-12 font-black bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200"
+                                >
+                                    <Zap className="h-4 w-4 mr-2" />
+                                    Generate
+                                </Button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

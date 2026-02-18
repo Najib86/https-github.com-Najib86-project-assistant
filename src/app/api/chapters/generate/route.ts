@@ -22,6 +22,8 @@ const generateSchema = z.object({
     level: z.string().optional(),
     sampleText: z.string().optional(),
     stream: z.boolean().optional().default(true),
+    instruction: z.string().optional(),
+    prompt: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -40,7 +42,7 @@ export async function POST(req: Request) {
             return new Response(JSON.stringify({ error: validated.error.message }), { status: 400 });
         }
 
-        const { projectId, chapterNumber, chapterTitle, topic, level } = validated.data;
+        const { projectId, chapterNumber, chapterTitle, topic, level, instruction, prompt: contextText } = validated.data;
 
         // Fetch Project Context (Interview Bot Data)
         const project = await prisma.project.findUnique({
@@ -88,7 +90,7 @@ export async function POST(req: Request) {
 
 
 
-        const prompt = `You are an expert academic writer helping a ${project?.level || level || "university"} student write their research project.
+        let prompt = `You are an expert academic writer helping a ${project?.level || level || "university"} student write their research project.
 
 ${contextSection}
 
@@ -99,15 +101,24 @@ ${RESEARCH_GUIDELINES}
 
 === WRITING TASK ===
 Chapter ${chapterNumber}: ${chapterTitle || "General"}
-Topic: "${topic}"
+Topic: "${topic}"`;
 
-=== INSTRUCTIONS ===
+        if (instruction) {
+            prompt += `\n\n=== USER INSTRUCTIONS ===\n${instruction}\n`;
+        }
+
+        if (contextText) {
+            prompt += `\n\n=== EXISTING CONTENT (CONTEXT) ===\n...${contextText.slice(-3000)}\n\n(Continue from here)`;
+        }
+
+        prompt += `\n\n=== INSTRUCTIONSPO ===
 1. Write detailed, well-structured academic content appropriate for ${project?.level || level || "university"} level.
 2. STRICTLY FOLLOW the "GUIDELINES FOR RESEARCH PROJECT EXECUTION" provided above.
 3. Ensure the content directly addresses the problem statement and objectives listed above.
 4. Use the methodology context to inform your approach.
 5. Write in formal academic tone with clear, precise language.
 6. Include relevant examples and explanations.
+7. If user instructions are provided, PRIORITIZE them.
 
 Write the chapter content now:`;
 
