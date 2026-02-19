@@ -1,10 +1,10 @@
 
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, Suspense, useEffect } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Loader2, Bot, FileCheck, ArrowRight, Eye, EyeOff } from "lucide-react"
+import { Loader2, Bot, FileCheck, ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react"
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -29,6 +29,13 @@ function LoginForm() {
     });
 
     const signupSuccess = searchParams.get("signup") === "success";
+
+    useEffect(() => {
+        const errorType = searchParams.get("error");
+        if (errorType === "unauthorized") {
+            setError("You do not have permission to view that page. Please log in with the correct account.");
+        }
+    }, [searchParams]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -66,13 +73,24 @@ function LoginForm() {
                 // Critical: Set user in localStorage for client-side checks on dashboard
                 localStorage.setItem("user", JSON.stringify(session.user));
 
+                const role = session.user.role;
                 const callbackUrl = searchParams.get("callbackUrl");
-                if (callbackUrl) {
-                    router.push(callbackUrl);
-                } else if (session.user.role === "supervisor") {
-                    router.push("/supervisor");
+
+                // Strict role-based redirection to prevent unauthorized access loops
+                if (role === "supervisor") {
+                    if (callbackUrl && callbackUrl.startsWith("/supervisor")) {
+                        router.push(callbackUrl);
+                    } else {
+                        router.push("/supervisor/dashboard");
+                    }
+                } else if (role === "student") {
+                    if (callbackUrl && callbackUrl.startsWith("/student")) {
+                        router.push(callbackUrl);
+                    } else {
+                        router.push("/student/dashboard");
+                    }
                 } else {
-                    router.push("/student");
+                    router.push(callbackUrl || "/student/dashboard");
                 }
             } else {
                 setError("Failed to retrieve session details");
@@ -85,7 +103,9 @@ function LoginForm() {
     };
 
     const handleGoogleSignIn = () => {
-        const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+        // For Google, we let NextAuth handle it. 
+        // Ideally we would want a custom callback to handle roles, but for now we rely on user manually navigating if needed
+        const callbackUrl = searchParams.get("callbackUrl") || "/student/dashboard";
         signIn("google", { callbackUrl });
     };
 
