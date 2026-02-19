@@ -7,7 +7,7 @@ interface RateLimitEntry {
 // For production at scale, use Upstash Redis
 const rateLimitMap = new Map<string, RateLimitEntry>();
 
-export function getRateLimitKey(type: "signup" | "login" | "reset", identifier: string): string {
+export function getRateLimitKey(type: "signup" | "login" | "reset" | "resend-verification", identifier: string): string {
   return `${type}:${identifier}`;
 }
 
