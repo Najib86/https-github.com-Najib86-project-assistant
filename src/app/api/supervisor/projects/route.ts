@@ -4,16 +4,25 @@ import { NextResponse } from "next/server";
 
 export async function GET(req: Request) {
     try {
+        const { searchParams } = new URL(req.url);
+        const supervisorId = searchParams.get("supervisorId");
+
+        const where: { supervisorId?: number } = {};
+        if (supervisorId) {
+            where.supervisorId = parseInt(supervisorId);
+        }
+
         const projects = await prisma.project.findMany({
+            where,
             include: {
                 student: {
                     select: { name: true, email: true }
                 },
                 chapters: {
-                    select: { status: true }
+                    select: { status: true, updatedAt: true, chapterNumber: true, chapter_id: true, title: true }
                 }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: { updatedAt: 'desc' }
         });
 
         // Add computed progress

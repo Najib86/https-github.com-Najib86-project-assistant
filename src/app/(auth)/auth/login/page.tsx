@@ -1,22 +1,56 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Suspense } from "react";
 
 export default function LoginPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center p-8"><Loader2 className="animate-spin h-8 w-8 text-indigo-600" /></div>}>
+            <LoginForm />
+        </Suspense>
+    );
+}
+
+function LoginForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [formData, setFormData] = useState({
         email: "",
         password: ""
     });
+
+    const callbackUrl = searchParams.get("callbackUrl");
+
+    useEffect(() => {
+        const checkSession = async () => {
+            const res = await fetch("/api/auth/session");
+            const session = await res.json();
+            if (session?.user) {
+                const role = session.user.role;
+                if (role === "supervisor") {
+                    router.push("/supervisor/dashboard");
+                } else {
+                    router.push("/student/dashboard");
+                }
+            }
+        };
+
+        const errorType = searchParams.get("error");
+        if (errorType === "unauthorized") {
+            setError("You do not have permission to view that page. Please log in with the correct account.");
+        } else {
+            checkSession();
+        }
+    }, [searchParams, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -39,26 +73,33 @@ export default function LoginPage() {
                 return;
             }
 
-            if (result?.ok) {
-                // Redirect based on role - NextAuth will handle session
-                router.push("/student/dashboard");
+            // Fetch session to get role
+            const sessionRes = await fetch("/api/auth/session");
+            const session = await sessionRes.json();
+
+            if (session?.user) {
+                // Set user in localStorage for client-side checks
+                localStorage.setItem("user", JSON.stringify(session.user));
+
+                const role = session.user.role;
+
+                if (role === "supervisor") {
+                    router.push("/supervisor/dashboard");
+                } else {
+                    router.push(callbackUrl || "/student/dashboard");
+                }
                 router.refresh();
             }
         } catch (err) {
+            console.error("Login error:", err);
             setError("An unexpected error occurred");
         } finally {
             setIsLoading(false);
         }
     };
 
-    const handleGoogleSignIn = async () => {
-        setIsLoading(true);
-        try {
-            await signIn("google", { callbackUrl: "/student/dashboard" });
-        } catch (err) {
-            setError("Google sign-in failed");
-            setIsLoading(false);
-        }
+    const handleGoogleSignIn = () => {
+        signIn("google", { callbackUrl: callbackUrl || "/student/dashboard" });
     };
 
     return (
@@ -127,7 +168,7 @@ export default function LoginPage() {
                     )}
                 </Button>
             </form>
-            
+
             <div className="relative w-full">
                 <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t" />
@@ -137,9 +178,9 @@ export default function LoginPage() {
                 </div>
             </div>
 
-            <Button 
-                variant="outline" 
-                className="w-full" 
+            <Button
+                variant="outline"
+                className="w-full"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
                 type="button"

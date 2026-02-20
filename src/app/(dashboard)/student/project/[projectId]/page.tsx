@@ -12,11 +12,13 @@ import LiteratureDiscovery from "@/components/LiteratureDiscovery";
 import ProjectActivityFeed from "@/components/ProjectActivityFeed";
 import ProjectProgress from "@/components/ProjectProgress";
 import StudentProjectTeam from "@/components/StudentProjectTeam";
+import ExportPreviewModal from "@/components/ExportPreviewModal";
 
 interface Chapter {
     chapter_id: number;
     title: string | null;
     chapterNumber: number;
+    content: string | null;
     status: string;
 }
 
@@ -72,6 +74,7 @@ export default function StudentProjectDetails() {
     const [inviteLink, setInviteLink] = useState("");
     const [creatingInvite, setCreatingInvite] = useState(false);
     const [showActivity, setShowActivity] = useState(false);
+    const [showExportPreview, setShowExportPreview] = useState(false);
 
     const handleCreateInvite = async () => {
         setCreatingInvite(true);
@@ -266,14 +269,23 @@ export default function StudentProjectDetails() {
                         {creatingInvite ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Users className="h-4 w-4 mr-2" />}
                         Invite Supervisor
                     </Button>
-                    <Button variant="outline" asChild className="flex-1 md:flex-none w-full md:w-auto rounded-xl shadow-sm border-gray-200 font-bold h-11 text-sm">
-                        <Link href={`/api/export/docx?projectId=${project.project_id}`}>
-                            <FileText className="h-4 w-4 mr-2 text-indigo-600" />
-                            Export Report
-                        </Link>
+                    <Button
+                        variant="outline"
+                        onClick={() => setShowExportPreview(true)}
+                        className="flex-1 md:flex-none w-full md:w-auto rounded-xl shadow-sm border-gray-200 font-bold h-11 text-sm transition-all hover:bg-indigo-50 hover:border-indigo-100"
+                    >
+                        <FileText className="h-4 w-4 mr-2 text-indigo-600" />
+                        Export Report
                     </Button>
                 </div>
             </div>
+
+            {/* Export Preview Modal */}
+            <ExportPreviewModal
+                project={project}
+                isOpen={showExportPreview}
+                onClose={() => setShowExportPreview(false)}
+            />
 
             {/* Invite Modal (same as before) */}
             {showInviteModal && (

@@ -4,7 +4,7 @@
 import { useState, Suspense, useEffect } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Loader2, Bot, FileCheck, ArrowRight, Eye, EyeOff, AlertCircle } from "lucide-react"
+import { Loader2, Bot, FileCheck, ArrowRight, Eye, EyeOff } from "lucide-react"
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
@@ -31,11 +31,27 @@ function LoginForm() {
     const signupSuccess = searchParams.get("signup") === "success";
 
     useEffect(() => {
+        const checkSession = async () => {
+            const res = await fetch("/api/auth/session");
+            const session = await res.json();
+            if (session?.user) {
+                const role = session.user.role;
+                if (role === "supervisor") {
+                    router.push("/supervisor/dashboard");
+                } else {
+                    router.push("/student/dashboard");
+                }
+            }
+        };
+
         const errorType = searchParams.get("error");
         if (errorType === "unauthorized") {
             setError("You do not have permission to view that page. Please log in with the correct account.");
+        } else {
+            // Only auto-redirect if there isn't an explicit error
+            checkSession();
         }
-    }, [searchParams]);
+    }, [searchParams, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });

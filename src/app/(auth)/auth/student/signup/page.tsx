@@ -6,11 +6,21 @@ import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
 import Image from "next/image";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Suspense } from "react";
 
 export default function StudentSignupPage() {
+    return (
+        <Suspense fallback={<div className="flex items-center justify-center p-8"><Loader2 className="animate-spin h-8 w-8 text-indigo-600" /></div>}>
+            <StudentSignupForm />
+        </Suspense>
+    );
+}
+
+function StudentSignupForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState("");
     const [formData, setFormData] = useState({
@@ -18,6 +28,8 @@ export default function StudentSignupPage() {
         email: "",
         password: ""
     });
+
+    const callbackUrl = searchParams.get("callbackUrl");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.id]: e.target.value });
@@ -53,7 +65,7 @@ export default function StudentSignupPage() {
                 // Account created but login failed - redirect to login
                 router.push("/auth/login?message=Account created. Please sign in.");
             } else if (signInResult?.ok) {
-                router.push("/student/dashboard");
+                router.push(callbackUrl || "/student/dashboard");
                 router.refresh();
             }
         } catch (err) {
@@ -64,13 +76,7 @@ export default function StudentSignupPage() {
     };
 
     const handleGoogleSignIn = async () => {
-        setIsLoading(true);
-        try {
-            await signIn("google", { callbackUrl: "/student/dashboard" });
-        } catch (err) {
-            setError("Google sign-in failed");
-            setIsLoading(false);
-        }
+        signIn("google", { callbackUrl: callbackUrl || "/student/dashboard" });
     };
 
     return (
@@ -165,9 +171,9 @@ export default function StudentSignupPage() {
                 </div>
             </div>
 
-            <Button 
-                variant="outline" 
-                className="w-full" 
+            <Button
+                variant="outline"
+                className="w-full"
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
                 type="button"

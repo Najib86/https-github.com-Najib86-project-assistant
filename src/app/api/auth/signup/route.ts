@@ -54,7 +54,7 @@ export async function POST(req: Request) {
         // Hash password
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        // Create user with email_verified: false
+        // Create user with email_verified: true (Instant Verification)
         const newUser = await prisma.user.create({
             data: {
                 name,
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
                 password: hashedPassword,
                 role: role || "student",
                 provider: "credentials",
-                email_verified: false
+                email_verified: true
             }
         });
 

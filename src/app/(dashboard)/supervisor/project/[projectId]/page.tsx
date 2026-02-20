@@ -5,13 +5,15 @@ import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { useParams } from "next/navigation";
-import { Loader2, ChevronRight } from "lucide-react"
+import { Loader2, ChevronRight, FileText } from "lucide-react"
 import { cn } from "@/lib/utils";
+import ExportPreviewModal from "@/components/ExportPreviewModal";
 
 interface Chapter {
     chapter_id: number;
     title: string | null;
     chapterNumber: number;
+    content: string | null;
     status: string;
 }
 
@@ -45,6 +47,7 @@ export default function SupervisorProjectDetails() {
     const [project, setProject] = useState<Project | null>(null);
     const [loading, setLoading] = useState(true);
     const [members, setMembers] = useState<Member[]>([]);
+    const [showExportPreview, setShowExportPreview] = useState(false);
 
     const fetchProject = useCallback(async () => {
         if (!projectId) return;
@@ -109,7 +112,24 @@ export default function SupervisorProjectDetails() {
                         </span>
                     </div>
                 </div>
+                <div className="flex items-center gap-3 w-full md:w-auto mt-2">
+                    <Button
+                        variant="outline"
+                        onClick={() => setShowExportPreview(true)}
+                        className="w-full md:w-auto rounded-xl shadow-sm border-gray-200 font-bold h-11 text-sm bg-white transition-all hover:bg-indigo-50 hover:border-indigo-100"
+                    >
+                        <FileText className="h-4 w-4 mr-2 text-indigo-600" />
+                        Preview Draft
+                    </Button>
+                </div>
             </div>
+
+            {/* Export Preview Modal */}
+            <ExportPreviewModal
+                project={project}
+                isOpen={showExportPreview}
+                onClose={() => setShowExportPreview(false)}
+            />
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Main Content - Chapters Review */}

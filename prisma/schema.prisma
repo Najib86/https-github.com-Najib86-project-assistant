@@ -32,6 +32,7 @@ model User {
   activities              ProjectActivity[]
   verificationTokens      VerificationToken[]
   passwordResetTokens     PasswordResetToken[]
+  inviteCode              String?            @unique
 
   @@map("users")
 }

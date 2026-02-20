@@ -66,13 +66,31 @@ function SignupForm() {
                 throw new Error(data.error || "Signup failed");
             }
 
-            // In a real app, you'd save the token/session here
-            // For now, redirect to login
-            const loginUrl = callbackUrl
-                ? `/login?signup=success&callbackUrl=${encodeURIComponent(callbackUrl)}`
-                : "/login?signup=success";
+            // Auto sign in after successful registration
+            const signInResult = await signIn("credentials", {
+                email: formData.email,
+                password: formData.password,
+                redirect: false,
+            });
 
-            router.push(loginUrl);
+            if (signInResult?.error) {
+                // Account created but login failed - redirect to login
+                const loginUrl = callbackUrl
+                    ? `/login?signup=success&callbackUrl=${encodeURIComponent(callbackUrl)}`
+                    : "/login?signup=success";
+                router.push(loginUrl);
+            } else if (signInResult?.ok) {
+                // Fetch session to get role and redirect to correct dashboard
+                const sessionRes = await fetch("/api/auth/session");
+                const session = await sessionRes.json();
+
+                if (session?.user?.role === "supervisor") {
+                    router.push("/supervisor/dashboard");
+                } else {
+                    router.push(callbackUrl || "/student/dashboard");
+                }
+                router.refresh();
+            }
         } catch (err) {
             setError(err instanceof Error ? err.message : "An unexpected error occurred");
         } finally {

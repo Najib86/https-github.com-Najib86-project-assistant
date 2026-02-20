@@ -111,14 +111,28 @@ export async function POST(req: Request) {
         }
 
         if (inviteCode) {
+            // First check SupervisorInvite table (student-invited)
             const invite = await prisma.supervisorInvite.findUnique({
                 where: { token: inviteCode },
                 include: { project: true }
             });
+
             if (invite && invite.expiresAt > new Date()) {
                 finalSupervisorId = invite.project.supervisorId;
             } else {
-                return NextResponse.json({ error: "Invalid/Expired code" }, { status: 400 });
+                // If not found, check User table for supervisor-generated code
+                const supervisor = await prisma.user.findFirst({
+                    where: {
+                        inviteCode: inviteCode,
+                        role: 'supervisor'
+                    }
+                });
+
+                if (supervisor) {
+                    finalSupervisorId = supervisor.id;
+                } else {
+                    return NextResponse.json({ error: "Invalid/Expired code" }, { status: 400 });
+                }
             }
         }
 
