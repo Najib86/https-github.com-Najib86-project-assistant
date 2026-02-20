@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 import {
     Loader2, Save, MessageSquare, History, Check, X, Send,
     AlertCircle, ShieldCheck, Zap, Bold, Italic, Underline as UnderlineIcon,
-    AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, List
+    AlignLeft, AlignCenter, AlignRight, Heading1, Heading2, List,
+    Highlighter, Strikethrough, CheckCircle, XCircle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCompletion } from "@ai-sdk/react";
@@ -15,6 +16,7 @@ import { Underline } from '@tiptap/extension-underline';
 import { TextStyle } from '@tiptap/extension-text-style';
 import { FontFamily } from '@tiptap/extension-font-family';
 import { TextAlign } from '@tiptap/extension-text-align';
+import Highlight from '@tiptap/extension-highlight';
 
 interface PlagiarismResult {
     similarityScore: number;
@@ -66,6 +68,7 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
             Underline,
             TextStyle,
             FontFamily,
+            Highlight,
             TextAlign.configure({
                 types: ['heading', 'paragraph'],
             }),
@@ -225,6 +228,8 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
             case 'left': editor.chain().focus().setTextAlign('left').run(); break;
             case 'center': editor.chain().focus().setTextAlign('center').run(); break;
             case 'right': editor.chain().focus().setTextAlign('right').run(); break;
+            case 'highlight': editor.chain().focus().toggleHighlight().run(); break;
+            case 'strike': editor.chain().focus().toggleStrike().run(); break;
         }
     };
 
@@ -261,6 +266,16 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                             <Button variant="ghost" size="icon" onClick={() => toggleFormat('underline')} className={cn("h-11 w-11 rounded-xl", editor.isActive('underline') && "bg-indigo-100 text-indigo-700")}>
                                 <UnderlineIcon className="h-5 w-5" />
                             </Button>
+                            {role === 'supervisor' && (
+                                <>
+                                    <Button variant="ghost" size="icon" onClick={() => toggleFormat('strike')} className={cn("h-11 w-11 rounded-xl", editor.isActive('strike') && "bg-red-100 text-red-700")}>
+                                        <Strikethrough className="h-5 w-5 text-red-500" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon" onClick={() => toggleFormat('highlight')} className={cn("h-11 w-11 rounded-xl", editor.isActive('highlight') && "bg-amber-100 text-amber-700")}>
+                                        <Highlighter className="h-5 w-5 text-amber-500" />
+                                    </Button>
+                                </>
+                            )}
                         </div>
 
                         <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 mx-2 flex-shrink-0" />
@@ -321,16 +336,33 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                             </span>
                         </div>
                         <div className="flex items-center gap-2 flex-shrink-0">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleAIAssist}
-                                disabled={isAIWriting}
-                                className="text-indigo-600 font-bold text-[10px] uppercase h-9 px-3"
-                            >
-                                <Zap className="h-3.5 w-3.5 mr-1.5" />
-                                AI Continue
-                            </Button>
+                            {role !== "supervisor" && (
+                                <>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={handleAIAssist}
+                                        disabled={isAIWriting}
+                                        className="text-indigo-600 font-bold text-[10px] uppercase h-9 px-3"
+                                    >
+                                        <Zap className="h-3.5 w-3.5 mr-1.5" />
+                                        AI Continue
+                                    </Button>
+                                    <button
+                                        onClick={handleCheckPlagiarism}
+                                        disabled={checkingPlagiarism}
+                                        className={cn(
+                                            "flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all h-9",
+                                            plagiarismResult
+                                                ? plagiarismResult.similarityScore > 20 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
+                                                : "bg-gray-50 text-gray-400 hover:text-indigo-600"
+                                        )}
+                                    >
+                                        {checkingPlagiarism ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
+                                        {plagiarismResult ? `${plagiarismResult.similarityScore}%` : "Scan"}
+                                    </button>
+                                </>
+                            )}
                             <Button
                                 variant="ghost"
                                 size="sm"
@@ -340,19 +372,37 @@ export default function ChapterEditor({ chapterId, projectId, initialContent, in
                                 <History className="h-3.5 w-3.5 mr-1.5" />
                                 History
                             </Button>
-                            <button
-                                onClick={handleCheckPlagiarism}
-                                disabled={checkingPlagiarism}
-                                className={cn(
-                                    "flex items-center gap-1.5 px-3 py-1 rounded-lg text-[10px] font-bold uppercase transition-all h-9",
-                                    plagiarismResult
-                                        ? plagiarismResult.similarityScore > 20 ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"
-                                        : "bg-gray-50 text-gray-400 hover:text-indigo-600"
-                                )}
-                            >
-                                {checkingPlagiarism ? <Loader2 className="h-3 w-3 animate-spin" /> : <ShieldCheck className="h-3.5 w-3.5" />}
-                                {plagiarismResult ? `${plagiarismResult.similarityScore}%` : "Scan"}
-                            </button>
+
+                            {role === "supervisor" && (
+                                <>
+                                    <Button
+                                        size="sm"
+                                        onClick={() => setIsCommentsOpen(true)}
+                                        className="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 font-bold text-[10px] uppercase h-9 px-3 rounded-lg flex items-center"
+                                    >
+                                        <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
+                                        Suggest Feedback
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        onClick={() => handleSave("Approved")}
+                                        disabled={status === "Approved" || saving}
+                                        className="bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold text-[10px] uppercase h-9 px-3 rounded-lg flex items-center"
+                                    >
+                                        <CheckCircle className="h-3.5 w-3.5 mr-1.5" />
+                                        Approve
+                                    </Button>
+                                    <Button
+                                        size="sm"
+                                        onClick={() => handleSave("Draft")}
+                                        disabled={status === "Draft" || saving}
+                                        className="bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 font-bold text-[10px] uppercase h-9 px-3 rounded-lg flex items-center"
+                                    >
+                                        <XCircle className="h-3.5 w-3.5 mr-1.5" />
+                                        Reject
+                                    </Button>
+                                </>
+                            )}
                         </div>
                     </div>
                 </div>
