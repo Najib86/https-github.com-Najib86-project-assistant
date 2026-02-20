@@ -79,7 +79,7 @@ export async function generateChapterContent(
     topic: string,
     level: string,
     sampleText?: string,
-    academicMetadata?: any
+    academicMetadata?: Record<string, any>
 ) {
     let contextStr = "";
     if (academicMetadata) {
@@ -146,3 +146,87 @@ export async function generateChapterContent(
         }
     });
 }
+
+/**
+ * Automatically analyze research materials and update relevant project chapters.
+ */
+export async function autoUpdateProjectWithResearch(submissionId: number) {
+    try {
+        const submission = await (prisma as any).researchSubmission.findUnique({
+            where: { id: submissionId },
+            include: {
+                files: true,
+                project: {
+                    include: { chapters: true }
+                }
+            }
+        });
+
+        if (!submission || !submission.projectId || !submission.project) return;
+
+        const project = submission.project;
+
+        // 1. Prepare Research Context for AI Analysis
+        const researchContext = `
+            NEW RESEARCH DATA SUBMITTED:
+            - Title: ${submission.title}
+            - Category: ${submission.category}
+            - Type: ${submission.researchType}
+            - Abstract: ${submission.abstract}
+            - Keywords: ${submission.keywords}
+            - Files Uploaded: ${submission.files.map((f: { fileName: string }) => f.fileName).join(", ")}
+        `;
+
+        // 2. Ask AI to synthesize this research into specific chapter insights
+        const analysisPrompt = `
+            Analyze the following research materials submitted by a student. 
+            Synthesize this data into meaningful academic paragraphs that can be added to the Results (Chapter 4), Discussion (Chapter 7), or Methodology (Chapter 3) of their project titled "${project.title}".
+            
+            ${researchContext}
+            
+            Format your response as a JSON object with chapter numbers as keys and the synthesized text as values.
+            Example: {"3": "Methodology update...", "4": "Results analysis...", "7": "Discussion points..."}
+            ONLY return the JSON.
+        `;
+
+        const analysisJson = await generateAIResponse(analysisPrompt, "json");
+        const updates = JSON.parse(analysisJson);
+
+        // 3. Update the chapters in the database
+        for (const [chapterNum, newContent] of Object.entries(updates as Record<string, string>)) {
+            const chapNum = parseInt(chapterNum);
+            const existingChapter = (project.chapters as any[]).find((c: any) => c.chapterNumber === chapNum);
+
+            if (existingChapter) {
+                // Determine if we should append or prepend
+                const updatedContent = `
+${existingChapter.content}
+
+<br/><hr/>
+<h3>AI RELIANCE: INTEGRATED RESEARCH DATA (${new Date().toLocaleDateString()})</h3>
+<p>${newContent}</p>
+                `.trim();
+
+                await prisma.chapter.update({
+                    where: { chapter_id: existingChapter.chapter_id },
+                    data: {
+                        content: updatedContent,
+                        status: "Draft", // Set back to draft so user can review
+                        updatedAt: new Date()
+                    }
+                });
+            } else {
+                // If chapter doesn't exist, we might want to skip or create it
+                // For now, let's just log
+                console.log(`[AI-RESEARCH] Chapter ${chapNum} not found for project ${project.project_id}`);
+            }
+        }
+
+        return { success: true, updatedChapters: Object.keys(updates) };
+
+    } catch (error) {
+        console.error("[AI-RESEARCH] Error in auto-update:", error);
+        throw error;
+    }
+}
+

@@ -31,8 +31,15 @@ const generateMissingContent = async (title: string, context: string, missingTyp
     `;
 
     const content = await generateAIResponse(prompt);
-    // Sanitize basic markdown if leaks through
-    return content.replace(/^```html/, '').replace(/```$/, '');
+    // Sanitize: remove markdown code blocks, bold markers, and weird artifacts
+    return content
+        .replace(/```html/g, '')
+        .replace(/```/g, '')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/### (.*?)(\n|$)/g, '<h3>$1</h3>')
+        .replace(/## (.*?)(\n|$)/g, '<h2>$1</h2>')
+        .replace(/# (.*?)(\n|$)/g, '<h1>$1</h1>')
+        .trim();
 };
 
 export async function GET(req: Request) {
@@ -64,7 +71,7 @@ export async function GET(req: Request) {
         // ---------------------------------------------------------
 
         // Parse Metadata
-        const meta = (project.academicMetadata as any) || {};
+        const meta = (project.academicMetadata as Record<string, any>) || {};
         const studentInfo = meta.student || {};
         const institutionInfo = meta.institution || {};
         const supervisorInfo = meta.supervisor || {};
@@ -89,7 +96,7 @@ export async function GET(req: Request) {
         const projectContext = `Title: ${project.title}. Level: ${level}. Student: ${studentName}. Institution: ${institutionName}`;
 
         // Identify Chapters
-        const chaptersMap = new Map<number | string, any>();
+        const chaptersMap = new Map<number | string, { title?: string | null; content?: string | null; chapterNumber?: number | null }>();
         project.chapters.forEach(c => {
             chaptersMap.set(c.chapterNumber, c);
             if (c.title) {
@@ -238,8 +245,8 @@ export async function GET(req: Request) {
 
         const tocLines: string[] = [];
         const addToToc = (title: string, indent = false) => {
-            const style = indent ? "margin-left: 20px; font-size: 11pt;" : "font-weight: bold; margin-top: 5px;";
-            tocLines.push(`<p class="toc-entry" style="${style}"><span>${title}</span><span></span></p>`);
+            const style = indent ? "margin-left: 30px; font-size: 11pt; color: #333333;" : "font-weight: bold; margin-top: 10px;";
+            tocLines.push(`<p style="${style}">${title}</p>`);
         };
 
         // --- HTML BODY ---
@@ -250,23 +257,21 @@ export async function GET(req: Request) {
         <title>${project.title}</title>
         <style>
             body { font-family: 'Times New Roman', serif; font-size: 12pt; line-height: ${lineHeight}; text-align: justify; }
-            h1, h2, h3, h4, h5, h6 { font-family: 'Times New Roman', serif; color: black; font-weight: bold; page-break-after: avoid; }
+            h1, h2, h3, h4, h5, h6 { font-family: 'Times New Roman', serif; color: #000000; font-weight: bold; page-break-after: avoid; }
             h2, h3, h4 { text-transform: capitalize; }
             .chapter-title { text-align: center; text-transform: uppercase; font-weight: bold; font-size: 14pt; margin-bottom: 24pt; }
             .section-break { page-break-before: always; }
-            .toc-entry { display: flex; justify-content: space-between; border-bottom: 1px dotted #ccc; margin-bottom: 4px; }
-            .toc-entry span { background: #fff; } 
-            .ai-notice { background-color: #f0f8ff; padding: 20px; border: 2px solid #007bff; margin-bottom: 40px; }
-            p { margin-bottom: 1em; }
+            .ai-notice { background-color: #f0f8ff; padding: 20px; border: 1px solid #007bff; margin-bottom: 40px; }
+            p { margin-bottom: 10pt; }
         </style>
     </head>
-    <body style="padding-left: 36pt;">`;
+    <body style="padding: 40pt;">`;
 
         // --- AI GENERATION NOTICE (New First Page) ---
         if (generatedSections.length > 0) {
             htmlContent += `
             <div class="ai-notice">
-                <h1 style="text-align: center; color: #0056b3;">⚠️ Project Assistant Report</h1>
+                <h1 style="text-align: center; color: #0056b3;">Project Assistant Report</h1>
                 <p><strong>Heads up!</strong> Some required academic sections were missing from your project. </p>
                 <p>To ensure your document meets structural requirements, our AI has automatically analyzed your project context and generated drafts for the following missing sections:</p>
                 <ul>
@@ -412,8 +417,8 @@ export async function GET(req: Request) {
             <br />`;
 
         if (project.citations && project.citations.length > 0) {
-            const sortedCitations = project.citations.sort((a: any, b: any) => a.formatted.localeCompare(b.formatted));
-            sortedCitations.forEach((cit: any) => {
+            const sortedCitations = [...project.citations].sort((a, b) => (a.formatted || "").localeCompare(b.formatted || ""));
+            sortedCitations.forEach((cit) => {
                 htmlContent += `<p style="text-indent: -0.5in; margin-left: 0.5in; margin-bottom: 1em;">${cit.formatted}</p>`;
             });
         } else {
@@ -432,7 +437,31 @@ export async function GET(req: Request) {
 
         htmlContent += `</body></html>`;
 
-        const fileBuffer = await HTMLtoDOCX(htmlContent, null, {
+        // --- FINAL SANITATION FOR DOCX COMPATIBILITY ---
+        const sanitizedHtml = htmlContent
+            // 1. Expand 3-digit hex colors (#FFF -> #FFFFFF)
+            .replace(/#([0-9a-fA-F])([0-9a-fA-F])([0-9a-fA-F])(?![0-9a-fA-F])/g, '#$1$1$2$2$3$3')
+            // 2. Remove Alpha channel from 8-digit hex (#RRGGBAA -> #RRGGBB)
+            .replace(/#([0-9a-fA-F]{6})([0-9a-fA-F]{2})\b/g, '#$1')
+            // 3. Convert all common color names to Hex to avoid library parsing gaps
+            .replace(/color:\s*indigo/gi, 'color: #4f46e5')
+            .replace(/color:\s*white/gi, 'color: #ffffff')
+            .replace(/color:\s*black/gi, 'color: #000000')
+            // 4. Force strip ALL background-colors from inline elements (Major crash source)
+            .replace(/<(span|a|strong|em|i|b)[^>]*style="[^"]*background-color:[^"]*"[^>]*>/gi, (m) => m.replace(/background-color:[^;"]*;?/gi, ''))
+            // 5. Remove all RGB/RGBA/Variable/Important/Dynamic CSS
+            .replace(/rgba?\([^)]+\)/gi, '#000000')
+            .replace(/var\(--[^)]+\)/gi, '#000000')
+            .replace(/!important/gi, '')
+            .replace(/style="[^"]*(inherit|transparent|initial|none|unset)[^"]*"/gi, '')
+            // 6. Convert PX to PT for library normalization
+            .replace(/(\d+)px/g, (m, p1) => `${Math.round(parseInt(p1) * 0.75)}pt`)
+            // 7. Fix standard tags
+            .replace(/<br\s*\/?>/g, '<br />')
+            .replace(/<hr\s*\/?>/g, '<div style="border-top: 1pt solid #cccccc; margin: 10pt 0;"></div>')
+            .trim();
+
+        const fileBuffer = await HTMLtoDOCX(sanitizedHtml, null, {
             table: { row: { cantSplit: true } },
             footer: true,
             pageNumber: true,

@@ -15,7 +15,8 @@ import {
     LogOut,
     Users,
     CheckSquare,
-    LayoutDashboard
+    LayoutDashboard,
+    ChevronDown
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -23,18 +24,102 @@ interface NavItem {
     href: string;
     icon: React.ElementType;
     label: string;
+    subItems?: { href: string; label: string }[];
 }
 
 const studentItems: NavItem[] = [
     { href: "/student/dashboard", icon: LayoutDashboard, label: "Overview" },
     { href: "/student/chapter-writer", icon: PenTool, label: "Drafting Room" },
     { href: "/student/questionnaire", icon: MessageSquare, label: "Interview Bot" },
+    {
+        href: "/student/research",
+        icon: Users,
+        label: "Research Upload",
+        subItems: [
+            { href: "/student/research/science", label: "Science" },
+            { href: "/student/research/engineering", label: "Engineering" },
+            { href: "/student/research/professional", label: "Professional Courses" },
+        ]
+    },
 ];
 
 const supervisorItems: NavItem[] = [
     { href: "/supervisor/dashboard", icon: Users, label: "Student Panel" },
     { href: "/supervisor/review", icon: CheckSquare, label: "Review Tasks" },
 ];
+
+const SidebarItem = ({
+    item,
+    pathname,
+    closeSidebar
+}: {
+    item: NavItem;
+    pathname: string;
+    closeSidebar: () => void
+}) => {
+    const isActive = pathname === item.href || (item.href !== "/student" && item.href !== "/supervisor" && pathname.startsWith(item.href));
+    const [isOpen, setIsOpen] = useState(isActive);
+
+    if (item.subItems) {
+        return (
+            <div className="space-y-1">
+                <button
+                    onClick={() => setIsOpen(!isOpen)}
+                    className={cn(
+                        "w-full flex items-center justify-between px-4 py-3.5 text-sm font-bold transition-all rounded-2xl group",
+                        isActive
+                            ? "bg-indigo-600 text-white shadow-xl shadow-indigo-100"
+                            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                    )}
+                >
+                    <div className="flex items-center gap-3">
+                        <item.icon className={cn("h-5 w-5 transition-transform group-hover:scale-110", isActive ? "text-white" : "text-gray-400")} />
+                        {item.label}
+                    </div>
+                    <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", isOpen ? "rotate-180" : "")} />
+                </button>
+                {isOpen && (
+                    <div className="ml-4 pl-4 border-l border-gray-100 space-y-1 mt-1 animate-in slide-in-from-top-2 duration-300">
+                        {item.subItems.map((sub) => {
+                            const subActive = pathname === sub.href;
+                            return (
+                                <Link
+                                    key={sub.href}
+                                    href={sub.href}
+                                    onClick={closeSidebar}
+                                    className={cn(
+                                        "block px-4 py-2 text-xs font-bold transition-all rounded-xl",
+                                        subActive
+                                            ? "text-indigo-600 bg-indigo-50"
+                                            : "text-gray-400 hover:text-gray-900 hover:bg-gray-50"
+                                    )}
+                                >
+                                    {sub.label}
+                                </Link>
+                            );
+                        })}
+                    </div>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <Link
+            href={item.href}
+            onClick={closeSidebar}
+            className={cn(
+                "flex items-center gap-3 px-4 py-3.5 text-sm font-bold transition-all rounded-2xl group",
+                isActive
+                    ? "bg-indigo-600 text-white shadow-xl shadow-indigo-100"
+                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+            )}
+        >
+            <item.icon className={cn("h-5 w-5 transition-transform group-hover:scale-110", isActive ? "text-white" : "text-gray-400")} />
+            {item.label}
+        </Link>
+    );
+};
 
 const SidebarContent = ({
     activeItems,
@@ -68,27 +153,16 @@ const SidebarContent = ({
             </Link>
         </div>
 
-        <nav className="flex-1 px-4 space-y-2">
+        <nav className="flex-1 px-4 space-y-2 overflow-y-auto pb-8">
             <p className="px-4 text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4">Main Menu</p>
-            {activeItems.map((item) => {
-                const isActive = pathname === item.href || (item.href !== "/student" && item.href !== "/supervisor" && pathname.startsWith(item.href));
-                return (
-                    <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={closeSidebar}
-                        className={cn(
-                            "flex items-center gap-3 px-4 py-3.5 text-sm font-bold transition-all rounded-2xl group",
-                            isActive
-                                ? "bg-indigo-600 text-white shadow-xl shadow-indigo-100 translate-x-1"
-                                : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
-                        )}
-                    >
-                        <item.icon className={cn("h-5 w-5 transition-transform group-hover:scale-110", isActive ? "text-white" : "text-gray-400")} />
-                        {item.label}
-                    </Link>
-                );
-            })}
+            {activeItems.map((item) => (
+                <SidebarItem
+                    key={item.href}
+                    item={item}
+                    pathname={pathname}
+                    closeSidebar={closeSidebar}
+                />
+            ))}
         </nav>
 
         <div className="p-6 mt-auto">

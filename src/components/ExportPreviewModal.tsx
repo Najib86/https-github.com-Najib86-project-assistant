@@ -52,7 +52,47 @@ export default function ExportPreviewModal({ project, isOpen, onClose }: Props) 
     };
 
     const handlePrint = () => {
-        window.print();
+        const printContent = document.querySelector(".printable")?.innerHTML;
+        const printWindow = window.open("", "_blank");
+        if (printWindow) {
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>${project.title}</title>
+                        <style>
+                            @page { margin: 2.54cm; }
+                            body { 
+                                font-family: 'Times New Roman', serif; 
+                                font-size: 12pt; 
+                                line-height: 1.5; 
+                                color: black;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            h1 { text-align: center; text-transform: uppercase; font-size: 16pt; margin-bottom: 2em; }
+                            h2 { font-size: 14pt; margin-top: 2em; border-bottom: 2px solid #000; padding-bottom: 0.5em; text-transform: uppercase; }
+                            h3 { font-size: 12pt; margin-top: 1.5em; }
+                            p { margin-bottom: 1em; text-align: justify; }
+                            .toc-entry { display: flex; justify-content: space-between; margin-bottom: 0.5em; }
+                            hr { border: none; border-top: 1px solid #ccc; margin: 2em 0; }
+                            @media print {
+                                .no-print { display: none; }
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${printContent}
+                        <script>
+                            window.onload = () => {
+                                window.print();
+                                window.onafterprint = () => window.close();
+                            };
+                        </script>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
     };
 
     return (
@@ -195,12 +235,6 @@ export default function ExportPreviewModal({ project, isOpen, onClose }: Props) 
                 </div>
             </div>
 
-            <style jsx>{`
-                @media print {
-                    .fixed, .relative:not(.printable) { display: none !important; }
-                    .printable { display: block !important; position: static !important; width: 100% !important; margin: 0 !important; padding: 0 !important; border: none !important; shadow: none !important; }
-                }
-            `}</style>
         </div>
     );
 }

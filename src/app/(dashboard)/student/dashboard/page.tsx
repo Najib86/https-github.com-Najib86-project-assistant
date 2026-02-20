@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { PlusCircle, Loader2, X, ChevronRight, ChevronLeft, CheckCircle2 } from "lucide-react"
+import { PlusCircle, Loader2, X, ChevronRight, ChevronLeft, CheckCircle2, Upload, FileCode, ImageIcon } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
@@ -25,6 +25,7 @@ export default function StudentDashboard() {
     const router = useRouter();
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
+    const [researchSubmissions, setResearchSubmissions] = useState<any[]>([]);
     const [showCreateModal, setShowCreateModal] = useState(false);
 
     // Multi-step form state
@@ -101,11 +102,39 @@ export default function StudentDashboard() {
         }
     }, [studentId]);
 
+    const fetchResearch = useCallback(async () => {
+        if (!studentId) return;
+        try {
+            const res = await fetch('/api/research/user');
+            if (res.ok) {
+                const data = await res.json();
+                setResearchSubmissions(data);
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    }, [studentId]);
+
     useEffect(() => {
         if (studentId) {
             fetchProjects();
+            fetchResearch();
         }
-    }, [studentId, fetchProjects]);
+    }, [studentId, fetchProjects, fetchResearch]);
+
+    const handleDeleteResearch = async (id: number) => {
+        if (!confirm("Are you sure you want to delete this research submission?")) return;
+        try {
+            const res = await fetch(`/api/research/${id}`, { method: "DELETE" });
+            if (res.ok) {
+                fetchResearch();
+            } else {
+                alert("Failed to delete research submission");
+            }
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     const handleCreateProject = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -368,6 +397,93 @@ export default function StudentDashboard() {
                         </div>
                     ))
                     }
+                </div>
+            )}
+
+            {/* Research Submissions Section */}
+            {researchSubmissions.length > 0 && (
+                <div className="space-y-6 md:space-y-8 mt-12 animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                            <h2 className="text-2xl font-bold text-gray-900">Research Uploads</h2>
+                            <p className="text-sm text-gray-500 mt-1">Materials and datasets you&apos;ve submitted.</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {researchSubmissions.map((sub) => (
+                            <div key={sub.id} className="bg-white rounded-[2rem] border border-gray-100 p-6 hover:shadow-2xl hover:shadow-indigo-100/50 transition-all group relative overflow-hidden">
+                                <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-50/50 rounded-full -mr-12 -mt-12 blur-2xl group-hover:bg-indigo-100/50 transition-colors" />
+
+                                <div className="flex justify-between items-start mb-4 relative z-10">
+                                    <span className={cn(
+                                        "px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-widest border",
+                                        sub.category === 'science' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                                            sub.category === 'engineering' ? 'bg-orange-50 text-orange-600 border-orange-100' :
+                                                'bg-purple-50 text-purple-600 border-purple-100'
+                                    )}>
+                                        {sub.category}
+                                    </span>
+                                    <span className={cn(
+                                        "px-3 py-1 text-[10px] font-black rounded-full uppercase tracking-widest border",
+                                        sub.status === 'submitted' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-gray-50 text-gray-400 border-gray-100'
+                                    )}>
+                                        {sub.status}
+                                    </span>
+                                </div>
+
+                                <h3 className="text-lg font-black text-gray-900 mb-2 line-clamp-2 leading-tight group-hover:text-indigo-600 transition-colors">
+                                    {sub.title || sub.project?.title || "Research Submission"}
+                                </h3>
+
+                                <div className="space-y-2 mb-6">
+                                    {sub.courseName && <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{sub.courseName}</p>}
+                                    {sub.project && (
+                                        <div className="flex items-center gap-1.5 bg-indigo-50/50 w-fit px-2 py-0.5 rounded-lg border border-indigo-100/50">
+                                            <div className="h-1.5 w-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                                            <p className="text-[9px] font-black text-indigo-600 uppercase tracking-tighter truncate max-w-[150px]">
+                                                Linked: {sub.project.title}
+                                            </p>
+                                        </div>
+                                    )}
+                                    <p className="text-[11px] text-gray-500 line-clamp-2 italic font-medium">
+                                        {sub.abstract || "No description provided."}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-between pt-4 border-t border-gray-50 mt-auto relative z-10">
+                                    <div className="flex items-center gap-1.5 text-gray-400">
+                                        <Upload className="h-3.5 w-3.5" />
+                                        <span className="text-[10px] font-black uppercase tracking-widest">{sub.files.length} Files</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        {sub.files.map((file: any, i: number) => (
+                                            <a
+                                                key={i}
+                                                href={file.fileUrl}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="h-8 w-8 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center text-indigo-600 hover:bg-indigo-600 hover:text-white transition-all shadow-sm hover:shadow-indigo-100 group/file"
+                                                title={file.fileName}
+                                            >
+                                                {file.fileType.startsWith('image/') ? <ImageIcon className="h-4 w-4" /> : <FileCode className="h-4 w-4" />}
+                                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover/file:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50">
+                                                    {file.fileName}
+                                                </div>
+                                            </a>
+                                        ))}
+                                        <button
+                                            onClick={() => handleDeleteResearch(sub.id)}
+                                            className="h-8 w-8 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-red-500 hover:bg-red-500 hover:text-white transition-all shadow-sm hover:shadow-red-100 ml-2"
+                                            title="Delete Submission"
+                                        >
+                                            <X className="h-4 w-4" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             )}
 
