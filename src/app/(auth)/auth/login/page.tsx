@@ -47,9 +47,8 @@ function LoginForm() {
         const errorType = searchParams.get("error");
         if (errorType === "unauthorized") {
             setError("You do not have permission to view that page. Please log in with the correct account.");
-        } else {
-            checkSession();
         }
+        checkSession();
     }, [searchParams, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -99,11 +98,11 @@ function LoginForm() {
     };
 
     const handleGoogleSignIn = () => {
-        signIn("google", { callbackUrl: callbackUrl || "/student/dashboard" });
+        signIn("google", { callbackUrl: callbackUrl || window.location.origin + "/auth/login?googleCallback=true" });
     };
 
     return (
-        <div className="flex flex-col items-center space-y-6">
+        <div className="w-full max-w-lg mx-auto my-16 bg-white p-8 md:p-12 rounded-3xl shadow-2xl shadow-indigo-100 flex flex-col items-center space-y-6 border border-indigo-50">
             <div className="flex flex-col items-center gap-4 text-center">
                 <Link href="/" className="transition-transform hover:scale-110">
                     <Image

@@ -47,10 +47,8 @@ function LoginForm() {
         const errorType = searchParams.get("error");
         if (errorType === "unauthorized") {
             setError("You do not have permission to view that page. Please log in with the correct account.");
-        } else {
-            // Only auto-redirect if there isn't an explicit error
-            checkSession();
         }
+        checkSession();
     }, [searchParams, router]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,9 +117,7 @@ function LoginForm() {
     };
 
     const handleGoogleSignIn = () => {
-        // For Google, we let NextAuth handle it. 
-        // Ideally we would want a custom callback to handle roles, but for now we rely on user manually navigating if needed
-        const callbackUrl = searchParams.get("callbackUrl") || "/student/dashboard";
+        const callbackUrl = searchParams.get("callbackUrl") || window.location.origin + "/login?googleCallback=true";
         signIn("google", { callbackUrl });
     };
 
