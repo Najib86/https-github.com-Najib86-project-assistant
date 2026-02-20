@@ -106,15 +106,16 @@ export default function PricingSection() {
               Partner & Reseller
             </h3>
             <div className="flex items-baseline gap-1 mb-1">
-              <h4 className="text-4xl font-black tracking-tight text-gray-900">₦20,000</h4>
+              <h4 className="text-4xl font-black tracking-tight text-gray-900">₦35,000</h4>
             </div>
-            <p className="text-xs font-bold text-orange-600 uppercase tracking-wider mb-4">
-              20 Activation Slots
+            <p className="text-[10px] xl:text-xs font-bold text-orange-600 uppercase tracking-wider mb-4 leading-tight">
+              10 Undergraduate
+              <br className="hidden xl:block" /> OR 5 Postgraduate
             </p>
 
             <ul className="space-y-4 text-left my-8">
-              <Feature text="₦1,000 per Slot (Wholesale)" />
-              <Feature text="Sell at ₦5k–₦10k Retail" />
+              <Feature text="Flexible UG/PG Selection" />
+              <Feature text="Sell at Retail Price" />
               <Feature text="Admin Dashboard Access" />
               <Feature text="Unique Activation Codes" />
               <Feature text="High Profit Margin" />
