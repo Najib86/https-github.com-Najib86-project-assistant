@@ -15,10 +15,10 @@ export async function GET(
                 project: {
                     include: {
                         student: {
-                            select: { 
+                            select: {
                                 id: true,
-                                name: true, 
-                                email: true 
+                                name: true,
+                                email: true
                             }
                         }
                     }
@@ -78,7 +78,7 @@ export async function POST(
         // Verify user exists and has supervisor role
         const user = await prisma.user.findUnique({
             where: { id: parseInt(userId) },
-            select: { id: true, role: true, name: true }
+            select: { id: true, role: true, name: true, email: true }
         });
 
         if (!user) {
@@ -87,6 +87,13 @@ export async function POST(
 
         if (user.role !== "supervisor") {
             return NextResponse.json({ error: "Only supervisors can accept this invite" }, { status: 403 });
+        }
+
+        // If invite is targeted to an email, verify it matches
+        if (invite.email && invite.email.toLowerCase() !== user.email.toLowerCase()) {
+            return NextResponse.json({
+                error: `This invitation is reserved for ${invite.email}. Please log in with that account.`
+            }, { status: 403 });
         }
 
         // Check if project already has a supervisor
@@ -121,9 +128,9 @@ export async function POST(
             })
         ]);
 
-        return NextResponse.json({ 
+        return NextResponse.json({
             success: true,
-            projectId: invite.projectId 
+            projectId: invite.projectId
         });
 
     } catch (error) {

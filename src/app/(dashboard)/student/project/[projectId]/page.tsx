@@ -69,28 +69,45 @@ export default function StudentProjectDetails() {
 
     const [currentUser, setCurrentUser] = useState<User & { role: string } | null>(null);
 
-    // Invite System
+    const [inviteEmail, setInviteEmail] = useState("");
+    const [supervisorCode, setSupervisorCode] = useState("");
+    const [inviteMethod, setInviteMethod] = useState<"email" | "code" | "link">("link");
+    const [inviteType, setInviteType] = useState<"link" | "direct">("link");
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [inviteLink, setInviteLink] = useState("");
     const [creatingInvite, setCreatingInvite] = useState(false);
     const [showActivity, setShowActivity] = useState(false);
     const [showExportPreview, setShowExportPreview] = useState(false);
 
-    const handleCreateInvite = async () => {
+    const handleCreateInvite = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         setCreatingInvite(true);
         try {
+            const body: { projectId: string | number, userId?: number, email?: string, supervisorCode?: string } = { projectId: projectId as string, userId: currentUser?.id };
+            if (inviteMethod === "email" && inviteEmail) body.email = inviteEmail;
+            if (inviteMethod === "code" && supervisorCode) body.supervisorCode = supervisorCode;
+
             const res = await fetch("/api/supervisor/invite", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ projectId }),
+                body: JSON.stringify(body),
             });
             const data = await res.json();
             if (res.ok) {
-                const url = `${window.location.origin}/invite/${data.token}`;
-                setInviteLink(url);
-                setShowInviteModal(true);
+                if (data.type === "connected") {
+                    alert(data.message || "Supervisor connected successfully!");
+                    fetchProject(); // Refresh the project data to show the new supervisor
+                    setShowInviteModal(false);
+                    setInviteEmail("");
+                    setSupervisorCode("");
+                } else {
+                    const url = `${window.location.origin}/invite/${data.token}`;
+                    setInviteLink(url);
+                    setInviteType(inviteMethod !== "link" ? "direct" : "link");
+                    setShowInviteModal(true);
+                }
             } else {
-                alert("Failed to create invite");
+                alert(data.error || "Failed to create invite");
             }
         } catch (e) {
             console.error(e);
@@ -98,6 +115,17 @@ export default function StudentProjectDetails() {
         } finally {
             setCreatingInvite(false);
         }
+    };
+
+    const shareOnWhatsApp = () => {
+        const text = `Hello Prof., kindly use this link to supervise my research project on ProjectAssistantAI: ${inviteLink}`;
+        window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    };
+
+    const shareViaEmail = () => {
+        const subject = `Research Project Supervision Invitation`;
+        const body = `Hello, \n\nI would like to invite you to supervise my research project titled "${project?.title}" on ProjectAssistantAI. \n\nPlease use the link below to join the project: \n${inviteLink} \n\nBest regards, \n${currentUser?.name}`;
+        window.location.href = `mailto:${inviteEmail || ''}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     };
 
     useEffect(() => {
@@ -260,15 +288,16 @@ export default function StudentProjectDetails() {
                             Team
                         </a>
                     </Button>
-                    <Button
-                        variant="outline"
-                        onClick={handleCreateInvite}
-                        disabled={creatingInvite}
-                        className="flex-1 md:flex-none w-full md:w-auto rounded-xl shadow-sm border-gray-200 font-bold h-11 text-sm text-indigo-600 hover:bg-indigo-50"
-                    >
-                        {creatingInvite ? <Loader2 className="animate-spin h-4 w-4 mr-2" /> : <Users className="h-4 w-4 mr-2" />}
-                        Invite Supervisor
-                    </Button>
+                    {currentUser?.id === project.studentId && !project.supervisor && (
+                        <Button
+                            variant="outline"
+                            onClick={() => setShowInviteModal(true)}
+                            className="flex-1 md:flex-none w-full md:w-auto rounded-xl shadow-sm border-gray-200 font-bold h-11 text-sm text-indigo-600 hover:bg-indigo-50"
+                        >
+                            <Users className="h-4 w-4 mr-2" />
+                            Invite Supervisor
+                        </Button>
+                    )}
                     <Button
                         variant="outline"
                         onClick={() => setShowExportPreview(true)}
@@ -287,7 +316,7 @@ export default function StudentProjectDetails() {
                 onClose={() => setShowExportPreview(false)}
             />
 
-            {/* Invite Modal (same as before) */}
+            {/* Invite Modal */}
             {showInviteModal && (
                 <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-200">
                     <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 animate-in scale-95 duration-200">
@@ -297,29 +326,153 @@ export default function StudentProjectDetails() {
                                 <X className="h-5 w-5" />
                             </Button>
                         </div>
-                        <p className="text-sm text-gray-500 mb-4">
-                            Share this link with your supervisor. They can join your project instantly without filling out paperwork.
-                        </p>
-                        <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200 mb-6">
-                            <input
-                                className="flex-1 bg-transparent text-sm font-medium text-gray-600 outline-none truncate"
-                                readOnly
-                                value={inviteLink}
-                            />
-                            <Button
-                                size="sm"
-                                onClick={() => {
-                                    navigator.clipboard.writeText(inviteLink);
-                                    alert("Copied to clipboard!");
-                                }}
-                                className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg"
-                            >
-                                Copy
-                            </Button>
-                        </div>
-                        <Button onClick={() => setShowInviteModal(false)} className="w-full font-bold rounded-xl h-11">
-                            Done
-                        </Button>
+
+                        {!inviteLink ? (
+                            <div className="space-y-4">
+                                <div className="flex p-1 bg-gray-100 rounded-xl">
+                                    <button
+                                        onClick={() => setInviteMethod("email")}
+                                        className={cn(
+                                            "flex-1 py-2 text-xs font-bold rounded-lg transition-all",
+                                            inviteMethod === "email" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                        )}
+                                    >
+                                        Direct Email
+                                    </button>
+                                    <button
+                                        onClick={() => setInviteMethod("code")}
+                                        className={cn(
+                                            "flex-1 py-2 text-xs font-bold rounded-lg transition-all",
+                                            inviteMethod === "code" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                        )}
+                                    >
+                                        Use Code
+                                    </button>
+                                    <button
+                                        onClick={() => setInviteMethod("link")}
+                                        className={cn(
+                                            "flex-1 py-2 text-xs font-bold rounded-lg transition-all",
+                                            inviteMethod === "link" ? "bg-white text-indigo-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                                        )}
+                                    >
+                                        General Link
+                                    </button>
+                                </div>
+
+                                {inviteMethod === "email" && (
+                                    <div className="space-y-2 py-2 animate-in fade-in slide-in-from-left-2 duration-200">
+                                        <p className="text-sm text-gray-500">
+                                            Invite a registered supervisor directly via their email.
+                                        </p>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Supervisor Email</label>
+                                            <input
+                                                type="email"
+                                                placeholder="supervisor@university.edu.ng"
+                                                className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all"
+                                                value={inviteEmail}
+                                                onChange={(e) => setInviteEmail(e.target.value)}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {inviteMethod === "code" && (
+                                    <div className="space-y-2 py-2 animate-in fade-in slide-in-from-right-2 duration-200">
+                                        <p className="text-sm text-gray-500">
+                                            Enter the 6-character invite code provided by your supervisor.
+                                        </p>
+                                        <div className="space-y-2">
+                                            <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Invite Code</label>
+                                            <input
+                                                type="text"
+                                                placeholder="E.g. A1B2C3"
+                                                maxLength={6}
+                                                className="w-full p-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 outline-none text-sm transition-all font-mono tracking-widest uppercase text-center"
+                                                value={supervisorCode}
+                                                onChange={(e) => setSupervisorCode(e.target.value.toUpperCase())}
+                                            />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {inviteMethod === "link" && (
+                                    <div className="py-2 animate-in fade-in duration-200">
+                                        <p className="text-sm text-gray-500">
+                                            Generate a shareable link that any supervisor can use to join your project.
+                                        </p>
+                                    </div>
+                                )}
+
+                                <Button
+                                    onClick={() => handleCreateInvite()}
+                                    className="w-full font-bold rounded-xl h-12 bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-100"
+                                    disabled={creatingInvite || (inviteMethod === "email" && !inviteEmail) || (inviteMethod === "code" && !supervisorCode)}
+                                >
+                                    {creatingInvite ? <Loader2 className="animate-spin h-5 w-5" /> : (
+                                        inviteMethod === "email" ? "Send Invitation" :
+                                            inviteMethod === "code" ? "Submit Invite Code" : "Create Shareable Link"
+                                    )}
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                <div className="p-4 bg-green-50 border border-green-100 rounded-xl">
+                                    <p className="text-sm text-green-800 font-medium">
+                                        {inviteType === "direct" ? `Invitation created for ${inviteEmail}!` : "Invitation link generated successfully!"}
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold text-gray-400 uppercase tracking-widest">Invitation Link</label>
+                                    <div className="flex items-center gap-2 bg-gray-50 p-3 rounded-xl border border-gray-200">
+                                        <input
+                                            className="flex-1 bg-transparent text-sm font-medium text-gray-600 outline-none truncate"
+                                            readOnly
+                                            value={inviteLink}
+                                        />
+                                        <Button
+                                            size="sm"
+                                            onClick={() => {
+                                                navigator.clipboard.writeText(inviteLink);
+                                                alert("Copied to clipboard!");
+                                            }}
+                                            className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg"
+                                        >
+                                            Copy
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Button
+                                        onClick={shareOnWhatsApp}
+                                        className="rounded-xl h-11 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold"
+                                    >
+                                        WhatsApp
+                                    </Button>
+                                    <Button
+                                        onClick={shareViaEmail}
+                                        variant="outline"
+                                        className="rounded-xl h-11 border-gray-200 font-bold"
+                                    >
+                                        Email Link
+                                    </Button>
+                                </div>
+
+                                <Button
+                                    variant="ghost"
+                                    onClick={() => {
+                                        setInviteLink("");
+                                        setInviteEmail("");
+                                        setShowInviteModal(false);
+                                    }}
+                                    className="w-full font-bold text-gray-400 hover:text-gray-600"
+                                >
+                                    Close
+                                </Button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

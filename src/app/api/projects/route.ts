@@ -28,19 +28,26 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Database connection failed", details: errorMessage }, { status: 503 });
         }
 
-        const where: { studentId?: number; supervisorId?: number } = {};
-        if (studentIdStr) {
-            const sid = parseInt(studentIdStr);
-            if (!isNaN(sid)) where.studentId = sid;
-        }
-        if (supervisorIdStr) {
-            const svid = parseInt(supervisorIdStr);
-            if (!isNaN(svid)) where.supervisorId = svid;
-        }
+        const sid = studentIdStr ? parseInt(studentIdStr) : null;
+        const svid = supervisorIdStr ? parseInt(supervisorIdStr) : null;
 
         const projects = await prisma.project.findMany({
-            where,
-            include: { chapters: true },
+            where: {
+                OR: [
+                    sid ? { studentId: sid } : {},
+                    sid ? { members: { some: { studentId: sid } } } : {},
+                    svid ? { supervisorId: svid } : {}
+                ].filter(condition => Object.keys(condition).length > 0)
+            },
+            include: {
+                chapters: true,
+                student: {
+                    select: {
+                        name: true,
+                        email: true
+                    }
+                }
+            },
             orderBy: { updatedAt: 'desc' }
         });
 

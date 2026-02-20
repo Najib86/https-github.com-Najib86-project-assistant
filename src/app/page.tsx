@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, MessageSquare, CheckCircle } from "lucide-react";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { Navbar } from "@/components/Navbar";
+import PricingSection from "@/components/PricingSection";
 
 export default function Home() {
   return (
@@ -200,7 +201,7 @@ export default function Home() {
             </div>
           </div>
         </section>
-
+        <PricingSection />
       </main>
     </div >
   );

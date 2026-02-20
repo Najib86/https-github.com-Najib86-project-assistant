@@ -70,7 +70,7 @@ export default function SupervisorProjectDetails() {
             const res = await fetch(`/api/projects/${projectId}/members`);
             if (res.ok) {
                 const data = await res.json();
-                setMembers(data);
+                setMembers(Array.isArray(data.members) ? data.members : Array.isArray(data) ? data : []);
             }
         } catch (error) {
             console.error(error);
@@ -137,12 +137,12 @@ export default function SupervisorProjectDetails() {
                     <div className="flex items-center justify-between">
                         <h2 className="text-xl font-bold text-gray-900">Chapters Review</h2>
                         <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">
-                            {project.chapters.filter(c => c.status === 'Submitted').length} Pending Review
+                            {(project.chapters || []).filter(c => c.status === 'Submitted').length} Pending Review
                         </span>
                     </div>
 
                     <div className="grid gap-4">
-                        {project.chapters.sort((a, b) => a.chapterNumber - b.chapterNumber).map((chapter) => (
+                        {(project.chapters || []).sort((a, b) => a.chapterNumber - b.chapterNumber).map((chapter) => (
                             <div key={chapter.chapter_id} className="group bg-white border border-gray-100 rounded-xl p-5 hover:shadow-md transition-all duration-300 flex items-center justify-between">
                                 <Link href={`/supervisor/project/${project.project_id}/chapter/${chapter.chapter_id}`} className="flex-1 flex items-center gap-4">
                                     <div className={cn(

@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
 });
 
 // Verify transporter configuration
-transporter.verify((error, success) => {
+transporter.verify((error) => {
     if (error) {
         console.error('Email transporter error:', error);
     } else {
@@ -396,6 +396,89 @@ export async function sendMemberAddedEmail({
     return sendEmail({
         to,
         subject: `You've been added to "${projectTitle}"`,
+        html,
+        text,
+    });
+}
+
+export function getSupervisorAssignedEmailTemplate({
+    supervisorName,
+    projectTitle,
+    projectLevel,
+    projectType,
+    projectUrl,
+}: {
+    supervisorName: string;
+    projectTitle: string;
+    projectLevel: string;
+    projectType: string;
+    projectUrl: string;
+}) {
+    const html = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>New Project Assignment</title>
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f8fafc;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color: #f8fafc; padding: 40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 16px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05); overflow: hidden;">
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 40px; text-align: center;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 800;">Project Assigned</h1>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 40px;">
+                            <p style="font-size: 16px; color: #1e293b;">Hello <strong>${supervisorName}</strong>,</p>
+                            <p style="font-size: 16px; line-height: 1.6; color: #475569;">
+                                You have been officially assigned as the supervisor for a new research project on Project Assistant.
+                            </p>
+                            
+                            <div style="margin: 30px 0; padding: 24px; background-color: #f1f5f9; border-radius: 12px; border-left: 4px solid #4f46e5;">
+                                <p style="margin: 0 0 8px; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Project Title</p>
+                                <p style="margin: 0 0 16px; font-size: 18px; font-weight: 700; color: #0f172a;">${projectTitle}</p>
+                                <div style="display: flex; gap: 12px;">
+                                    <p style="margin: 0; font-size: 13px; color: #64748b;"><strong>Level:</strong> ${projectLevel}</p>
+                                    <p style="margin: 0; font-size: 13px; color: #64748b; margin-left: 20px;"><strong>Type:</strong> ${projectType}</p>
+                                </div>
+                            </div>
+
+                            <div style="text-align: center; margin-top: 30px;">
+                                <a href="${projectUrl}" style="display: inline-block; background-color: #4f46e5; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: 600;">Access Project Workspace</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 20px; text-align: center; background-color: #f8fafc; color: #94a3b8; font-size: 12px;">
+                            &copy; ${new Date().getFullYear()} Project Assistant. All rights reserved.
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
+    `;
+    return { html, text: `Hello ${supervisorName}, you have been assigned as supervisor for "${projectTitle}". View it here: ${projectUrl}` };
+}
+
+export async function sendSupervisorAssignedEmail(params: {
+    to: string;
+    supervisorName: string;
+    projectTitle: string;
+    projectLevel: string;
+    projectType: string;
+    projectUrl: string;
+}) {
+    const { html, text } = getSupervisorAssignedEmailTemplate(params);
+    return sendEmail({
+        to: params.to,
+        subject: `New Project Assigned: ${params.projectTitle}`,
         html,
         text,
     });

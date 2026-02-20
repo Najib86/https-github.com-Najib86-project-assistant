@@ -63,7 +63,7 @@ export default function SupervisorDashboard() {
             const res = await fetch(`/api/projects?supervisorId=${supervisorId}`);
             if (res.ok) {
                 const data = await res.json();
-                setProjects(data);
+                setProjects(Array.isArray(data) ? data : data.projects ? data.projects : []);
             }
         } catch (error) {
             console.error(error);
@@ -175,7 +175,7 @@ export default function SupervisorDashboard() {
                     <div>
                         <p className="text-sm font-medium text-gray-500">Pending Reviews</p>
                         <p className="text-2xl font-bold text-gray-900">
-                            {projects.reduce((acc, p) => acc + p.chapters.filter(c => c.status === 'Submitted').length, 0)}
+                            {projects.reduce((acc, p) => acc + (p.chapters || []).filter(c => c.status === 'Submitted').length, 0)}
                         </p>
                     </div>
                 </div>
@@ -230,7 +230,7 @@ export default function SupervisorDashboard() {
                                     {/* Chapter Progress Indicators */}
                                     <div className="grid grid-cols-5 gap-2">
                                         {[1, 2, 3, 4, 5].map((num) => {
-                                            const chapter = project.chapters.find(c => c.chapterNumber === num);
+                                            const chapter = (project.chapters || []).find(c => c.chapterNumber === num);
                                             const status = chapter?.status || 'Not Started';
                                             // Mock data fix: Ensure chapters exist
                                             return (
