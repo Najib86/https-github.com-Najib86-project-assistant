@@ -279,3 +279,16 @@ model ProjectActivity {
   project Project @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
+
+model Template {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String?
+  type        String   // project / receipt
+  content     Json     // Stores the structure (e.g., chapter titles, subsections)
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("templates")
+}
