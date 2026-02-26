@@ -9,53 +9,53 @@ datasource db {
 }
 
 model User {
-  id                  Int                @id @default(autoincrement())
+  id                  Int       @id @default(autoincrement())
   name                String
-  email               String             @unique
-  password            String?            @map("password_hash")
-  role                String             @default("student")
+  email               String    @unique
+  password            String?   @map("password_hash")
+  role                String    @default("student")
   department          String?
-  provider            String?            @default("credentials")
-  email_verified      Boolean            @default(false) @map("email_verified")
-  failedLoginAttempts Int                @default(0)
+  provider            String?   @default("credentials")
+  email_verified      Boolean   @default(false) @map("email_verified")
+  failedLoginAttempts Int       @default(0)
   lockUntil           DateTime?
-  createdAt           DateTime           @default(now())
-  
-  comments                Comment[]
-  exports                 Export[]
-  projects                Project[]          @relation("StudentProjects")
-  supervises              Project[]          @relation("SupervisorProjects")
-  projectMembers          ProjectMember[]
-  acceptedInvites         SupervisorInvite[] @relation("AcceptedInvites")
-  sentInvites             MemberInvite[]     @relation("InvitedMembers")
-  messages                Message[]
-  activities              ProjectActivity[]
-  verificationTokens      VerificationToken[]
-  passwordResetTokens     PasswordResetToken[]
-  inviteCode              String?            @unique
-  researchSubmissions     ResearchSubmission[]
+  createdAt           DateTime  @default(now())
+
+  comments            Comment[]
+  exports             Export[]
+  projects            Project[]            @relation("StudentProjects")
+  supervises          Project[]            @relation("SupervisorProjects")
+  projectMembers      ProjectMember[]
+  acceptedInvites     SupervisorInvite[]   @relation("AcceptedInvites")
+  sentInvites         MemberInvite[]       @relation("InvitedMembers")
+  messages            Message[]
+  activities          ProjectActivity[]
+  verificationTokens  VerificationToken[]
+  passwordResetTokens PasswordResetToken[]
+  inviteCode          String?              @unique
+  researchSubmissions ResearchSubmission[]
 
   @@map("users")
 }
 
 model ResearchSubmission {
-  id            Int            @id @default(autoincrement())
-  userId        Int
-  projectId     Int? // Link to a specific project
-  category      String // science / engineering / professional
-  title         String?
-  courseName    String?
-  department    String?
-  supervisor    String
-  researchType  String // Experimental / Survey / Simulation / Field Study
-  abstract      String         @db.Text
-  keywords      String
-  status        String         @default("draft") // draft / submitted
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project       Project?       @relation(fields: [projectId], references: [project_id], onDelete: SetNull)
-  files         ResearchFile[]
+  id           Int            @id @default(autoincrement())
+  userId       Int
+  projectId    Int? // Link to a specific project
+  category     String // science / engineering / professional
+  title        String?
+  courseName   String?
+  department   String?
+  supervisor   String
+  researchType String // Experimental / Survey / Simulation / Field Study
+  abstract     String         @db.Text
+  keywords     String
+  status       String         @default("draft") // draft / submitted
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project      Project?       @relation(fields: [projectId], references: [project_id], onDelete: SetNull)
+  files        ResearchFile[]
 
   @@map("research_submissions")
 }
@@ -81,7 +81,7 @@ model VerificationToken {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@index([token])
 }
@@ -94,7 +94,7 @@ model PasswordResetToken {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@index([userId])
   @@index([token])
 }
@@ -110,40 +110,40 @@ model SupervisorInvite {
   acceptedAt   DateTime?
   status       String    @default("pending")
 
-  project      Project   @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
-  acceptedBy   User?     @relation("AcceptedInvites", fields: [acceptedById], references: [id])
+  project    Project @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+  acceptedBy User?   @relation("AcceptedInvites", fields: [acceptedById], references: [id])
 
   @@index([token])
   @@index([projectId])
 }
 
 model Project {
-  project_id        Int                @id @default(autoincrement())
-  title             String
-  level             String
-  type              String
-  status            String             @default("Draft")
-  studentId         Int
-  supervisorId      Int?
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  methodology       String?
-  objectives        String?
-  problemStatement  String?
-  referenceText     String?
-  chapters          Chapter[]
-  comments          Comment[]
-  exports           Export[]
-  student           User               @relation("StudentProjects", fields: [studentId], references: [id])
-  supervisor        User?              @relation("SupervisorProjects", fields: [supervisorId], references: [id])
-  questionnaires    Questionnaire[]
-  members           ProjectMember[]
-  citations         Citation[]
-  supervisorInvites SupervisorInvite[]
-  memberInvites     MemberInvite[]     @relation("MemberInvites")
-  messages          Message[]
-  activities        ProjectActivity[]
-  academicMetadata  Json?
+  project_id          Int                  @id @default(autoincrement())
+  title               String
+  level               String
+  type                String
+  status              String               @default("Draft")
+  studentId           Int
+  supervisorId        Int?
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  methodology         String?
+  objectives          String?
+  problemStatement    String?
+  referenceText       String?
+  chapters            Chapter[]
+  comments            Comment[]
+  exports             Export[]
+  student             User                 @relation("StudentProjects", fields: [studentId], references: [id])
+  supervisor          User?                @relation("SupervisorProjects", fields: [supervisorId], references: [id])
+  questionnaires      Questionnaire[]
+  members             ProjectMember[]
+  citations           Citation[]
+  supervisorInvites   SupervisorInvite[]
+  memberInvites       MemberInvite[]       @relation("MemberInvites")
+  messages            Message[]
+  activities          ProjectActivity[]
+  academicMetadata    Json?
   researchSubmissions ResearchSubmission[]
 }
 
@@ -249,8 +249,8 @@ model MemberInvite {
   acceptedAt DateTime?
   status     String    @default("pending")
 
-  project    Project   @relation("MemberInvites", fields: [projectId], references: [project_id], onDelete: Cascade)
-  inviter    User      @relation("InvitedMembers", fields: [invitedBy], references: [id], onDelete: Cascade)
+  project Project @relation("MemberInvites", fields: [projectId], references: [project_id], onDelete: Cascade)
+  inviter User    @relation("InvitedMembers", fields: [invitedBy], references: [id], onDelete: Cascade)
 
   @@index([token])
   @@index([projectId])
@@ -263,9 +263,9 @@ model Message {
   projectId  Int
   senderId   Int
   createdAt  DateTime @default(now())
-  
-  sender     User     @relation(fields: [senderId], references: [id], onDelete: Cascade)
-  project    Project  @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+
+  sender  User    @relation(fields: [senderId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
 }
 
 model ProjectActivity {
@@ -276,6 +276,6 @@ model ProjectActivity {
   details     String?
   createdAt   DateTime @default(now())
 
-  project     Project  @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

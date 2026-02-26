@@ -4,6 +4,8 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles, MessageSquare, CheckCircle } from "lucide-react";
 import { HeroCarousel } from "@/components/HeroCarousel";
 import { Navbar } from "@/components/Navbar";
+import { HowItWorksSection } from "@/components/HowItWorksSection";
+import { AICapabilities } from "@/components/AICapabilities";
 // import PricingSection from "@/components/PricingSection";
 
 export default function Home() {
@@ -151,6 +153,12 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* How It Works Section */}
+        <HowItWorksSection />
+
+        {/* AI Capabilities Section */}
+        <AICapabilities />
 
         {/* Features Section */}
         <section id="features" className="py-16 md:py-28 bg-gray-50/80 backdrop-blur-sm relative border-y border-gray-100/50">

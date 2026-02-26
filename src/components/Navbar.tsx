@@ -29,6 +29,12 @@ export function Navbar() {
                 {/* Desktop Nav */}
                 <nav className="hidden md:flex items-center gap-6">
                     <Link
+                        href="#how-it-works"
+                        className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors"
+                    >
+                        How it Works
+                    </Link>
+                    <Link
                         href="#pricing"
                         className="text-sm font-bold text-gray-500 hover:text-gray-900 transition-colors"
                     >
@@ -59,6 +65,13 @@ export function Navbar() {
             {/* Mobile Menu */}
             {isOpen && (
                 <div className="absolute top-16 left-0 w-full bg-white border-b border-gray-100 p-4 shadow-xl md:hidden flex flex-col gap-4 animate-in slide-in-from-top-5 fade-in duration-200">
+                    <Link
+                        href="#how-it-works"
+                        className="block w-full py-4 px-4 text-center font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl active:bg-gray-100 transition-colors"
+                        onClick={() => setIsOpen(false)}
+                    >
+                        How it Works
+                    </Link>
                     <Link
                         href="#pricing"
                         className="block w-full py-4 px-4 text-center font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-xl active:bg-gray-100 transition-colors"

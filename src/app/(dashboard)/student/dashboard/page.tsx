@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
 import { LoadingLogo } from "@/components/ui/LoadingLogo";
+import universityData from "../../../../../json.json";
 
 interface Project {
     project_id: number;
@@ -63,6 +64,14 @@ export default function StudentDashboard() {
     const [generatingStatus, setGeneratingStatus] = useState("");
     const [studentId, setStudentId] = useState<number | null>(null);
     const [regeneratingId, setRegeneratingId] = useState<number | null>(null);
+
+    const universitiesList = universityData.universities || [];
+    const selectedUniversity = universitiesList.find(u => u.name === formData.institutionName);
+    const facultiesList = selectedUniversity?.academic_offerings?.faculties || [];
+    const selectedFaculty = facultiesList.find(f => f.name === formData.faculty);
+    const departmentsList = selectedFaculty?.departments || [];
+    const selectedDepartment = departmentsList.find(d => d.name === formData.department);
+    const coursesList = selectedDepartment?.courses || [];
 
     useEffect(() => {
         const userStr = localStorage.getItem("user");
@@ -651,45 +660,61 @@ export default function StudentDashboard() {
                                             <div className="space-y-1.5">
                                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Institution Name</label>
                                                 <input
+                                                    list="institutions-list"
                                                     className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
                                                     value={formData.institutionName}
                                                     onChange={(e) => setFormData({ ...formData, institutionName: e.target.value })}
                                                     placeholder="e.g. University of Lagos"
                                                     required
                                                 />
+                                                <datalist id="institutions-list">
+                                                    {universitiesList.map((u, i) => <option key={i} value={u.name} />)}
+                                                </datalist>
                                             </div>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div className="space-y-1.5">
                                                     <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Faculty / School</label>
                                                     <input
+                                                        list="faculties-list"
                                                         className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
                                                         value={formData.faculty}
                                                         onChange={(e) => setFormData({ ...formData, faculty: e.target.value })}
                                                         placeholder="e.g. Faculty of Engineering"
                                                         required
                                                     />
+                                                    <datalist id="faculties-list">
+                                                        {facultiesList.map((f, i) => <option key={i} value={f.name} />)}
+                                                    </datalist>
                                                 </div>
                                                 <div className="space-y-1.5">
                                                     <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Department</label>
                                                     <input
+                                                        list="departments-list"
                                                         className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
                                                         value={formData.department}
                                                         onChange={(e) => setFormData({ ...formData, department: e.target.value })}
                                                         placeholder="e.g. Computer Engineering"
                                                         required
                                                     />
+                                                    <datalist id="departments-list">
+                                                        {departmentsList.map((d, i) => <option key={i} value={d.name} />)}
+                                                    </datalist>
                                                 </div>
                                             </div>
                                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                 <div className="space-y-1.5">
                                                     <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Programme / Degree</label>
                                                     <input
+                                                        list="courses-list"
                                                         className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300"
                                                         value={formData.programme}
                                                         onChange={(e) => setFormData({ ...formData, programme: e.target.value })}
                                                         placeholder="e.g. B.Sc. Computer Science"
                                                         required
                                                     />
+                                                    <datalist id="courses-list">
+                                                        {coursesList.map((c, i) => <option key={i} value={c} />)}
+                                                    </datalist>
                                                 </div>
                                                 <div className="space-y-1.5">
                                                     <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Graduation Year</label>

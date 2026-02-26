@@ -1,0 +1,442 @@
+{
+  "university_system": "Nigeria",
+  "metadata": {
+    "source": "Nigerian Universities Commission (NUC) / Comprehensive University Database",
+    "total_universities": 123,
+    "last_updated": "2024",
+    "data_includes": [
+      "university_details",
+      "academic_structure",
+      "faculties",
+      "departments",
+      "courses_of_study"
+    ],
+    "classification_summary": {
+      "federal_universities": 43,
+      "state_universities": 45,
+      "private_universities": 35
+    }
+  },
+  "universities": [
+    {
+      "name": "Abia State University",
+      "acronym": "ABSU",
+      "type": "state",
+      "motto": "Excellence and Service",
+      "website": "http://abiastateuniversity.edu.ng/",
+      "logo": "http://abiastateuniversity.edu.ng/wp-content/themes/Poseidon/assets/Images/logo1.png",
+      "location": {
+        "state": "Abia",
+        "city": "Uturu",
+        "geopolitical_zone": "South-East"
+      },
+      "established": 1981,
+      "accreditation": "NUC",
+      "academic_offerings": {
+        "faculties": [
+          {
+            "name": "Faculty of Agriculture and Veterinary Medicine",
+            "departments": [
+              {
+                "name": "Agricultural Economics",
+                "courses": ["Agricultural Economics", "Farm Management", "Agricultural Marketing"]
+              },
+              {
+                "name": "Animal Science and Fisheries",
+                "courses": ["Animal Nutrition", "Animal Breeding", "Fisheries Management"]
+              },
+              {
+                "name": "Crop Production and Protection",
+                "courses": ["Crop Science", "Plant Protection", "Soil Science"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Arts",
+            "departments": [
+              {
+                "name": "English Language and Literature",
+                "courses": ["English Language", "Literature in English", "Creative Writing"]
+              },
+              {
+                "name": "History and International Studies",
+                "courses": ["African History", "World History", "Diplomatic History"]
+              },
+              {
+                "name": "Religious Studies",
+                "courses": ["Christian Studies", "Islamic Studies", "Comparative Religion"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Biological and Physical Sciences",
+            "departments": [
+              {
+                "name": "Biochemistry",
+                "courses": ["Metabolic Biochemistry", "Clinical Biochemistry", "Molecular Biology"]
+              },
+              {
+                "name": "Microbiology",
+                "courses": ["Medical Microbiology", "Industrial Microbiology", "Environmental Microbiology"]
+              },
+              {
+                "name": "Plant Science and Biotechnology",
+                "courses": ["Plant Physiology", "Genetics", "Biotechnology"]
+              },
+              {
+                "name": "Pure and Industrial Chemistry",
+                "courses": ["Organic Chemistry", "Inorganic Chemistry", "Physical Chemistry"]
+              },
+              {
+                "name": "Physics",
+                "courses": ["Solid State Physics", "Electronics", "Quantum Mechanics"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Business Administration",
+            "departments": [
+              {
+                "name": "Accounting",
+                "courses": ["Financial Accounting", "Cost Accounting", "Taxation", "Auditing"]
+              },
+              {
+                "name": "Banking and Finance",
+                "courses": ["Banking", "Corporate Finance", "Investment Analysis"]
+              },
+              {
+                "name": "Business Administration",
+                "courses": ["Management", "Entrepreneurship", "Human Resource Management"]
+              },
+              {
+                "name": "Marketing",
+                "courses": ["Marketing Management", "Consumer Behavior", "Advertising"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Education",
+            "departments": [
+              {
+                "name": "Educational Administration",
+                "courses": ["School Management", "Educational Planning", "Supervision"]
+              },
+              {
+                "name": "Guidance and Counseling",
+                "courses": ["Counseling Psychology", "Career Guidance", "Mental Health"]
+              },
+              {
+                "name": "Science Education",
+                "courses": ["Biology Education", "Chemistry Education", "Physics Education"]
+              },
+              {
+                "name": "Social Science Education",
+                "courses": ["Economics Education", "Political Science Education"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Engineering",
+            "departments": [
+              {
+                "name": "Chemical Engineering",
+                "courses": ["Process Design", "Petrochemical Engineering", "Reaction Engineering"]
+              },
+              {
+                "name": "Civil Engineering",
+                "courses": ["Structural Engineering", "Geotechnical Engineering", "Transportation Engineering"]
+              },
+              {
+                "name": "Electrical/Electronic Engineering",
+                "courses": ["Power Systems", "Electronics", "Telecommunications"]
+              },
+              {
+                "name": "Mechanical Engineering",
+                "courses": ["Thermodynamics", "Fluid Mechanics", "Manufacturing"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Environmental Sciences",
+            "departments": [
+              {
+                "name": "Architecture",
+                "courses": ["Architectural Design", "Building Construction", "History of Architecture"]
+              },
+              {
+                "name": "Estate Management",
+                "courses": ["Property Valuation", "Real Estate", "Facility Management"]
+              },
+              {
+                "name": "Surveying and Geoinformatics",
+                "courses": ["Geodesy", "Cartography", "GIS"]
+              },
+              {
+                "name": "Urban and Regional Planning",
+                "courses": ["Land Use Planning", "Transportation Planning", "Environmental Planning"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Law",
+            "departments": [
+              {
+                "name": "Public Law",
+                "courses": ["Constitutional Law", "Criminal Law", "Administrative Law"]
+              },
+              {
+                "name": "Private Law",
+                "courses": ["Contract Law", "Tort Law", "Company Law", "Family Law"]
+              },
+              {
+                "name": "Jurisprudence and International Law",
+                "courses": ["Legal Theory", "International Law", "Human Rights Law"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Social Sciences",
+            "departments": [
+              {
+                "name": "Economics",
+                "courses": ["Microeconomics", "Macroeconomics", "Econometrics", "Development Economics"]
+              },
+              {
+                "name": "Political Science",
+                "courses": ["Political Theory", "Comparative Politics", "International Relations"]
+              },
+              {
+                "name": "Psychology",
+                "courses": ["Clinical Psychology", "Social Psychology", "Developmental Psychology"]
+              },
+              {
+                "name": "Sociology and Anthropology",
+                "courses": ["Sociological Theory", "Social Stratification", "Criminology"]
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "name": "Abubakar Tafawa Balewa University",
+      "acronym": "ATBU",
+      "type": "federal",
+      "motto": "Doctrina matter artium (Education is the mother of the practical arts)",
+      "website": "https://www.atbu.edu.ng/web/front",
+      "logo": "https://www.atbu.edu.ng/public/assets/images/atbu_logo.png",
+      "location": {
+        "state": "Bauchi",
+        "city": "Bauchi",
+        "geopolitical_zone": "North-East"
+      },
+      "established": 1980,
+      "accreditation": "NUC",
+      "academic_offerings": {
+        "faculties": [
+          {
+            "name": "Faculty of Agriculture",
+            "departments": [
+              {
+                "name": "Agricultural Economics and Extension",
+                "courses": ["Agricultural Economics", "Farm Management", "Extension Education"]
+              },
+              {
+                "name": "Animal Production",
+                "courses": ["Animal Nutrition", "Animal Breeding", "Livestock Production"]
+              },
+              {
+                "name": "Crop Production",
+                "courses": ["Agronomy", "Plant Breeding", "Horticulture"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Engineering",
+            "departments": [
+              {
+                "name": "Agricultural Engineering",
+                "courses": ["Farm Machinery", "Irrigation Engineering", "Post-Harvest Technology"]
+              },
+              {
+                "name": "Chemical Engineering",
+                "courses": ["Process Engineering", "Petrochemicals", "Biochemical Engineering"]
+              },
+              {
+                "name": "Civil Engineering",
+                "courses": ["Structural Engineering", "Water Resources", "Geotechnical Engineering"]
+              },
+              {
+                "name": "Electrical Engineering",
+                "courses": ["Power Systems", "Control Engineering", "Electronics"]
+              },
+              {
+                "name": "Mechanical Engineering",
+                "courses": ["Thermodynamics", "Machine Design", "Production Engineering"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Environmental Sciences",
+            "departments": [
+              {
+                "name": "Architecture",
+                "courses": ["Architectural Design", "Building Technology", "Environmental Design"]
+              },
+              {
+                "name": "Building Technology",
+                "courses": ["Construction Management", "Building Materials", "Building Services"]
+              },
+              {
+                "name": "Quantity Surveying",
+                "courses": ["Construction Economics", "Cost Planning", "Contract Administration"]
+              },
+              {
+                "name": "Surveying and Geoinformatics",
+                "courses": ["Land Surveying", "Geodesy", "Geographic Information Systems"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Management Sciences",
+            "departments": [
+              {
+                "name": "Accounting",
+                "courses": ["Financial Accounting", "Management Accounting", "Public Sector Accounting"]
+              },
+              {
+                "name": "Business Management",
+                "courses": ["Organizational Behavior", "Strategic Management", "Small Business Management"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Science",
+            "departments": [
+              {
+                "name": "Biological Sciences",
+                "courses": ["Botany", "Zoology", "Genetics", "Ecology"]
+              },
+              {
+                "name": "Biochemistry",
+                "courses": ["Enzymology", "Metabolism", "Clinical Biochemistry"]
+              },
+              {
+                "name": "Chemistry",
+                "courses": ["Organic Chemistry", "Inorganic Chemistry", "Physical Chemistry"]
+              },
+              {
+                "name": "Computer Science",
+                "courses": ["Programming", "Data Structures", "Database Systems", "Artificial Intelligence"]
+              },
+              {
+                "name": "Geology",
+                "courses": ["Mineralogy", "Petrology", "Structural Geology", "Sedimentology"]
+              },
+              {
+                "name": "Mathematics",
+                "courses": ["Pure Mathematics", "Applied Mathematics", "Statistics"]
+              },
+              {
+                "name": "Microbiology",
+                "courses": ["Medical Microbiology", "Industrial Microbiology", "Environmental Microbiology"]
+              },
+              {
+                "name": "Physics",
+                "courses": ["Solid State Physics", "Electronics", "Quantum Mechanics"]
+              }
+            ]
+          },
+          {
+            "name": "Faculty of Technology Education",
+            "departments": [
+              {
+                "name": "Science Education",
+                "courses": ["Biology Education", "Chemistry Education", "Physics Education"]
+              },
+              {
+                "name": "Vocational and Technology Education",
+                "courses": ["Technical Education", "Business Education", "Agricultural Education"]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "academic_categories": {
+    "all_faculties": [
+      "Faculty of Administration and Management",
+      "Faculty of Agriculture",
+      "Faculty of Arts",
+      "Faculty of Basic Medical Sciences",
+      "Faculty of Clinical Sciences",
+      "Faculty of Computing",
+      "Faculty of Dentistry",
+      "Faculty of Education",
+      "Faculty of Engineering",
+      "Faculty of Environmental Sciences",
+      "Faculty of Law",
+      "Faculty of Pharmacy",
+      "Faculty of Science",
+      "Faculty of Social Sciences",
+      "Faculty of Veterinary Medicine"
+    ],
+    "common_courses": {
+      "sciences": ["Biology", "Chemistry", "Physics", "Mathematics", "Computer Science", "Geology", "Biochemistry", "Microbiology"],
+      "engineering": ["Civil Engineering", "Mechanical Engineering", "Electrical Engineering", "Chemical Engineering", "Computer Engineering"],
+      "social_sciences": ["Economics", "Political Science", "Sociology", "Psychology", "Geography"],
+      "arts_humanities": ["English", "History", "Philosophy", "Religious Studies", "Linguistics"],
+      "management": ["Accounting", "Business Administration", "Banking and Finance", "Marketing", "Public Administration"],
+      "medical": ["Medicine and Surgery", "Nursing", "Medical Laboratory Science", "Radiography", "Physiotherapy"],
+      "law": ["Public Law", "Private Law", "International Law", "Islamic Law"]
+    }
+  },
+  "universities_by_state": {
+    "Abia": ["Abia State University", "Gregory University", "Michael Okpara University of Agriculture"],
+    "Adamawa": ["Adamawa State University", "American University of Nigeria", "Modibbo Adama University"],
+    "Akwa Ibom": ["Akwa Ibom State University", "University of Uyo"],
+    "Anambra": ["Chukwuemeka Odumegwu Ojukwu University", "Madonna University", "Nnamdi Azikiwe University"],
+    "Bauchi": ["Abubakar Tafawa Balewa University"],
+    "Bayelsa": ["Niger Delta University"],
+    "Benue": ["Benue State University", "University of Agriculture, Makurdi"],
+    "Borno": ["Borno State University", "University of Maiduguri"],
+    "Cross River": ["Cross River University of Technology", "University of Calabar"],
+    "Delta": ["Delta State University", "Western Delta University"],
+    "Ebonyi": ["Ebonyi State University"],
+    "Edo": ["Ambrose Alli University", "Benson Idahosa University", "Igbinedion University", "University of Benin"],
+    "Ekiti": ["Adekunle Ajasin University", "Ekiti State University", "Federal University, Oye-Ekiti"],
+    "Enugu": ["Enugu State University of Science and Technology", "Godfrey Okoye University", "University of Nigeria, Nsukka"],
+    "FCT": ["Baze University", "Nile University", "University of Abuja"],
+    "Gombe": ["Federal University, Kashere", "Gombe State University"],
+    "Imo": ["Federal University of Technology, Owerri", "Imo State University"],
+    "Jigawa": ["Federal University, Dutse"],
+    "Kaduna": ["Ahmadu Bello University", "Kaduna State University"],
+    "Kano": ["Bayero University Kano", "Yusuf Maitama Sule University"],
+    "Katsina": ["Al-Qalam University", "Federal University, Dustin-Ma", "Umaru Musa Yar'Adua University"],
+    "Kebbi": ["Federal University, Birnin Kebbi", "Kebbi State University of Science and Technology"],
+    "Kogi": ["Federal University, Lokoja", "Kogi State University"],
+    "Kwara": ["Al-Hikmah University", "Kwara State University", "Landmark University", "University of Ilorin"],
+    "Lagos": ["Anchor University", "Lagos State University", "University of Lagos"],
+    "Nasarawa": ["Federal University, Lafia", "Nasarawa State University"],
+    "Niger": ["Federal University of Technology, Minna", "Ibrahim Badamasi Babangida University"],
+    "Ogun": ["Babcock University", "Bells University", "Covenant University", "Federal University of Agriculture, Abeokuta", "Olabisi Onabanjo University"],
+    "Ondo": ["Adekunle Ajasin University", "Federal University of Technology, Akure", "Ondo State University of Science and Technology"],
+    "Osun": ["Bowen University", "Fountain University", "Obafemi Awolowo University", "Osun State University"],
+    "Oyo": ["Ajayi Crowther University", "Dominican University", "University of Ibadan", "Lead City University"],
+    "Plateau": ["Plateau State University", "University of Jos"],
+    "Rivers": ["Pamo University of Medical Sciences", "Rivers State University", "University of Port Harcourt"],
+    "Sokoto": ["Sokoto State University", "Usmanu Danfodio University"],
+    "Taraba": ["Federal University, Wukari", "Taraba State University"],
+    "Yobe": ["Federal University, Gashua", "Yobe State University"],
+    "Zamfara": ["Federal University, Gusau"]
+  },
+  "geopolitical_zones": {
+    "north_central": ["Benue", "FCT", "Kogi", "Kwara", "Nasarawa", "Niger", "Plateau"],
+    "north_east": ["Adamawa", "Bauchi", "Borno", "Gombe", "Taraba", "Yobe"],
+    "north_west": ["Kaduna", "Katsina", "Kano", "Kebbi", "Sokoto", "Jigawa", "Zamfara"],
+    "south_east": ["Abia", "Anambra", "Ebonyi", "Enugu", "Imo"],
+    "south_south": ["Akwa Ibom", "Bayelsa", "Cross River", "Delta", "Edo", "Rivers"],
+    "south_west": ["Ekiti", "Lagos", "Ogun", "Ondo", "Osun", "Oyo"]
+  }
+}

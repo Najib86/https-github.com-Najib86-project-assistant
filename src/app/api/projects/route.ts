@@ -1,9 +1,84 @@
-
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { generateChapterContent, CHAPTERS_LIST } from "@/lib/ai-service";
+import fs from 'fs';
+import path from 'path';
 
 export const dynamic = 'force-dynamic';
+
+// Heuristic learning algorithm to update JSON statically
+async function updateInstitutionsData(metadata: any) {
+    if (!metadata?.institution) return;
+
+    const { name, faculty, department, programme } = metadata.institution;
+    if (!name || !faculty || !department || !programme) return;
+
+    try {
+        const filePath = path.join(process.cwd(), 'json.json');
+        if (!fs.existsSync(filePath)) return;
+
+        const fileContent = fs.readFileSync(filePath, 'utf-8');
+        const data = JSON.parse(fileContent);
+
+        let shouldUpdate = false;
+
+        // Find or create university
+        let university = data.universities.find((u: any) => u.name.toLowerCase() === name.toLowerCase());
+        if (!university) {
+            university = {
+                name,
+                acronym: name.split(' ').map((w: string) => w[0]).join('').toUpperCase(),
+                type: "unknown",
+                location: { state: "Unknown", city: "Unknown", geopolitical_zone: "Unknown" },
+                established: new Date().getFullYear(),
+                academic_offerings: { faculties: [] }
+            };
+            data.universities.push(university);
+            shouldUpdate = true;
+        }
+
+        // Ensure academic_offerings and faculties exist
+        if (!university.academic_offerings) university.academic_offerings = { faculties: [] };
+        if (!university.academic_offerings.faculties) university.academic_offerings.faculties = [];
+
+        // Find or create faculty
+        let fac = university.academic_offerings.faculties.find((f: any) => f.name.toLowerCase() === faculty.toLowerCase());
+        if (!fac) {
+            fac = { name: faculty, departments: [] };
+            university.academic_offerings.faculties.push(fac);
+            shouldUpdate = true;
+        }
+
+        // Ensure departments exist
+        if (!fac.departments) fac.departments = [];
+
+        // Find or create department
+        let dep = fac.departments.find((d: any) => d.name.toLowerCase() === department.toLowerCase());
+        if (!dep) {
+            dep = { name: department, courses: [] };
+            fac.departments.push(dep);
+            shouldUpdate = true;
+        }
+
+        // Ensure courses exist
+        if (!dep.courses) dep.courses = [];
+
+        // Find or create course
+        const hasCourse = dep.courses.some((c: string) => c.toLowerCase() === programme.toLowerCase());
+        if (!hasCourse) {
+            dep.courses.push(programme);
+            shouldUpdate = true;
+        }
+
+        if (shouldUpdate) {
+            fs.writeFileSync(filePath, JSON.stringify(data, null, 2), 'utf-8');
+            console.log(`Self-learning algorithm updated json.json with ${name} -> ${faculty} -> ${department}`);
+        }
+    } catch (err) {
+        console.error("Failed to update institutions learning data", err);
+    }
+}
+
 
 /**
  * GET /api/projects
@@ -164,6 +239,11 @@ export async function POST(req: Request) {
                 academicMetadata: parsedMetadata // Save the metadata
             },
         });
+
+        // Run learning optimization asynchronously so it doesn't block the request
+        if (parsedMetadata) {
+            updateInstitutionsData(parsedMetadata).catch(console.error);
+        }
 
         // Trigger AI chapter generation in batches to prevent rate limits
         const { runInBatches } = await import("@/lib/utils");
