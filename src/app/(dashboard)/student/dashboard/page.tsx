@@ -593,12 +593,20 @@ export default function StudentDashboard() {
                                                     onChange={(e) => setFormData({ ...formData, templateId: e.target.value })}
                                                 >
                                                     <option value="">Standard (Default) Structure</option>
-                                                    {templates.map(t => (
-                                                        <option key={t.id} value={t.id}>{t.name}</option>
-                                                    ))}
+                                                    {templates.map(t => {
+                                                        let displayName = t.name;
+                                                        if (t.name.includes("1500VA") || t.name.includes("Inverter") || t.name.includes("UNIJOS")) {
+                                                            displayName = "Science";
+                                                        } else if (t.name.toLowerCase().includes("social science")) {
+                                                            displayName = "Social Science";
+                                                        }
+                                                        return (
+                                                            <option key={t.id} value={t.id}>{displayName}</option>
+                                                        );
+                                                    })}
                                                 </select>
                                                 <p className="text-[10px] text-gray-400 ml-1 italic">
-                                                    Choosing a template pre-configures your project&apos;s chapters (e.g. for specific engineering or social science guidelines).
+                                                    Choosing a template pre-configures your project's chapters (e.g. for specific engineering or social science guidelines).
                                                 </p>
                                             </div>
 
