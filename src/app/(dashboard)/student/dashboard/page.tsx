@@ -21,6 +21,12 @@ interface Project {
     chapters: { chapter_id: number; title: string | null; chapterNumber: number; status: string; content?: string }[];
 }
 
+interface Template {
+    id: number;
+    name: string;
+    description: string | null;
+}
+
 
 export default function StudentDashboard() {
     const router = useRouter();
@@ -57,8 +63,11 @@ export default function StudentDashboard() {
         supervisorEmail: "",
         researchArea: "",
         keywords: "", // Comma separated
-        inviteCode: ""
+        inviteCode: "",
+        templateId: ""
     });
+
+    const [templates, setTemplates] = useState<Template[]>([]);
 
     const [file, setFile] = useState<File | null>(null);
     const [generatingStatus, setGeneratingStatus] = useState("");
@@ -131,6 +140,13 @@ export default function StudentDashboard() {
         }
     }, [studentId, fetchProjects, fetchResearch]);
 
+    useEffect(() => {
+        fetch("/api/templates")
+            .then(res => res.json())
+            .then(data => setTemplates(data))
+            .catch(err => console.error("Failed to fetch templates", err));
+    }, []);
+
     const handleDeleteResearch = async (id: number) => {
         if (!confirm("Are you sure you want to delete this research submission?")) return;
         try {
@@ -158,6 +174,9 @@ export default function StudentDashboard() {
             data.append("title", formData.title);
             data.append("level", formData.level);
             data.append("type", formData.type);
+            if (formData.templateId) {
+                data.append("templateId", formData.templateId);
+            }
 
             // Construct Academic Metadata JSON
             const academicMetadata = {
@@ -564,6 +583,23 @@ export default function StudentDashboard() {
                                                         <option value="Theoretical">Theoretical Review</option>
                                                     </select>
                                                 </div>
+                                            </div>
+
+                                            <div className="space-y-1.5 pt-1">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Structural Template</label>
+                                                <select
+                                                    className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none bg-white font-medium cursor-pointer"
+                                                    value={formData.templateId}
+                                                    onChange={(e) => setFormData({ ...formData, templateId: e.target.value })}
+                                                >
+                                                    <option value="">Standard (Default) Structure</option>
+                                                    {templates.map(t => (
+                                                        <option key={t.id} value={t.id}>{t.name}</option>
+                                                    ))}
+                                                </select>
+                                                <p className="text-[10px] text-gray-400 ml-1 italic">
+                                                    Choosing a template pre-configures your project&apos;s chapters (e.g. for specific engineering or social science guidelines).
+                                                </p>
                                             </div>
 
                                             <div className="space-y-2 pt-2">

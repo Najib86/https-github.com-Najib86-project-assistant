@@ -4,10 +4,23 @@ import { generateChapterContent, CHAPTERS_LIST } from "@/lib/ai-service";
 import fs from 'fs';
 import path from 'path';
 
+interface AcademicMetadata {
+    institution?: {
+        name?: string;
+        faculty?: string;
+        department?: string;
+        programme?: string;
+    };
+    research?: {
+        area?: string;
+        keywords?: string[] | string;
+    };
+}
+
 export const dynamic = 'force-dynamic';
 
 // Heuristic learning algorithm to update JSON statically
-async function updateInstitutionsData(metadata: any) {
+async function updateInstitutionsData(metadata: AcademicMetadata) {
     if (!metadata?.institution) return;
 
     const { name, faculty, department, programme } = metadata.institution;
@@ -148,7 +161,8 @@ export async function POST(req: Request) {
         const supervisorIdStr = formData.get("supervisorId") as string;
         const file = formData.get("file") as File | null;
         const inviteCode = formData.get("inviteCode") as string;
-        const academicMetadataStr = formData.get("academicMetadata") as string; // NEW
+        const academicMetadataStr = formData.get("academicMetadata") as string;
+        const templateIdStr = formData.get("templateId") as string;
 
         if (!studentIdStr || !title || !level || !type) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -245,10 +259,26 @@ export async function POST(req: Request) {
             updateInstitutionsData(parsedMetadata).catch(console.error);
         }
 
+        // Determine chapters to generate
+        let chaptersToGenerate = CHAPTERS_LIST;
+        if (templateIdStr) {
+            try {
+                const template = await prisma.template.findUnique({
+                    where: { id: parseInt(templateIdStr) }
+                });
+                if (template && Array.isArray(template.content)) {
+                    chaptersToGenerate = template.content as { id: number, title: string }[];
+                }
+            } catch (templateError) {
+                console.warn("Failed to fetch template chapters:", templateError);
+                // Fallback to default
+            }
+        }
+
         // Trigger AI chapter generation in batches to prevent rate limits
         const { runInBatches } = await import("@/lib/utils");
 
-        await runInBatches(CHAPTERS_LIST, 2, async (chapter) => {
+        await runInBatches(chaptersToGenerate, 2, async (chapter) => {
             try {
                 await generateChapterContent(
                     project.project_id,
