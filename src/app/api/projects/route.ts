@@ -293,14 +293,16 @@ export async function POST(req: Request) {
             ...(templateStructureReference ? { templateStructureReference } : {})
         };
 
-        // Trigger AI chapter generation in batches to prevent rate limits
+        // Trigger AI chapter generation deliberately in smaller batches (1 at a time) to prevent Gemini Rate Limits (429 errors).
+        // Since we now generate a massive 12-chapter pipeline, sending multiple requests simultaneously
+        // often causes the AI provider to instantly block the request, resulting in NO chapters being generated.
         const { runInBatches } = await import("@/lib/utils");
 
         // Fire and forget (don't await) the generation process so the user gets the project ID immediately.
-        // The dashboard has a "Retry Generation" or shows progress anyway.
-        // This makes the project generation "Seamless" and fast.
-        runInBatches(chaptersToGenerate, 2, async (chapter) => {
+        // We use batch size 1 to pace the AI.
+        runInBatches(chaptersToGenerate, 1, async (chapter) => {
             try {
+                console.log(`[Background] Starting Generation for: ${chapter.title}`);
                 await generateChapterContent(
                     project.project_id,
                     chapter.id,
@@ -310,11 +312,15 @@ export async function POST(req: Request) {
                     project.referenceText || undefined,
                     metadataForGeneration
                 );
+                console.log(`[Background] Finished Generation for: ${chapter.title}`);
+
+                // Add a small 2-second delay between chapters to avoid rate limits
+                await new Promise(res => setTimeout(res, 2000));
             } catch (e) {
-                console.error("AI Error for chapter:", chapter.title, e);
+                console.error(`[Background] AI Error for chapter ${chapter.title}:`, e);
             }
         }).catch(err => {
-            console.error("Background Chapter Generation failed:", err);
+            console.error("[Background] Chapter Generation Loop crashed:", err);
         });
 
         return NextResponse.json(project, { status: 201 });
