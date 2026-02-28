@@ -268,22 +268,30 @@ export async function POST(req: Request) {
         }
 
         // Determine chapters to generate
-        // The user explicitly requested to ENSURE the complete project is generated using the template configurations
-        // WITH the new automated structure. Thus we enforce CHAPTERS_LIST and ignore legacy template chapter definitions
-        // to resolve the audit issues consistently across all environments.
-        let chaptersToGenerate = CHAPTERS_LIST;
+        // We use the fully automated 12-chapter sequence as the primary priority.
+        const chaptersToGenerate = CHAPTERS_LIST;
+        let templateStructureReference = null;
+
         if (templateIdStr) {
             try {
                 const template = await prisma.template.findUnique({
                     where: { id: parseInt(templateIdStr) }
                 });
-                // Legacy: if (template && Array.isArray(template.content)) chaptersToGenerate = template.content
-                // But we bypass this to enforce the comprehensive academic structure.
+                if (template && Array.isArray(template.content)) {
+                    // We only use the legacy template structure as a format/structure reference,
+                    // we DO NOT overwrite our fully automated 12-chapter list sequence.
+                    templateStructureReference = template.content;
+                }
             } catch (templateError) {
                 console.warn("Failed to fetch template chapters:", templateError);
-                // Fallback to default
+                // Fallback to null
             }
         }
+
+        const metadataForGeneration = {
+            ...parsedMetadata,
+            ...(templateStructureReference ? { templateStructureReference } : {})
+        };
 
         // Trigger AI chapter generation in batches to prevent rate limits
         const { runInBatches } = await import("@/lib/utils");
@@ -299,8 +307,8 @@ export async function POST(req: Request) {
                     chapter.title,
                     project.title,
                     project.level,
-                    extractedText,
-                    parsedMetadata
+                    project.referenceText || undefined,
+                    metadataForGeneration
                 );
             } catch (e) {
                 console.error("AI Error for chapter:", chapter.title, e);

@@ -126,6 +126,8 @@ export async function generateChapterContent(
            - Bibliography: Generate at least 30-40 credible academic references in APA format.
 
         ${sampleText ? `Style Reference (Mimic this writing style/tone and incorporate relevant data if any): \n"${sampleText.substring(0, 4000)}..."` : ""}
+        ${academicMetadata?.templateStructureReference ? `\nTEMPLATE FORMAT REFERENCE:\nThe user selected a specific institutional template. Use the following template structure ONLY as a format, naming, or structural reference for this chapter if relevant: \n${JSON.stringify(academicMetadata.templateStructureReference)}. 
+        \x2a\x2aCRITICAL\x2a\x2a: DO NOT deviate from generating the assigned 12-chapter sequence ("${chapterTitle}"). The template structure is strictly for internal formatting reference within the chapter.` : ""}
 
         TASK: Write the COMPLETE and EXTREMELY DETAILED content for "${chapterTitle}" now. Do not start with "Here is the chapter" or "Sure". specific content only.
     `;
