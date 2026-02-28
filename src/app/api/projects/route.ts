@@ -268,15 +268,17 @@ export async function POST(req: Request) {
         }
 
         // Determine chapters to generate
+        // The user explicitly requested to ENSURE the complete project is generated using the template configurations
+        // WITH the new automated structure. Thus we enforce CHAPTERS_LIST and ignore legacy template chapter definitions
+        // to resolve the audit issues consistently across all environments.
         let chaptersToGenerate = CHAPTERS_LIST;
         if (templateIdStr) {
             try {
                 const template = await prisma.template.findUnique({
                     where: { id: parseInt(templateIdStr) }
                 });
-                if (template && Array.isArray(template.content)) {
-                    chaptersToGenerate = template.content as { id: number, title: string }[];
-                }
+                // Legacy: if (template && Array.isArray(template.content)) chaptersToGenerate = template.content
+                // But we bypass this to enforce the comprehensive academic structure.
             } catch (templateError) {
                 console.warn("Failed to fetch template chapters:", templateError);
                 // Fallback to default
