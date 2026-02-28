@@ -5,15 +5,18 @@ import { RESEARCH_GUIDELINES } from "@/lib/guidelines";
 import { AIOrchestrator } from "./ai/ai.orchestrator";
 
 export const CHAPTERS_LIST = [
-    { id: 1, title: "Abstract" },
-    { id: 2, title: "Introduction" },
-    { id: 3, title: "Literature Review" },
-    { id: 4, title: "Methodology" },
-    { id: 5, title: "Implementation" },
-    { id: 6, title: "Results" },
-    { id: 7, title: "Discussion" },
-    { id: 8, title: "Conclusion" },
-    { id: 9, title: "References" }
+    { id: 1, title: "Title Page" },
+    { id: 2, title: "Certification" },
+    { id: 3, title: "Dedication" },
+    { id: 4, title: "Acknowledgement" },
+    { id: 5, title: "Table of Contents" },
+    { id: 6, title: "Abstract" },
+    { id: 7, title: "Chapter One: Introduction" },
+    { id: 8, title: "Chapter Two: Literature Review" },
+    { id: 9, title: "Chapter Three: Methodology" },
+    { id: 10, title: "Chapter Four: Results and Discussion" },
+    { id: 11, title: "Chapter Five: Summary, Conclusion and Recommendations" },
+    { id: 12, title: "Bibliography" }
 ];
 
 import { redis } from "./redis";
@@ -93,10 +96,10 @@ export async function generateChapterContent(
     }
 
     const prompt = `
-        Context: You are an expert academic writer and researcher. You are writing a specific chapter for a final year project report (Level: ${level || "University"}).
+        Context: You are an expert academic writer and researcher. You are writing a specific section/chapter for a final year project report (Level: ${level || "University"}).
         
         Project Topic: "${topic}"
-        Current Chapter: ${chapterTitle} (Chapter ${chapterNumber})
+        Current Section/Chapter: ${chapterTitle} (ID: ${chapterNumber})
         ${contextStr}
 
         === STRICT UNIVERSITY GUIDELINES ===
@@ -105,22 +108,26 @@ export async function generateChapterContent(
         ====================================
 
         CRITICAL INSTRUCTIONS:
-        1. **ELABORATE & DETAILED**: This must be a full, comprehensive academic chapter. Do NOT write a summary or an outline. Write the actual full content.
-        2. **LENGTH**: Aim for substantial depth (minimum 1500-2000 words if possible for major chapters like Literature Review or Methodology).
-        3. **STRUCTURE**: Use the guidelines above to structure this specific chapter correctly. Ensure all required sub-sections for this chapter are present.
+        1. **ELABORATE & DETAILED**: This must be a full, comprehensive academic text. Do NOT write a summary or an outline. Write the actual full content.
+        2. **LENGTH**: Target 40-60 pages total across the project. For major chapters (Chapters 1-5), you MUST write at least 3000-5000 words. Expand heavily on literature, methodology details, and findings.
+        3. **STRUCTURE**: Expand each subsection significantly to ensure the total project length reaches 40-60 pages.
         4. **TONE**: Use a formal, objective, and scholarly tone.
-        5. **CITATIONS**: You MUST include in-text citations in APA style (Author, Year) to support arguments. Invent plausible citations if real ones are not accessible, but prioritize accuracy if the model usually provides it.
+        5. **CITATIONS**: You MUST include in-text citations in APA style (Author, Year) to support arguments. Provide a comprehensive list in the Bibliography section.
         6. **FORMAT**: Use Markdown for headings (## for main sections, ### for subsections).
-        7. **CONTENT**:
-           - If this is Chapter 1 (Introduction): Include Background, Problem Statement, Research Questions, Objectives, Significance, Scope, and Operational Definitions.
-           - If this is Chapter 2 (Lit Review): Cover Conceptual Review, Theoretical Framework, and Empirical Review.
-           - If this is Chapter 3 (Methodology): detailed Research Design, Population, Sample/Sampling, Instruments, Validity/Reliability, and Data Analysis.
-           - If this is Chapter 4 (Results): Present mock data analysis and findings clearly linked to research questions.
-           - If this is Chapter 5: Summary, Conclusion, and Recommendations.
+        7. **SPECIFIC SECTIONS TARGETS**:
+           - Title Page/Certification/Dedication/Acknowledgement: Write appropriate formal templates filled with dummy academic names (e.g., Dr. A. B. Smith) where relevant.
+           - Table of Contents: Generate a detailed mockup Table of Contents mapping out Chapters 1-5 with standard pagination.
+           - Abstract: Provide a comprehensive 275-350 word summary covering objectives, methodology, findings, and conclusion. Do not exceed 400 words.
+           - Chapter One (Introduction): Minimum 10 pages worth of content. Cover Background, Statement of Problem, Objectives, Research Questions, Hypotheses, Significance, Scope, and Definition of Terms.
+           - Chapter Two (Lit Review): Minimum 15 pages worth of content. Extensive conceptual review, theoretical framework (multiple theories), and empirical review of at least 15 past studies.
+           - Chapter Three (Methodology): Minimum 10 pages worth of content. Detailed Research Design, Population, Sample/Sampling, Instruments, Validity/Reliability, and Step-by-step Data Analysis procedure.
+           - Chapter Four (Results): Present extensive mock data analysis, tables, charts, and deep-dive discussion of findings linked to research questions and prior literature.
+           - Chapter Five: Detailed Summary of Findings, Conclusion, and actionable Recommendations.
+           - Bibliography: Generate at least 30-40 credible academic references in APA format.
 
         ${sampleText ? `Style Reference (Mimic this writing style/tone and incorporate relevant data if any): \n"${sampleText.substring(0, 4000)}..."` : ""}
 
-        TASK: Write the COMPLETE content for ${chapterTitle} now. Do not start with "Here is the chapter" or "Sure". specific content only.
+        TASK: Write the COMPLETE and EXTREMELY DETAILED content for "${chapterTitle}" now. Do not start with "Here is the chapter" or "Sure". specific content only.
     `;
 
     const content = await generateAIResponse(prompt, "text");

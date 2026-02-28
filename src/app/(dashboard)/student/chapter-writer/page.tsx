@@ -11,15 +11,18 @@ import { cn } from "@/lib/utils";
 import Image from "next/image";
 
 const CHAPTERS_LIST = [
-    { id: 1, title: "Abstract", hint: "Summary of the entire project, including problem, method, results, and conclusion." },
-    { id: 2, title: "Introduction", hint: "Background, Problem Statement, Objectives, Scope, and Significance." },
-    { id: 3, title: "Literature Review", hint: "Review of related works, theoretical framework, and research gaps." },
-    { id: 4, title: "Methodology", hint: "Research design, population, sampling, data collection, or system analysis." },
-    { id: 5, title: "Implementation", hint: "System design, architecture, algorithms, or field work details." },
-    { id: 6, title: "Results", hint: "Presentation of data, screenshots of system, or analysis findings." },
-    { id: 7, title: "Discussion", hint: "Interpretation of results in context of literature and objectives." },
-    { id: 8, title: "Conclusion", hint: "Summary of findings, conclusion, limitations, and recommendations." },
-    { id: 9, title: "References", hint: "List of all citations in APA/MLA format." }
+    { id: 1, title: "Title Page", hint: "Formal required title page with project details." },
+    { id: 2, title: "Certification", hint: "Official certification page signed by supervisors." },
+    { id: 3, title: "Dedication", hint: "Personal dedication of the project." },
+    { id: 4, title: "Acknowledgement", hint: "Formal acknowledgement of supporting individuals." },
+    { id: 5, title: "Table of Contents", hint: "List of chapters, headings, and standard pagination." },
+    { id: 6, title: "Abstract", hint: "Comprehensive summary of problem, method, results, and conclusion." },
+    { id: 7, title: "Chapter One: Introduction", hint: "Background, Problem Statement, Objectives, Scope, and Significance." },
+    { id: 8, title: "Chapter Two: Literature Review", hint: "Review of related works, theoretical framework, and research gaps." },
+    { id: 9, title: "Chapter Three: Methodology", hint: "Research design, population, sampling, data collection, or system analysis." },
+    { id: 10, title: "Chapter Four: Results and Discussion", hint: "Presentation of data, screenshots, or analysis findings." },
+    { id: 11, title: "Chapter Five: Summary, Conclusion and Recommendations", hint: "Summary of findings, conclusion, limitations, and recommendations." },
+    { id: 12, title: "Bibliography", hint: "List of all citations in APA format." }
 ];
 
 export default function ChapterWriter() {
