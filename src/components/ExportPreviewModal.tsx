@@ -42,11 +42,11 @@ export default function ExportPreviewModal({ project, isOpen, onClose }: Props) 
     const [copied, setCopied] = useState(false);
     const [validation, setValidation] = useState<ValidationResult | null>(null);
     const [showValidation, setShowValidation] = useState(false);
-    const [isFixingGaps, setIsFixingGaps] = useState(false);
+    const [fixStatus, setFixStatus] = useState<"idle" | "confirm" | "fixing" | "success" | "error">("idle");
+    const [fixMessage, setFixMessage] = useState("");
 
     const handleFixGaps = async () => {
-        if (!confirm("This will prompt the AI to generate missing sections and fix length issues. Continue?")) return;
-        setIsFixingGaps(true);
+        setFixStatus("fixing");
         try {
             const res = await fetch(`/api/projects/${project.project_id}/fix-audit-gaps`, {
                 method: "POST",
@@ -55,17 +55,21 @@ export default function ExportPreviewModal({ project, isOpen, onClose }: Props) 
             });
 
             if (res.ok) {
-                alert("AI optimization requested! Please refresh the page in a few moments to see the updates.");
-                onClose();
+                setFixStatus("success");
+                setFixMessage("Optimization started! Refreshing...");
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
             } else {
-                const data = await res.json();
-                alert(data.error || "Failed to fix gaps");
+                setFixStatus("error");
+                setFixMessage("Unable to complete optimization at this time.");
+                setTimeout(() => setFixStatus("idle"), 4000);
             }
         } catch (error) {
             console.error("Failed to fix gaps:", error);
-            alert("Network error occurred.");
-        } finally {
-            setIsFixingGaps(false);
+            setFixStatus("error");
+            setFixMessage("Network issue detected. Please try again.");
+            setTimeout(() => setFixStatus("idle"), 4000);
         }
     };
 
@@ -373,16 +377,42 @@ export default function ExportPreviewModal({ project, isOpen, onClose }: Props) 
                                                 </div>
                                             ))}
                                         </div>
-                                        <div className="pt-4">
-                                            <Button
-                                                onClick={handleFixGaps}
-                                                disabled={isFixingGaps}
-                                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-100 dark:shadow-none"
-                                            >
-                                                {isFixingGaps ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                                {isFixingGaps ? "Optimizing..." : "Prompt AI to Fix & Validate"}
-                                            </Button>
-                                        </div>
+                                        {fixStatus === "confirm" ? (
+                                            <div className="pt-4 p-5 mt-4 border rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30 flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200">
+                                                <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400 font-black text-sm uppercase tracking-wider">
+                                                    <AlertCircle className="h-4 w-4" />
+                                                    <span>AI Optimization</span>
+                                                </div>
+                                                <p className="text-xs text-indigo-600/80 dark:text-indigo-300/80 font-medium pb-2">This will automatically invoke the AI Orchestrator to resolve missing chunks and adapt lengths. Proceed?</p>
+                                                <div className="flex gap-2">
+                                                    <Button size="sm" variant="outline" className="flex-1 bg-white dark:bg-gray-900 rounded-xl" onClick={() => setFixStatus("idle")}>Cancel</Button>
+                                                    <Button size="sm" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl" onClick={handleFixGaps}>Start Auto-Fix</Button>
+                                                </div>
+                                            </div>
+                                        ) : fixStatus === "success" ? (
+                                            <div className="pt-4 p-5 mt-4 border rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30 flex flex-col gap-2 items-center text-center animate-in fade-in duration-300">
+                                                <div className="h-8 w-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-1">
+                                                    <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                                </div>
+                                                <p className="text-sm font-black text-emerald-700 dark:text-emerald-400">{fixMessage}</p>
+                                            </div>
+                                        ) : fixStatus === "error" ? (
+                                            <div className="pt-4 p-5 mt-4 border rounded-2xl bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30 flex flex-col gap-2 items-center text-center animate-in shake duration-300">
+                                                <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400 mb-1" />
+                                                <p className="text-sm font-bold text-red-700 dark:text-red-400 leading-tight">{fixMessage}</p>
+                                            </div>
+                                        ) : (
+                                            <div className="pt-6">
+                                                <Button
+                                                    onClick={() => setFixStatus("confirm")}
+                                                    disabled={fixStatus === "fixing"}
+                                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-100 dark:shadow-none h-12 font-bold"
+                                                >
+                                                    {fixStatus === "fixing" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                    {fixStatus === "fixing" ? "Optimizing..." : "Prompt AI to Fix & Validate"}
+                                                </Button>
+                                            </div>
+                                        )}
                                     </>
                                 )}
                             </div>
