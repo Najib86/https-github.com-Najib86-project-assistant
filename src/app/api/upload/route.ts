@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import * as mammoth from "mammoth";
-import { PDFParse } from "pdf-parse";
+import pdf from "pdf-parse";
 
 export async function POST(req: Request) {
     try {
@@ -15,8 +15,9 @@ export async function POST(req: Request) {
         let text = "";
 
         if (file.type === "application/pdf") {
-            const parser = new PDFParse({ data: buffer });
-            const data = await parser.getText();
+            // @ts-ignore - handled dynamically below
+            const pdfFunc = pdf.default || pdf;
+            const data = await pdfFunc(buffer);
             text = data.text;
         } else if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
             const result = await mammoth.extractRawText({ buffer: buffer });

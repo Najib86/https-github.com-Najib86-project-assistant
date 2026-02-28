@@ -1,6 +1,9 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
 import { generateChapterContent, CHAPTERS_LIST } from "@/lib/ai-service";
+import { rateLimit } from "@/lib/rate-limit";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import fs from 'fs';
 import path from 'path';
 
@@ -153,6 +156,12 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
     try {
+        const session = await getServerSession(authOptions);
+        const user = session?.user as { id?: string | number } | undefined;
+        if (user?.id) {
+            await rateLimit(`project-create:${user.id}`);
+        }
+
         const formData = await req.formData();
         const studentIdStr = formData.get("studentId") as string;
         const title = formData.get("title") as string;
@@ -176,11 +185,10 @@ export async function POST(req: Request) {
             try {
                 const buffer = Buffer.from(await file.arrayBuffer());
                 if (file.type === "application/pdf") {
-                    // Dynamic import to prevent top-level failures on Vercel
-                    const { PDFParse } = await import("pdf-parse");
-                    const parser = new PDFParse({ data: buffer });
-                    const result = await parser.getText();
-                    extractedText = result.text;
+                    const pdfModule = await import("pdf-parse");
+                    const pdf = (pdfModule as any).default || pdfModule;
+                    const data = await pdf(buffer);
+                    extractedText = data.text;
                 } else if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
                     const mammoth = await import("mammoth");
                     const result = await mammoth.extractRawText({ buffer: buffer });
@@ -278,7 +286,10 @@ export async function POST(req: Request) {
         // Trigger AI chapter generation in batches to prevent rate limits
         const { runInBatches } = await import("@/lib/utils");
 
-        await runInBatches(chaptersToGenerate, 2, async (chapter) => {
+        // Fire and forget (don't await) the generation process so the user gets the project ID immediately.
+        // The dashboard has a "Retry Generation" or shows progress anyway.
+        // This makes the project generation "Seamless" and fast.
+        runInBatches(chaptersToGenerate, 2, async (chapter) => {
             try {
                 await generateChapterContent(
                     project.project_id,
@@ -292,6 +303,8 @@ export async function POST(req: Request) {
             } catch (e) {
                 console.error("AI Error for chapter:", chapter.title, e);
             }
+        }).catch(err => {
+            console.error("Background Chapter Generation failed:", err);
         });
 
         return NextResponse.json(project, { status: 201 });
