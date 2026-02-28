@@ -42,6 +42,32 @@ export default function ExportPreviewModal({ project, isOpen, onClose }: Props) 
     const [copied, setCopied] = useState(false);
     const [validation, setValidation] = useState<ValidationResult | null>(null);
     const [showValidation, setShowValidation] = useState(false);
+    const [isFixingGaps, setIsFixingGaps] = useState(false);
+
+    const handleFixGaps = async () => {
+        if (!confirm("This will prompt the AI to generate missing sections and fix length issues. Continue?")) return;
+        setIsFixingGaps(true);
+        try {
+            const res = await fetch(`/api/projects/${project.project_id}/fix-audit-gaps`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ validation })
+            });
+
+            if (res.ok) {
+                alert("AI optimization requested! Please refresh the page in a few moments to see the updates.");
+                onClose();
+            } else {
+                const data = await res.json();
+                alert(data.error || "Failed to fix gaps");
+            }
+        } catch (error) {
+            console.error("Failed to fix gaps:", error);
+            alert("Network error occurred.");
+        } finally {
+            setIsFixingGaps(false);
+        }
+    };
 
     useEffect(() => {
         if (isOpen && project) {
@@ -332,20 +358,32 @@ export default function ExportPreviewModal({ project, isOpen, onClose }: Props) 
 
                                 {/* Errors/Warnings */}
                                 {((validation?.errors?.length || 0) > 0 || (validation?.warnings?.length || 0) > 0) && (
-                                    <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                                        {validation?.errors?.map((err, i) => (
-                                            <div key={i} className="flex gap-2 text-xs text-red-600 font-bold leading-tight">
-                                                <AlertCircle className="h-3 w-3 shrink-0" />
-                                                <span>{err}</span>
-                                            </div>
-                                        ))}
-                                        {validation?.warnings?.map((warn, i) => (
-                                            <div key={i} className="flex gap-2 text-xs text-amber-600 font-bold leading-tight">
-                                                <AlertCircle className="h-3 w-3 shrink-0" />
-                                                <span>{warn}</span>
-                                            </div>
-                                        ))}
-                                    </div>
+                                    <>
+                                        <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                                            {validation?.errors?.map((err, i) => (
+                                                <div key={i} className="flex gap-2 text-xs text-red-600 font-bold leading-tight">
+                                                    <AlertCircle className="h-3 w-3 shrink-0" />
+                                                    <span>{err}</span>
+                                                </div>
+                                            ))}
+                                            {validation?.warnings?.map((warn, i) => (
+                                                <div key={i} className="flex gap-2 text-xs text-amber-600 font-bold leading-tight">
+                                                    <AlertCircle className="h-3 w-3 shrink-0" />
+                                                    <span>{warn}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                        <div className="pt-4">
+                                            <Button
+                                                onClick={handleFixGaps}
+                                                disabled={isFixingGaps}
+                                                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-100 dark:shadow-none"
+                                            >
+                                                {isFixingGaps ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                {isFixingGaps ? "Optimizing..." : "Prompt AI to Fix & Validate"}
+                                            </Button>
+                                        </div>
+                                    </>
                                 )}
                             </div>
                         </div>

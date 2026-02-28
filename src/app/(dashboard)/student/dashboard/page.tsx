@@ -174,8 +174,22 @@ export default function StudentDashboard() {
             data.append("title", formData.title);
             data.append("level", formData.level);
             data.append("type", formData.type);
-            if (formData.templateId) {
-                data.append("templateId", formData.templateId);
+
+            // Auto-select template based on academic metadata
+            let autoTemplateId = "";
+            const facultyLower = formData.faculty.toLowerCase();
+            const deptLower = formData.department.toLowerCase();
+
+            if (facultyLower.includes("science") || facultyLower.includes("engineering") || deptLower.includes("computer")) {
+                const scienceTemplate = templates.find(t => t.name.includes("1500VA") || t.name.includes("Inverter") || t.name.includes("UNIJOS"));
+                if (scienceTemplate) autoTemplateId = scienceTemplate.id.toString();
+            } else if (facultyLower.includes("social") || facultyLower.includes("art") || facultyLower.includes("management")) {
+                const socialTemplate = templates.find(t => t.name.toLowerCase().includes("social science"));
+                if (socialTemplate) autoTemplateId = socialTemplate.id.toString();
+            }
+
+            if (autoTemplateId) {
+                data.append("templateId", autoTemplateId);
             }
 
             // Construct Academic Metadata JSON
@@ -232,7 +246,7 @@ export default function StudentDashboard() {
             if (!res.ok) throw new Error("Failed to create project");
 
             const newProject = await res.json();
-            setProjects([newProject, ...projects]);
+            setProjects([{ ...newProject, chapters: newProject.chapters || [] }, ...projects]);
             setShowCreateModal(false);
             setFile(null);
             setFormData(prev => ({ ...prev, title: "", inviteCode: "" })); // Reset basics
@@ -585,30 +599,7 @@ export default function StudentDashboard() {
                                                 </div>
                                             </div>
 
-                                            <div className="space-y-1.5 pt-1">
-                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Structural Template</label>
-                                                <select
-                                                    className="w-full border border-gray-200 bg-gray-50/50 p-3.5 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none bg-white font-medium cursor-pointer"
-                                                    value={formData.templateId}
-                                                    onChange={(e) => setFormData({ ...formData, templateId: e.target.value })}
-                                                >
-                                                    <option value="">Standard (Default) Structure</option>
-                                                    {templates.map(t => {
-                                                        let displayName = t.name;
-                                                        if (t.name.includes("1500VA") || t.name.includes("Inverter") || t.name.includes("UNIJOS")) {
-                                                            displayName = "Science";
-                                                        } else if (t.name.toLowerCase().includes("social science")) {
-                                                            displayName = "Social Science";
-                                                        }
-                                                        return (
-                                                            <option key={t.id} value={t.id}>{displayName}</option>
-                                                        );
-                                                    })}
-                                                </select>
-                                                <p className="text-[10px] text-gray-400 ml-1 italic">
-                                                    Choosing a template pre-configures your project's chapters (e.g. for specific engineering or social science guidelines).
-                                                </p>
-                                            </div>
+
 
                                             <div className="space-y-2 pt-2">
                                                 <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Reference Material (Optional)</label>

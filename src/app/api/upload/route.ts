@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import * as mammoth from "mammoth";
-import pdf from "pdf-parse";
+// pdf-parse is imported dynamically to avoid ESM default export issues in Turbopack
 
 export async function POST(req: Request) {
     try {
@@ -15,8 +15,9 @@ export async function POST(req: Request) {
         let text = "";
 
         if (file.type === "application/pdf") {
-            // @ts-ignore - handled dynamically below
-            const pdfFunc = pdf.default || pdf;
+            const pdfModule = await import("pdf-parse");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const pdfFunc = (pdfModule as any).default || pdfModule;
             const data = await pdfFunc(buffer);
             text = data.text;
         } else if (file.type === "application/vnd.openxmlformats-officedocument.wordprocessingml.document") {
