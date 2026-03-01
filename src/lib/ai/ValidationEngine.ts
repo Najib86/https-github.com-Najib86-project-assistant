@@ -9,7 +9,7 @@ export interface ValidationResult {
 }
 
 export class ValidationEngine {
-    private readonly MIN_WORDS_PER_CHAPTER = 2000; // Realistic academic minimum
+    private readonly MIN_WORDS_PER_CHAPTER = 2500; // Realistic academic minimum
 
     validateSection(sectionTitle: string, content: string): ValidationResult {
         const errors: string[] = [];

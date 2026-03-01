@@ -12,10 +12,14 @@ export const redis = {
             return data as unknown as T;
         }
     },
-    async set(key: string, value: any, options?: { ex?: number }): Promise<string | null> {
+    async set(key: string, value: any, options?: { ex?: number, nx?: boolean }): Promise<string | null> {
         const stringValue = typeof value === "string" ? value : JSON.stringify(value);
-        if (options?.ex) {
+        if (options?.ex && options?.nx) {
+            return await redisClient.set(key, stringValue, "EX", options.ex, "NX");
+        } else if (options?.ex) {
             return await redisClient.set(key, stringValue, "EX", options.ex);
+        } else if (options?.nx) {
+            return await redisClient.set(key, stringValue, "NX");
         } else {
             return await redisClient.set(key, stringValue);
         }
@@ -25,5 +29,8 @@ export const redis = {
     },
     async expire(key: string, seconds: number): Promise<number> {
         return await redisClient.expire(key, seconds);
+    },
+    async del(key: string): Promise<number> {
+        return await redisClient.del(key);
     }
 };

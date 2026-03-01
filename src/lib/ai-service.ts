@@ -42,23 +42,20 @@ export async function generateAIResponse(prompt: string, mode: string = "text"):
         if (cached) return cached;
     } catch { }
 
-    const { generateText } = await import("ai");
-    try {
-        const { text } = await generateText({
-            model: google("gemini-1.5-flash-latest"),
-            prompt: finalPrompt
-        });
+    const result = await orchestrator.generateRaw(finalPrompt);
 
-        let cleaned = text;
-        if (mode === "json") {
-            cleaned = cleaned.replace(/```json/g, "").replace(/```/g, "").trim();
-        }
-
-        try { await redis.set(cacheKey, cleaned, { ex: 3600 }); } catch { }
-        return cleaned;
-    } catch (e: any) {
-        throw new Error("AI Service Unavailable: " + e.message);
+    if (!result.success) {
+        throw new Error(result.error || "AI Service Unavailable");
     }
+
+    let cleaned = result.content;
+
+    if (mode === "json") {
+        cleaned = cleaned.replace(/```json/gi, "").replace(/```/g, "").trim();
+    }
+
+    try { await redis.set(cacheKey, cleaned, { ex: 3600 }); } catch { }
+    return cleaned;
 }
 
 export async function streamAIResponse(prompt: string) {
@@ -80,15 +77,26 @@ export async function generateChapterContent(
     sampleText?: string,
     academicMetadata?: Record<string, any>
 ) {
-    return await orchestrator.generateSection(
-        projectId,
-        chapterNumber,
-        chapterTitle,
-        topic,
-        level,
-        sampleText,
-        academicMetadata
-    );
+    const lockKey = `lock:chapter:${projectId}:${chapterNumber}`;
+    const locked = await redis.set(lockKey, "1", { nx: true, ex: 60 });
+
+    if (!locked) {
+        throw new Error("Chapter generation already in progress.");
+    }
+
+    try {
+        return await orchestrator.generateSection(
+            projectId,
+            chapterNumber,
+            chapterTitle,
+            topic,
+            level,
+            sampleText,
+            academicMetadata
+        );
+    } finally {
+        await redis.del(lockKey);
+    }
 }
 
 /**
@@ -160,42 +168,89 @@ export async function autoUpdateProjectWithResearch(submissionId: number) {
         `;
 
         const analysisJson = await generateAIResponse(analysisPrompt, "json");
-        const updates = JSON.parse(analysisJson);
+        let updates: Record<string, string> = {};
+
+        const firstBrace = analysisJson.indexOf("{");
+        const lastBrace = analysisJson.lastIndexOf("}");
+
+        if (firstBrace !== -1) {
+            try {
+                let jsonSlice = "";
+                if (lastBrace !== -1 && lastBrace > firstBrace) {
+                    jsonSlice = analysisJson.slice(firstBrace, lastBrace + 1);
+                } else {
+                    jsonSlice = analysisJson.slice(firstBrace) + '"}'; // basic heal
+                }
+
+                // Final sanitization for inline breaks
+                jsonSlice = jsonSlice.replace(/\n/g, '\\n').replace(/\r/g, '');
+
+                updates = JSON.parse(jsonSlice);
+            } catch (e) {
+                console.warn("[AI-RESEARCH] JSON Parse Failed:", e);
+                // Primitive fallback
+                updates = { "10": "Research Integrated successfully (Raw fallback):\n" + analysisJson.substring(0, 200) };
+            }
+        } else {
+            throw new Error("Could not extract any JSON from AI output.");
+        }
 
         // 3. Update the chapters in the database with diff highlighting and versioning
         for (const [chapterNum, synthesizedNewContext] of Object.entries(updates as Record<string, string>)) {
             const chapNum = parseInt(chapterNum);
+
+            if (synthesizedNewContext.length < 300) {
+                console.warn(`[AI-RESEARCH] Ignored short synthesized content for chapter ${chapNum}`);
+                continue;
+            }
+
+            if (!orchestrator.validateSectionStructure(chapNum, synthesizedNewContext)) {
+                console.warn(`[AI-RESEARCH] Structural validation failed for synthesized content on chapter ${chapNum}`);
+            }
+
             const existingChapter = (project.chapters as any[]).find((c: any) => c.chapterNumber === chapNum);
 
-            if (existingChapter) {
-                const oldContent = existingChapter.content || "";
+            const lockKey = `lock:chapter:${project.project_id}:${chapNum}`;
+            const locked = await redis.set(lockKey, "1", { nx: true, ex: 60 });
 
-                // Construct diff
-                const diffContent = generateDiffHighlighting("Previous Section Content...", synthesizedNewContext);
-                const updatedContent = `${oldContent}\n\n<br/><hr/><h3>AI RELIANCE: INTEGRATED RESEARCH DATA (${new Date().toLocaleDateString()})</h3>\n${diffContent}`;
+            if (!locked) {
+                console.warn(`[AI-RESEARCH] Chapter ${chapNum} is currently locked. Skipping research update.`);
+                continue;
+            }
 
-                // Create a ChapterVersion for history highlighting
-                await prisma.chapterVersion.create({
-                    data: {
-                        chapterId: existingChapter.chapter_id,
-                        oldContent: oldContent,
-                        newContent: updatedContent,
-                        changeSummary: "Integrated new research data from submission ID: " + submissionId
-                    }
-                });
+            try {
+                if (existingChapter) {
+                    const oldContent = existingChapter.content || "";
 
-                // Update actual chapter
-                await prisma.chapter.update({
-                    where: { chapter_id: existingChapter.chapter_id },
-                    data: {
-                        content: updatedContent,
-                        status: "Draft",
-                        updatedAt: new Date()
-                    }
-                });
+                    // Construct diff
+                    const diffContent = generateDiffHighlighting(oldContent, synthesizedNewContext);
+                    const updatedContent = `${oldContent}\n\n<br/><hr/><h3>AI RELIANCE: INTEGRATED RESEARCH DATA (${new Date().toLocaleDateString()})</h3>\n${diffContent}`;
 
-            } else {
-                console.log(`[AI-RESEARCH] Chapter ID ${chapNum} not found for project ${project.project_id}`);
+                    // Create a ChapterVersion for history highlighting
+                    await prisma.chapterVersion.create({
+                        data: {
+                            chapterId: existingChapter.chapter_id,
+                            oldContent: oldContent,
+                            newContent: updatedContent,
+                            changeSummary: "Integrated new research data from submission ID: " + submissionId
+                        }
+                    });
+
+                    // Update actual chapter
+                    await prisma.chapter.update({
+                        where: { chapter_id: existingChapter.chapter_id },
+                        data: {
+                            content: updatedContent,
+                            status: "Draft",
+                            updatedAt: new Date()
+                        }
+                    });
+
+                } else {
+                    console.log(`[AI-RESEARCH] Chapter ID ${chapNum} not found for project ${project.project_id}`);
+                }
+            } finally {
+                await redis.del(lockKey);
             }
         }
 
