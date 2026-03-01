@@ -7,7 +7,7 @@ export async function GET(_: Request, { params }: { params: Promise<{ chapterId:
         const { chapterId } = await params;
         const versions = await prisma.chapterVersion.findMany({
             where: { chapterId: parseInt(chapterId) },
-            orderBy: { versionNumber: 'desc' }
+            orderBy: { createdAt: 'desc' }
         });
 
         return NextResponse.json(versions);
@@ -29,18 +29,12 @@ export async function POST(_: Request, { params }: { params: Promise<{ chapterId
             return NextResponse.json({ error: "Chapter not found" }, { status: 404 });
         }
 
-        // Logic to get next version number
-        const lastVersion = await prisma.chapterVersion.findFirst({
-            where: { chapterId: parseInt(chapterId) },
-            orderBy: { versionNumber: 'desc' }
-        });
-        const nextVersion = (lastVersion?.versionNumber || 0) + 1;
-
         const newVersion = await prisma.chapterVersion.create({
             data: {
                 chapterId: parseInt(chapterId),
-                contentSnapshot: chapter.content || "",
-                versionNumber: nextVersion,
+                oldContent: chapter.content || "",
+                newContent: chapter.content || "",
+                changeSummary: "Manual snapshot",
                 createdAt: new Date()
             }
         });

@@ -145,6 +145,7 @@ model Project {
   activities          ProjectActivity[]
   academicMetadata    Json?
   researchSubmissions ResearchSubmission[]
+  generationLogs      GenerationLog[]
 }
 
 model Chapter {
@@ -165,12 +166,30 @@ model Chapter {
 }
 
 model ChapterVersion {
-  version_id      Int      @id @default(autoincrement())
-  chapterId       Int
-  versionNumber   Int
-  contentSnapshot String   @db.Text
+  id            Int      @id @default(autoincrement())
+  chapterId     Int
+  oldContent    String   @db.Text
+  newContent    String   @db.Text
+  changeSummary String?  @db.Text
+  createdAt     DateTime @default(now())
+  chapter       Chapter  @relation(fields: [chapterId], references: [chapter_id], onDelete: Cascade)
+}
+
+model GenerationLog {
+  id              Int      @id @default(autoincrement())
+  projectId       Int
+  chapterNumber   Int
+  provider        String
+  retries         Int
+  validationScore Float
+  wordCount       Int
+  success         Boolean
+  failureReason   String?  @db.Text
   createdAt       DateTime @default(now())
-  chapter         Chapter  @relation(fields: [chapterId], references: [chapter_id], onDelete: Cascade)
+
+  project         Project  @relation(fields: [projectId], references: [project_id], onDelete: Cascade)
+
+  @@index([projectId])
 }
 
 model Comment {

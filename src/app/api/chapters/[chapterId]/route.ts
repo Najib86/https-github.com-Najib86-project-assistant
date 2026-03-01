@@ -42,8 +42,9 @@ export async function PUT(req: Request, { params }: { params: Promise<{ chapterI
             await prisma.chapterVersion.create({
                 data: {
                     chapterId: parseInt(chapterId),
-                    contentSnapshot: content || "",
-                    versionNumber: await getNextVersionNumber(parseInt(chapterId)),
+                    oldContent: content || "",
+                    newContent: content || "",
+                    changeSummary: "Manual version creation",
                     createdAt: new Date()
                 }
             });
@@ -68,10 +69,4 @@ export async function PUT(req: Request, { params }: { params: Promise<{ chapterI
     }
 }
 
-async function getNextVersionNumber(chapterId: number) {
-    const lastVersion = await prisma.chapterVersion.findFirst({
-        where: { chapterId },
-        orderBy: { versionNumber: 'desc' }
-    });
-    return (lastVersion?.versionNumber || 0) + 1;
-}
+

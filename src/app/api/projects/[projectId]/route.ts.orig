@@ -37,29 +37,6 @@ export async function GET(_: Request, { params }: { params: Promise<{ projectId:
     }
 }
 
-export async function PATCH(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
-    try {
-        const { projectId } = await params;
-        const projectIdInt = parseInt(projectId);
-        if (isNaN(projectIdInt)) return NextResponse.json({ error: "Invalid Project ID" }, { status: 400 });
-
-        const body = await req.json();
-        const { academicMetadata } = body;
-
-        const updatedProject = await prisma.project.update({
-            where: { project_id: projectIdInt },
-            data: {
-                academicMetadata: academicMetadata
-            }
-        });
-
-        return NextResponse.json(updatedProject);
-    } catch (error) {
-        console.error("Error updating project:", error);
-        return NextResponse.json({ error: "Failed to update project" }, { status: 500 });
-    }
-}
-
 export async function DELETE(req: Request, { params }: { params: Promise<{ projectId: string }> }) {
     try {
         const { projectId } = await params;

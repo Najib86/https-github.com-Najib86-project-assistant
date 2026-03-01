@@ -5,7 +5,7 @@ import { useState, useEffect } from "react";
 import {
     X, FileText, Download, Loader2,
     Printer, Copy, Check, AlertCircle,
-    ShieldCheck, Eye
+    ShieldCheck, Eye, ChevronLeft, ChevronRight, CheckCircle2
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { validateNOUProject, ValidationResult } from "@/lib/validations/nou-project";
@@ -25,6 +25,7 @@ interface Project {
     project_id: number;
     title: string;
     chapters: Chapter[];
+    academicMetadata?: any;
 }
 
 interface Props {
@@ -73,9 +74,117 @@ export default function ExportPreviewModal({ project, isOpen, onClose }: Props) 
         }
     };
 
+    const [exportStep, setExportStep] = useState(1);
+    const [isSavingMeta, setIsSavingMeta] = useState(false);
+
+    // Default form state from metadata
+    const meta = project?.academicMetadata || {};
+    const [formData, setFormData] = useState({
+        fullName: meta?.student?.fullName === "Student Draft" ? "" : (meta?.student?.fullName || ""),
+        studentIdNo: meta?.student?.studentIdNo === "N/A" ? "" : (meta?.student?.studentIdNo || ""),
+        email: meta?.student?.email || "",
+        phone: meta?.student?.phone === "N/A" ? "" : (meta?.student?.phone || ""),
+
+        institutionName: meta?.institution?.name === "TBD" ? "" : (meta?.institution?.name || ""),
+        faculty: meta?.institution?.faculty === "TBD" ? "" : (meta?.institution?.faculty || ""),
+        department: meta?.institution?.department === "TBD" ? "" : (meta?.institution?.department || ""),
+        programme: meta?.institution?.programme === "TBD" ? "" : (meta?.institution?.programme || ""),
+        graduationYear: meta?.institution?.graduationYear || new Date().getFullYear().toString(),
+
+        supervisorTitle: meta?.supervisor?.title || "",
+        supervisorName: meta?.supervisor?.name === "Pending" ? "" : (meta?.supervisor?.name || ""),
+        supervisorEmail: meta?.supervisor?.email === "N/A" ? "" : (meta?.supervisor?.email || ""),
+
+        researchArea: meta?.research?.area || project?.title || "",
+        keywords: meta?.research?.keywords?.join(', ') || "",
+    });
+
+    const facultiesList = [
+        { name: "Faculty of Agricultural Sciences" },
+        { name: "Faculty of Arts" },
+        { name: "Faculty of Education" },
+        { name: "Faculty of Health Sciences" },
+        { name: "Faculty of Law" },
+        { name: "Faculty of Management Sciences" },
+        { name: "Faculty of Sciences" },
+        { name: "Faculty of Social Sciences" },
+    ];
+
+    const departmentsList = [
+        { name: "Computer Science" },
+        { name: "Information Technology" },
+        { name: "Software Engineering" },
+        { name: "Business Administration" },
+        { name: "Accounting" },
+        { name: "Economics" },
+        { name: "Mass Communication" },
+        { name: "Political Science" },
+    ];
+
+    const coursesList = [
+        "B.Sc. Computer Science",
+        "B.Sc. Information Technology",
+        "B.Sc. Software Engineering",
+        "B.Sc. Business Administration",
+    ];
+
+    const universitiesList = [
+        { name: "National Open University of Nigeria" },
+        { name: "University of Lagos" },
+        { name: "Obafemi Awolowo University" },
+        { name: "Ahmadu Bello University" },
+        { name: "University of Ibadan" },
+    ];
+
+    const handleSaveMetadata = async () => {
+        setIsSavingMeta(true);
+        try {
+            const newMeta = {
+                student: {
+                    fullName: formData.fullName || "Student Draft",
+                    studentIdNo: formData.studentIdNo || "N/A",
+                    email: formData.email,
+                    phone: formData.phone || "N/A"
+                },
+                institution: {
+                    name: formData.institutionName || "TBD",
+                    faculty: formData.faculty || "TBD",
+                    department: formData.department || "TBD",
+                    programme: formData.programme || "TBD",
+                    graduationYear: formData.graduationYear || new Date().getFullYear().toString()
+                },
+                supervisor: {
+                    title: formData.supervisorTitle || "",
+                    name: formData.supervisorName || "Pending",
+                    email: formData.supervisorEmail || "N/A"
+                },
+                research: {
+                    area: formData.researchArea || project?.title || "",
+                    keywords: formData.keywords ? formData.keywords.split(',').map((k: string) => k.trim()).filter(Boolean) : []
+                }
+            };
+
+            await fetch(`/api/projects/${project.project_id}`, {
+                method: "PATCH",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ academicMetadata: newMeta })
+            });
+
+            // Re-validate after saving (could optionally refresh the page entirely if needed)
+            setExportStep(4);
+        } catch (e) {
+            console.error(e);
+            alert("Failed to save details. Skipping to export preview.");
+            setExportStep(4);
+        } finally {
+            setIsSavingMeta(false);
+        }
+    };
+
     useEffect(() => {
         if (isOpen && project) {
             setValidation(validateNOUProject(project));
+            setExportStep(1); // Reset export steps when modal opened
         }
     }, [isOpen, project]);
 
@@ -248,285 +357,513 @@ export default function ExportPreviewModal({ project, isOpen, onClose }: Props) 
     };
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
-            <div
-                className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300"
-                onClick={onClose}
-            />
-
-            <div className="relative w-full max-w-6xl h-[95vh] bg-white dark:bg-gray-950 rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-gray-100 dark:border-gray-800">
-                {/* Header */}
-                <div className="p-6 md:px-10 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-950 sticky top-0 z-10">
-                    <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center">
-                            <FileText className="h-6 w-6 text-indigo-600" />
+        <>
+            {exportStep < 4 ? (
+                <div className="fixed inset-0 z-[100] bg-gray-900/50 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200">
+                    <div className="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                        <div className="p-8 border-b border-gray-100 flex items-center justify-between bg-white relative z-10">
+                            <div>
+                                <h2 className="text-xl font-black text-gray-900">Finalize Project Details</h2>
+                                <p className="text-sm text-gray-400 font-medium">Step {exportStep} of 3 (Optional)</p>
+                            </div>
+                            <Button variant="ghost" size="icon" onClick={() => { setExportStep(1); onClose(); }} className="rounded-full bg-gray-50 hover:bg-red-50 hover:text-red-500 transition-colors">
+                                <X className="h-6 w-6" />
+                            </Button>
                         </div>
-                        <div>
-                            <h2 className="text-xl font-black text-gray-900 dark:text-white leading-tight">Project Export Center</h2>
-                            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">NOU Guidelines Compliant</p>
-                        </div>
-                    </div>
 
-                    <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={handleSaveTemplate}
-                            disabled={isSavingTemplate}
-                            className="rounded-xl flex gap-2 border-indigo-200 text-indigo-600"
-                        >
-                            {isSavingTemplate ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
-                            Save Structure as Template
-                        </Button>
-                        <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-2" />
-                        <Button
-                            variant={showValidation ? "default" : "outline"}
-                            onClick={() => setShowValidation(!showValidation)}
-                            className="rounded-xl flex gap-2"
-                        >
-                            {validation?.isValid ? <ShieldCheck className="h-4 w-4 text-emerald-500" /> : <AlertCircle className="h-4 w-4 text-amber-500" />}
-                            Academic Audit
-                        </Button>
-                        <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-2" />
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handleCopy}
-                            className="rounded-xl"
-                            title="Copy text"
-                        >
-                            {copied ? <Check className="h-5 w-5 text-emerald-500" /> : <Copy className="h-5 w-5" />}
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={handlePrint}
-                            className="rounded-xl"
-                            title="Print"
-                        >
-                            <Printer className="h-5 w-5" />
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={onClose}
-                            className="rounded-xl"
-                        >
-                            <X className="h-6 w-6" />
-                        </Button>
-                    </div>
-                </div>
-
-                <div className="flex flex-1 overflow-hidden">
-                    {/* Sidebar / Validation Report */}
-                    {showValidation && (
-                        <div className="w-80 border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 overflow-y-auto p-6 animate-in slide-in-from-left duration-300">
-                            <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-6">Academic Audit</h3>
-
-                            <div className="space-y-6">
-                                {/* Status Card */}
-                                <div className={`p-4 rounded-2xl border ${validation?.isValid ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-amber-50 border-amber-100 text-amber-700'}`}>
-                                    <div className="flex items-center gap-2 mb-2">
-                                        {validation?.isValid ? <ShieldCheck className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
-                                        <span className="font-black uppercase text-[10px] tracking-wider">Status</span>
+                        <div className="flex-1 overflow-y-auto p-6 md:p-8">
+                            {exportStep === 1 && (
+                                <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
+                                    <h3 className="text-xl font-bold text-gray-800">Student Information</h3>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Full Name</label>
+                                        <input
+                                            className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                            value={formData.fullName}
+                                            onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                            placeholder="Your full legal name"
+                                        />
                                     </div>
-                                    <p className="text-sm font-bold">{validation?.isValid ? "Compliant with NOU Guide" : "Action Needed"}</p>
-                                </div>
-
-                                {/* Metric: Page Count */}
-                                <div>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Estimated Pages</label>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-2xl font-black">{validation?.metrics.totalPageEstimate || 0}</span>
-                                        <span className="text-[10px] font-bold text-gray-400">Target: 40-60</span>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Student ID / Matric No</label>
+                                            <input
+                                                className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                                value={formData.studentIdNo}
+                                                onChange={(e) => setFormData({ ...formData, studentIdNo: e.target.value })}
+                                                placeholder="e.g. ENG/2023/001"
+                                            />
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Phone Number</label>
+                                            <input
+                                                className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                                value={formData.phone}
+                                                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                                placeholder="+234..."
+                                            />
+                                        </div>
                                     </div>
-                                    <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mt-2 overflow-hidden">
-                                        <div
-                                            className={`h-full rounded-full ${(validation?.metrics.totalPageEstimate || 0) >= 40 && (validation?.metrics.totalPageEstimate || 0) <= 60 ? 'bg-emerald-500' : 'bg-amber-500'}`}
-                                            style={{ width: `${Math.min(((validation?.metrics.totalPageEstimate || 0) / 60) * 100, 100)}%` }}
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Email Address</label>
+                                        <input
+                                            type="email"
+                                            className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                            value={formData.email}
+                                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                            placeholder="student@university.edu"
                                         />
                                     </div>
                                 </div>
+                            )}
 
-                                {/* Metric: Abstract */}
-                                <div>
-                                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Abstract Words</label>
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-2xl font-black">{validation?.metrics.abstractWordCount || 0}</span>
-                                        <span className="text-[10px] font-bold text-gray-400">Max: 400</span>
+                            {exportStep === 2 && (
+                                <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
+                                    <h3 className="text-xl font-bold text-gray-800">Institution Details</h3>
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Institution Name</label>
+                                        <input
+                                            list="institutions-list"
+                                            className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                            value={formData.institutionName}
+                                            onChange={(e) => setFormData({ ...formData, institutionName: e.target.value })}
+                                            placeholder="e.g. University of Lagos"
+                                        />
+                                        <datalist id="institutions-list">
+                                            {universitiesList.map((u, i) => <option key={i} value={u.name} />)}
+                                        </datalist>
                                     </div>
-                                    <p className={`text-[10px] font-bold mt-1 ${(validation?.metrics.abstractWordCount || 0) > 400 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                        {(validation?.metrics.abstractWordCount || 0) > 400 ? "Too long" : "Length OK"}
-                                    </p>
-                                </div>
-
-                                {/* Errors/Warnings */}
-                                {((validation?.errors?.length || 0) > 0 || (validation?.warnings?.length || 0) > 0) && (
-                                    <>
-                                        <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">
-                                            {validation?.errors?.map((err, i) => (
-                                                <div key={i} className="flex gap-2 text-xs text-red-600 font-bold leading-tight">
-                                                    <AlertCircle className="h-3 w-3 shrink-0" />
-                                                    <span>{err}</span>
-                                                </div>
-                                            ))}
-                                            {validation?.warnings?.map((warn, i) => (
-                                                <div key={i} className="flex gap-2 text-xs text-amber-600 font-bold leading-tight">
-                                                    <AlertCircle className="h-3 w-3 shrink-0" />
-                                                    <span>{warn}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                        {fixStatus === "confirm" ? (
-                                            <div className="pt-4 p-5 mt-4 border rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30 flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200">
-                                                <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400 font-black text-sm uppercase tracking-wider">
-                                                    <AlertCircle className="h-4 w-4" />
-                                                    <span>AI Optimization</span>
-                                                </div>
-                                                <p className="text-xs text-indigo-600/80 dark:text-indigo-300/80 font-medium pb-2">This will automatically invoke the AI Orchestrator to resolve missing chunks and adapt lengths. Proceed?</p>
-                                                <div className="flex gap-2">
-                                                    <Button size="sm" variant="outline" className="flex-1 bg-white dark:bg-gray-900 rounded-xl" onClick={() => setFixStatus("idle")}>Cancel</Button>
-                                                    <Button size="sm" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl" onClick={handleFixGaps}>Start Auto-Fix</Button>
-                                                </div>
-                                            </div>
-                                        ) : fixStatus === "success" ? (
-                                            <div className="pt-4 p-5 mt-4 border rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30 flex flex-col gap-2 items-center text-center animate-in fade-in duration-300">
-                                                <div className="h-8 w-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-1">
-                                                    <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-                                                </div>
-                                                <p className="text-sm font-black text-emerald-700 dark:text-emerald-400">{fixMessage}</p>
-                                            </div>
-                                        ) : fixStatus === "error" ? (
-                                            <div className="pt-4 p-5 mt-4 border rounded-2xl bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30 flex flex-col gap-2 items-center text-center animate-in shake duration-300">
-                                                <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400 mb-1" />
-                                                <p className="text-sm font-bold text-red-700 dark:text-red-400 leading-tight">{fixMessage}</p>
-                                            </div>
-                                        ) : (
-                                            <div className="pt-6">
-                                                <Button
-                                                    onClick={() => setFixStatus("confirm")}
-                                                    disabled={fixStatus === "fixing"}
-                                                    className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-100 dark:shadow-none h-12 font-bold"
-                                                >
-                                                    {fixStatus === "fixing" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                                    {fixStatus === "fixing" ? "Optimizing..." : "Prompt AI to Fix & Validate"}
-                                                </Button>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                            </div>
-                        </div>
-                    )}
-
-                    {/* Content Area */}
-                    <div className="flex-1 overflow-y-auto p-8 md:p-12 lg:p-20 bg-gray-50/30 dark:bg-gray-900/30">
-                        <div className="max-w-[800px] mx-auto bg-white dark:bg-gray-900 shadow-xl shadow-indigo-50/20 dark:shadow-none border border-gray-100 dark:border-gray-800 p-12 md:p-20 rounded-[2rem] min-h-screen printable">
-                            {/* Document Mockup */}
-                            <div className="text-center mb-24 space-y-8">
-                                <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white uppercase tracking-tight leading-tight">
-                                    {project.title}
-                                </h1>
-                                <div className="h-1.5 w-24 bg-indigo-600 mx-auto rounded-full" />
-                                <div className="space-y-1">
-                                    <p className="text-gray-400 font-bold uppercase tracking-[0.3em] text-[10px]">Academic Research Thesis</p>
-                                    <p className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-widest">National Open University of Nigeria</p>
-                                </div>
-                            </div>
-
-                            {/* Chapters Content */}
-                            <div className="space-y-32">
-                                {sortedChapters.map(chapter => (
-                                    <div key={chapter.chapter_id} className="space-y-10 group">
-                                        <div className="text-center space-y-2">
-                                            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.4em]">Chapter {chapter.chapterNumber}</p>
-                                            <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
-                                                {chapter.title || "Untitled"}
-                                            </h2>
-                                        </div>
-
-                                        {chapter.content ? (
-                                            <div
-                                                className="prose prose-indigo dark:prose-invert max-w-none prose-p:leading-[2.0] prose-p:text-gray-700 dark:prose-p:text-gray-300 font-serif text-lg text-justify"
-                                                dangerouslySetInnerHTML={{ __html: chapter.content }}
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Faculty / School</label>
+                                            <input
+                                                list="faculties-list"
+                                                className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                                value={formData.faculty}
+                                                onChange={(e) => setFormData({ ...formData, faculty: e.target.value })}
+                                                placeholder="e.g. Faculty of Engineering"
                                             />
-                                        ) : (
-                                            <div className="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-12 border-2 border-dashed border-gray-200 dark:border-gray-800 text-center">
-                                                <p className="text-sm text-gray-400 font-bold italic">This chapter is currently empty.</p>
-                                            </div>
-                                        )}
+                                            <datalist id="faculties-list">
+                                                {facultiesList.map((f, i) => <option key={i} value={f.name} />)}
+                                            </datalist>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Department</label>
+                                            <input
+                                                list="departments-list"
+                                                className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                                value={formData.department}
+                                                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                                                placeholder="e.g. Computer Engineering"
+                                            />
+                                            <datalist id="departments-list">
+                                                {departmentsList.map((d, i) => <option key={i} value={d.name} />)}
+                                            </datalist>
+                                        </div>
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Programme / Degree</label>
+                                            <input
+                                                list="courses-list"
+                                                className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                                value={formData.programme}
+                                                onChange={(e) => setFormData({ ...formData, programme: e.target.value })}
+                                                placeholder="e.g. B.Sc. Computer Science"
+                                            />
+                                            <datalist id="courses-list">
+                                                {coursesList.map((c, i) => <option key={i} value={c} />)}
+                                            </datalist>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Graduation Year</label>
+                                            <input
+                                                className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                                value={formData.graduationYear}
+                                                onChange={(e) => setFormData({ ...formData, graduationYear: e.target.value })}
+                                                placeholder="202X"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
 
-                            <div className="mt-40 pt-10 border-t border-gray-100 dark:border-gray-800 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">
-                                Faculty of Social Sciences Guide Applied
-                            </div>
+                            {exportStep === 3 && (
+                                <div className="space-y-5 animate-in fade-in slide-in-from-right-4">
+                                    <h3 className="text-xl font-bold text-gray-800">Supervisor & Research Info</h3>
+
+                                    <div className="bg-blue-50/50 p-6 rounded-2xl border border-blue-100 mb-2">
+                                        <h4 className="text-sm font-bold text-blue-800 mb-4">Primary Supervisor</h4>
+                                        <div className="grid grid-cols-3 gap-4 mb-4">
+                                            <div className="col-span-1 space-y-1.5">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Title</label>
+                                                <select
+                                                    className="w-full border border-blue-200 bg-white p-3.5 rounded-xl text-base font-medium outline-none border-r-8 border-transparent"
+                                                    value={formData.supervisorTitle}
+                                                    onChange={(e) => setFormData({ ...formData, supervisorTitle: e.target.value })}
+                                                >
+                                                    <option value="">Select...</option>
+                                                    <option value="Mr.">Mr.</option>
+                                                    <option value="Mrs.">Mrs.</option>
+                                                    <option value="Dr.">Dr.</option>
+                                                    <option value="Prof.">Prof.</option>
+                                                </select>
+                                            </div>
+                                            <div className="col-span-2 space-y-1.5">
+                                                <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Name</label>
+                                                <input
+                                                    className="w-full border border-blue-200 bg-white p-3.5 rounded-xl text-base font-medium outline-none"
+                                                    value={formData.supervisorName}
+                                                    onChange={(e) => setFormData({ ...formData, supervisorName: e.target.value })}
+                                                    placeholder="e.g. John Doe"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Research Area</label>
+                                        <input
+                                            className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                            value={formData.researchArea}
+                                            onChange={(e) => setFormData({ ...formData, researchArea: e.target.value })}
+                                            placeholder="e.g. Machine Learning in Healthcare"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs font-bold uppercase tracking-wider text-gray-400 ml-1">Keywords</label>
+                                        <input
+                                            className="w-full border border-gray-200 bg-gray-50/50 p-4 rounded-xl focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all outline-none font-medium placeholder:text-gray-300 text-base"
+                                            value={formData.keywords}
+                                            onChange={(e) => setFormData({ ...formData, keywords: e.target.value })}
+                                            placeholder="Comma separated e.g. AI, Diagnostics"
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="p-6 md:px-8 border-t border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row gap-3">
+                            {exportStep > 1 && (
+                                <Button
+                                    type="button"
+                                    variant="outline"
+                                    onClick={() => setExportStep(prev => prev - 1)}
+                                    disabled={isSavingMeta}
+                                    className="rounded-xl font-bold border-gray-200 bg-white h-12 px-6"
+                                >
+                                    <ChevronLeft className="mr-1 h-4 w-4" /> Back
+                                </Button>
+                            )}
+
+                            <div className="flex-1" />
+
+                            <Button
+                                type="button"
+                                variant="ghost"
+                                onClick={handleSaveMetadata}
+                                disabled={isSavingMeta}
+                                className="rounded-xl font-bold text-gray-400 hover:text-indigo-600 h-12 px-6"
+                            >
+                                Skip to Export Preview
+                            </Button>
+
+                            {exportStep < 3 ? (
+                                <Button type="button" onClick={() => setExportStep(prev => prev + 1)} className="rounded-xl h-12 font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200 px-8">
+                                    Next <ChevronRight className="ml-1 h-4 w-4" />
+                                </Button>
+                            ) : (
+                                <Button type="button" onClick={handleSaveMetadata} disabled={isSavingMeta} className="rounded-xl h-12 font-bold bg-indigo-600 text-white shadow-lg shadow-indigo-200 px-8">
+                                    {isSavingMeta ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : <CheckCircle2 className="mr-2 h-4 w-4" />}
+                                    {isSavingMeta ? "Saving..." : "Save & Preview"}
+                                </Button>
+                            )}
                         </div>
                     </div>
                 </div>
+            ) : (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-8">
+                    <div
+                        className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-300"
+                        onClick={() => { setExportStep(1); onClose(); }}
+                    />
 
-                {/* Footer Actions */}
-                <div className="p-6 md:px-10 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-950 z-10">
-                    <div className="hidden sm:flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
-                            <ShieldCheck className="h-5 w-5 text-emerald-600" />
-                        </div>
-                        <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest max-w-[200px] leading-relaxed">
-                            Exported files include professional formatting and pagination.
-                        </p>
-                    </div>
-
-                    <div className="flex gap-4 w-full sm:w-auto items-center">
-                        {isBatchExporting && (
-                            <div className="flex flex-col items-end mr-4 min-w-[150px]">
-                                <span className="text-[10px] font-black uppercase text-indigo-600 mb-1">Building Package: {exportProgress}%</span>
-                                <div className="w-32 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
-                                    <div className="h-full bg-indigo-600 transition-all duration-300" style={{ width: `${exportProgress}%` }} />
+                    <div className="relative w-full max-w-6xl h-[95vh] bg-white dark:bg-gray-950 rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300 border border-gray-100 dark:border-gray-800">
+                        {/* Header */}
+                        <div className="p-6 md:px-10 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-950 sticky top-0 z-10">
+                            <div className="flex items-center gap-4">
+                                <div className="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-2xl flex items-center justify-center">
+                                    <FileText className="h-6 w-6 text-indigo-600" />
+                                </div>
+                                <div>
+                                    <h2 className="text-xl font-black text-gray-900 dark:text-white leading-tight">Project Export Center</h2>
+                                    <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">NOU Guidelines Compliant</p>
                                 </div>
                             </div>
-                        )}
 
-                        <Button
-                            variant="outline"
-                            onClick={handleBatchExport}
-                            disabled={isBatchExporting}
-                            className="flex-1 sm:flex-none rounded-xl font-bold h-14 px-6 border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-sm md:text-base"
-                        >
-                            {isBatchExporting ? (
-                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Zipping...</>
-                            ) : (
-                                <><Download className="mr-2 h-4 w-4" /> Download Package (ZIP)</>
-                            )}
-                        </Button>
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={handleSaveTemplate}
+                                    disabled={isSavingTemplate}
+                                    className="rounded-xl flex gap-2 border-indigo-200 text-indigo-600"
+                                >
+                                    {isSavingTemplate ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShieldCheck className="h-4 w-4" />}
+                                    Save Structure as Template
+                                </Button>
+                                <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-2" />
+                                <Button
+                                    variant={showValidation ? "default" : "outline"}
+                                    onClick={() => setShowValidation(!showValidation)}
+                                    className="rounded-xl flex gap-2"
+                                >
+                                    {validation?.isValid ? <ShieldCheck className="h-4 w-4 text-emerald-500" /> : <AlertCircle className="h-4 w-4 text-amber-500" />}
+                                    Academic Audit
+                                </Button>
+                                <div className="w-px h-6 bg-gray-200 dark:bg-gray-800 mx-2" />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handleCopy}
+                                    className="rounded-xl"
+                                    title="Copy text"
+                                >
+                                    {copied ? <Check className="h-5 w-5 text-emerald-500" /> : <Copy className="h-5 w-5" />}
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={handlePrint}
+                                    className="rounded-xl"
+                                    title="Print"
+                                >
+                                    <Printer className="h-5 w-5" />
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => { setExportStep(1); onClose(); }}
+                                    className="rounded-xl"
+                                >
+                                    <X className="h-6 w-6" />
+                                </Button>
+                            </div>
+                        </div>
 
-                        <Button
-                            variant="outline"
-                            onClick={() => handlePdfExport(false)}
-                            disabled={isPdfExporting || isBatchExporting}
-                            className="flex-1 sm:flex-none rounded-xl font-bold h-14 px-6 border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-sm md:text-base"
-                        >
-                            {isPdfExporting ? (
-                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Rendering PDF...</>
-                            ) : (
-                                <><Eye className="mr-2 h-4 w-4" /> PDF Only</>
-                            )}
-                        </Button>
+                        <div className="flex flex-1 overflow-hidden">
+                            {/* Sidebar / Validation Report */}
+                            {showValidation && (
+                                <div className="w-80 border-r border-gray-100 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/50 overflow-y-auto p-6 animate-in slide-in-from-left duration-300">
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-gray-400 mb-6">Academic Audit</h3>
 
-                        <Button
-                            onClick={handleDownload}
-                            disabled={isDownloading || isBatchExporting}
-                            className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black h-14 px-10 shadow-xl shadow-indigo-100 dark:shadow-none transition-all active:scale-[0.98] text-sm md:text-base"
-                        >
-                            {isDownloading ? (
-                                <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Fetching...</>
-                            ) : (
-                                <><Download className="mr-2 h-4 w-4" /> Word Only</>
+                                    <div className="space-y-6">
+                                        {/* Status Card */}
+                                        <div className={`p-4 rounded-2xl border ${validation?.isValid ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-amber-50 border-amber-100 text-amber-700'}`}>
+                                            <div className="flex items-center gap-2 mb-2">
+                                                {validation?.isValid ? <ShieldCheck className="h-5 w-5" /> : <AlertCircle className="h-5 w-5" />}
+                                                <span className="font-black uppercase text-[10px] tracking-wider">Status</span>
+                                            </div>
+                                            <p className="text-sm font-bold">{validation?.isValid ? "Compliant with NOU Guide" : "Action Needed"}</p>
+                                        </div>
+
+                                        {/* Metric: Page Count */}
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Estimated Pages</label>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-2xl font-black">{validation?.metrics.totalPageEstimate || 0}</span>
+                                                <span className="text-[10px] font-bold text-gray-400">Target: 40-60</span>
+                                            </div>
+                                            <div className="w-full h-1.5 bg-gray-200 dark:bg-gray-800 rounded-full mt-2 overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full ${(validation?.metrics.totalPageEstimate || 0) >= 40 && (validation?.metrics.totalPageEstimate || 0) <= 60 ? 'bg-emerald-500' : 'bg-amber-500'}`}
+                                                    style={{ width: `${Math.min(((validation?.metrics.totalPageEstimate || 0) / 60) * 100, 100)}%` }}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        {/* Metric: Abstract */}
+                                        <div>
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 block mb-2">Abstract Words</label>
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-2xl font-black">{validation?.metrics.abstractWordCount || 0}</span>
+                                                <span className="text-[10px] font-bold text-gray-400">Max: 400</span>
+                                            </div>
+                                            <p className={`text-[10px] font-bold mt-1 ${(validation?.metrics.abstractWordCount || 0) > 400 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                {(validation?.metrics.abstractWordCount || 0) > 400 ? "Too long" : "Length OK"}
+                                            </p>
+                                        </div>
+
+                                        {/* Errors/Warnings */}
+                                        {((validation?.errors?.length || 0) > 0 || (validation?.warnings?.length || 0) > 0) && (
+                                            <>
+                                                <div className="space-y-4 pt-4 border-t border-gray-200 dark:border-gray-800">
+                                                    {validation?.errors?.map((err, i) => (
+                                                        <div key={i} className="flex gap-2 text-xs text-red-600 font-bold leading-tight">
+                                                            <AlertCircle className="h-3 w-3 shrink-0" />
+                                                            <span>{err}</span>
+                                                        </div>
+                                                    ))}
+                                                    {validation?.warnings?.map((warn, i) => (
+                                                        <div key={i} className="flex gap-2 text-xs text-amber-600 font-bold leading-tight">
+                                                            <AlertCircle className="h-3 w-3 shrink-0" />
+                                                            <span>{warn}</span>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                                {fixStatus === "confirm" ? (
+                                                    <div className="pt-4 p-5 mt-4 border rounded-2xl bg-indigo-50/50 dark:bg-indigo-900/10 border-indigo-100 dark:border-indigo-900/30 flex flex-col gap-3 animate-in fade-in zoom-in-95 duration-200">
+                                                        <div className="flex items-center gap-2 text-indigo-700 dark:text-indigo-400 font-black text-sm uppercase tracking-wider">
+                                                            <AlertCircle className="h-4 w-4" />
+                                                            <span>AI Optimization</span>
+                                                        </div>
+                                                        <p className="text-xs text-indigo-600/80 dark:text-indigo-300/80 font-medium pb-2">This will automatically invoke the AI Orchestrator to resolve missing chunks and adapt lengths. Proceed?</p>
+                                                        <div className="flex gap-2">
+                                                            <Button size="sm" variant="outline" className="flex-1 bg-white dark:bg-gray-900 rounded-xl" onClick={() => setFixStatus("idle")}>Cancel</Button>
+                                                            <Button size="sm" className="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl" onClick={handleFixGaps}>Start Auto-Fix</Button>
+                                                        </div>
+                                                    </div>
+                                                ) : fixStatus === "success" ? (
+                                                    <div className="pt-4 p-5 mt-4 border rounded-2xl bg-emerald-50 dark:bg-emerald-900/10 border-emerald-100 dark:border-emerald-900/30 flex flex-col gap-2 items-center text-center animate-in fade-in duration-300">
+                                                        <div className="h-8 w-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center mb-1">
+                                                            <Check className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                                                        </div>
+                                                        <p className="text-sm font-black text-emerald-700 dark:text-emerald-400">{fixMessage}</p>
+                                                    </div>
+                                                ) : fixStatus === "error" ? (
+                                                    <div className="pt-4 p-5 mt-4 border rounded-2xl bg-red-50 dark:bg-red-900/10 border-red-100 dark:border-red-900/30 flex flex-col gap-2 items-center text-center animate-in shake duration-300">
+                                                        <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400 mb-1" />
+                                                        <p className="text-sm font-bold text-red-700 dark:text-red-400 leading-tight">{fixMessage}</p>
+                                                    </div>
+                                                ) : (
+                                                    <div className="pt-6">
+                                                        <Button
+                                                            onClick={() => setFixStatus("confirm")}
+                                                            disabled={fixStatus === "fixing"}
+                                                            className="w-full bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl shadow-lg shadow-indigo-100 dark:shadow-none h-12 font-bold"
+                                                        >
+                                                            {fixStatus === "fixing" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                            {fixStatus === "fixing" ? "Optimizing..." : "Prompt AI to Fix & Validate"}
+                                                        </Button>
+                                                    </div>
+                                                )}
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
                             )}
-                        </Button>
+
+                            {/* Content Area */}
+                            <div className="flex-1 overflow-y-auto p-8 md:p-12 lg:p-20 bg-gray-50/30 dark:bg-gray-900/30">
+                                <div className="max-w-[800px] mx-auto bg-white dark:bg-gray-900 shadow-xl shadow-indigo-50/20 dark:shadow-none border border-gray-100 dark:border-gray-800 p-12 md:p-20 rounded-[2rem] min-h-screen printable">
+                                    {/* Document Mockup */}
+                                    <div className="text-center mb-24 space-y-8">
+                                        <h1 className="text-3xl md:text-5xl font-black text-gray-900 dark:text-white uppercase tracking-tight leading-tight">
+                                            {project.title}
+                                        </h1>
+                                        <div className="h-1.5 w-24 bg-indigo-600 mx-auto rounded-full" />
+                                        <div className="space-y-1">
+                                            <p className="text-gray-400 font-bold uppercase tracking-[0.3em] text-[10px]">Academic Research Thesis</p>
+                                            <p className="text-gray-900 dark:text-white font-black text-xs uppercase tracking-widest">National Open University of Nigeria</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Chapters Content */}
+                                    <div className="space-y-32">
+                                        {sortedChapters.map(chapter => (
+                                            <div key={chapter.chapter_id} className="space-y-10 group">
+                                                <div className="text-center space-y-2">
+                                                    <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.4em]">Chapter {chapter.chapterNumber}</p>
+                                                    <h2 className="text-2xl font-black text-gray-900 dark:text-white uppercase tracking-tight">
+                                                        {chapter.title || "Untitled"}
+                                                    </h2>
+                                                </div>
+
+                                                {chapter.content ? (
+                                                    <div
+                                                        className="prose prose-indigo dark:prose-invert max-w-none prose-p:leading-[2.0] prose-p:text-gray-700 dark:prose-p:text-gray-300 font-serif text-lg text-justify"
+                                                        dangerouslySetInnerHTML={{ __html: chapter.content }}
+                                                    />
+                                                ) : (
+                                                    <div className="bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-12 border-2 border-dashed border-gray-200 dark:border-gray-800 text-center">
+                                                        <p className="text-sm text-gray-400 font-bold italic">This chapter is currently empty.</p>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-40 pt-10 border-t border-gray-100 dark:border-gray-800 text-center text-[10px] font-black text-gray-300 uppercase tracking-[0.5em]">
+                                        Faculty of Social Sciences Guide Applied
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Footer Actions */}
+                        <div className="p-6 md:px-10 border-t border-gray-100 dark:border-gray-800 flex items-center justify-between bg-white dark:bg-gray-950 z-10">
+                            <div className="hidden sm:flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center">
+                                    <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                                </div>
+                                <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest max-w-[200px] leading-relaxed">
+                                    Exported files include professional formatting and pagination.
+                                </p>
+                            </div>
+
+                            <div className="flex gap-4 w-full sm:w-auto items-center">
+                                {isBatchExporting && (
+                                    <div className="flex flex-col items-end mr-4 min-w-[150px]">
+                                        <span className="text-[10px] font-black uppercase text-indigo-600 mb-1">Building Package: {exportProgress}%</span>
+                                        <div className="w-32 h-1 bg-gray-100 dark:bg-gray-800 rounded-full overflow-hidden">
+                                            <div className="h-full bg-indigo-600 transition-all duration-300" style={{ width: `${exportProgress}%` }} />
+                                        </div>
+                                    </div>
+                                )}
+
+                                <Button
+                                    variant="outline"
+                                    onClick={handleBatchExport}
+                                    disabled={isBatchExporting}
+                                    className="flex-1 sm:flex-none rounded-xl font-bold h-14 px-6 border-indigo-600 text-indigo-600 hover:bg-indigo-50 text-sm md:text-base"
+                                >
+                                    {isBatchExporting ? (
+                                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Zipping...</>
+                                    ) : (
+                                        <><Download className="mr-2 h-4 w-4" /> Download Package (ZIP)</>
+                                    )}
+                                </Button>
+
+                                <Button
+                                    variant="outline"
+                                    onClick={() => handlePdfExport(false)}
+                                    disabled={isPdfExporting || isBatchExporting}
+                                    className="flex-1 sm:flex-none rounded-xl font-bold h-14 px-6 border-indigo-200 text-indigo-600 hover:bg-indigo-50 text-sm md:text-base"
+                                >
+                                    {isPdfExporting ? (
+                                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Rendering PDF...</>
+                                    ) : (
+                                        <><Eye className="mr-2 h-4 w-4" /> PDF Only</>
+                                    )}
+                                </Button>
+
+                                <Button
+                                    onClick={handleDownload}
+                                    disabled={isDownloading || isBatchExporting}
+                                    className="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-black h-14 px-10 shadow-xl shadow-indigo-100 dark:shadow-none transition-all active:scale-[0.98] text-sm md:text-base"
+                                >
+                                    {isDownloading ? (
+                                        <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Fetching...</>
+                                    ) : (
+                                        <><Download className="mr-2 h-4 w-4" /> Word Only</>
+                                    )}
+                                </Button>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
+            )}
+        </>
     );
 }
