@@ -37,7 +37,7 @@ export async function getDefaultTemplate(): Promise<ProjectTemplate | null> {
         name: template.name,
         description: template.description || undefined,
         type: template.type,
-        content: template.content as TemplateChapter[],
+        content: template.content as unknown as TemplateChapter[],
         isDefault: template.isDefault
     };
 }
@@ -57,7 +57,7 @@ export async function getTemplateById(templateId: number): Promise<ProjectTempla
         name: template.name,
         description: template.description || undefined,
         type: template.type,
-        content: template.content as TemplateChapter[],
+        content: template.content as unknown as TemplateChapter[],
         isDefault: template.isDefault
     };
 }
@@ -79,7 +79,7 @@ export async function getAllTemplates(): Promise<ProjectTemplate[]> {
         name: t.name,
         description: t.description || undefined,
         type: t.type,
-        content: t.content as TemplateChapter[],
+        content: t.content as unknown as TemplateChapter[],
         isDefault: t.isDefault
     }));
 }
@@ -89,12 +89,12 @@ export async function getAllTemplates(): Promise<ProjectTemplate[]> {
  */
 export function validateTemplateStructure(content: any): boolean {
     if (!Array.isArray(content)) return false;
-    
+
     for (const chapter of content) {
         if (!chapter.id || !chapter.title) return false;
         if (chapter.subsections && !Array.isArray(chapter.subsections)) return false;
     }
-    
+
     return true;
 }
 
