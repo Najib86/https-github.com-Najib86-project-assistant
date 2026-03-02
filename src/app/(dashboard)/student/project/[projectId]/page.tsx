@@ -79,6 +79,18 @@ export default function StudentProjectDetails() {
     const [showActivity, setShowActivity] = useState(false);
     const [showExportPreview, setShowExportPreview] = useState(false);
 
+    // Toast and generation state
+    const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' | 'info' } | null>(null);
+    const [isPolling, setIsPolling] = useState(false);
+
+    // Clear toast auto
+    useEffect(() => {
+        if (toast) {
+            const t = setTimeout(() => setToast(null), 5000);
+            return () => clearTimeout(t);
+        }
+    }, [toast]);
+
     const handleCreateInvite = async (e?: React.FormEvent) => {
         if (e) e.preventDefault();
         setCreatingInvite(true);
@@ -135,20 +147,57 @@ export default function StudentProjectDetails() {
         }
     }, []);
 
-    const fetchProject = useCallback(async () => {
+    const fetchProject = useCallback(async (polling = false) => {
         if (!projectId) return;
         try {
             const res = await fetch(`/api/projects/${projectId}`);
             if (res.ok) {
                 const data = await res.json();
-                setProject(data);
+
+                setProject(prev => {
+                    // Toast triggers on changes
+                    if (polling && prev) {
+                        const newCompleted = data.chapters.filter((c: Chapter) =>
+                            (c.status === "Completed" || c.status === "Draft") &&
+                            prev.chapters.find(p => p.chapter_id === c.chapter_id)?.status !== c.status
+                        );
+                        const newFailed = data.chapters.filter((c: Chapter) =>
+                            c.status === "Pending Regeneration" &&
+                            prev.chapters.find(p => p.chapter_id === c.chapter_id)?.status !== "Pending Regeneration"
+                        );
+
+                        if (newCompleted.length > 0) {
+                            setToast({ message: `${newCompleted[0].title || 'A chapter'} successfully generated!`, type: 'success' });
+                        } else if (newFailed.length > 0) {
+                            setToast({ message: `${newFailed[0].title || 'A chapter'} failed generation.`, type: 'error' });
+                        }
+                    }
+                    return data;
+                });
             }
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(false);
+            if (!polling) setLoading(false);
         }
     }, [projectId]);
+
+    // Polling effect
+    useEffect(() => {
+        let interval: NodeJS.Timeout;
+        const needsPolling = project?.chapters?.some(c => c.status === "Generating" || c.status === "In Progress" || c.status === "NotStarted");
+
+        if (needsPolling) {
+            setIsPolling(true);
+            interval = setInterval(() => {
+                fetchProject(true);
+            }, 4000);
+        } else {
+            setIsPolling(false);
+        }
+
+        return () => clearInterval(interval);
+    }, [project?.chapters, fetchProject]);
 
 
 
@@ -272,10 +321,13 @@ export default function StudentProjectDetails() {
 
                     {/* Progress Bar */}
                     <div className="max-w-md w-full flex items-center gap-3">
-                        <span className="text-xs font-bold text-indigo-600 w-16">Progress</span>
+                        <span className="text-xs font-bold text-indigo-600 w-16">
+                            {isPolling ? "Generating" : "Progress"}
+                            {isPolling && <Loader2 className="inline ml-1 h-3 w-3 animate-spin" />}
+                        </span>
                         <ProjectProgress chapters={project.chapters} />
                         <span className="text-xs font-bold text-gray-400">
-                            {Math.round((project.chapters.filter(c => c.status === 'Completed' || c.status === 'Approved').length / project.chapters.length) * 100)}%
+                            {Math.round((project.chapters.filter(c => c.status === 'Completed' || c.status === 'Approved' || c.status === 'Draft').length / project.chapters.length) * 100)}%
                         </span>
                     </div>
 
@@ -612,6 +664,25 @@ export default function StudentProjectDetails() {
                     </div>
                 </div>
             </div>
+
+            {/* Toast Notification Container */}
+            {toast && (
+                <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-5 fade-in duration-300">
+                    <div className={cn(
+                        "flex items-center gap-3 px-5 py-4 rounded-xl shadow-2xl border",
+                        toast.type === "success" ? "bg-green-50 border-green-200 text-green-800" :
+                            toast.type === "error" ? "bg-red-50 border-red-200 text-red-800" :
+                                "bg-blue-50 border-blue-200 text-blue-800"
+                    )}>
+                        {toast.type === "success" && <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />}
+                        {toast.type === "error" && <X className="h-4 w-4 text-red-500" />}
+                        <p className="text-sm font-bold">{toast.message}</p>
+                        <button onClick={() => setToast(null)} className="ml-4 opacity-70 hover:opacity-100">
+                            <X className="h-4 w-4" />
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

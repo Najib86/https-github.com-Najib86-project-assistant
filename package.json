@@ -9,7 +9,12 @@
     "lint": "eslint",
     "postinstall": "prisma generate",
     "test:auth": "node scripts/test-auth.mjs",
-    "start:socket": "node scripts/socket-server.mjs"
+    "start:socket": "node scripts/socket-server.mjs",
+    "seed:templates": "node scripts/seed-templates.mjs",
+    "test:generation": "node scripts/test-generation.mjs",
+    "db:studio": "npx prisma studio",
+    "db:migrate": "npx prisma migrate dev",
+    "db:reset": "npx prisma migrate reset"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.29",

@@ -3,6 +3,7 @@ import { ExportAuditEngine } from "./ExportAuditEngine";
 import { GroqProvider } from "./providers/groq";
 import { FeedbackAnalytics } from "./FeedbackAnalytics";
 import { ValidationEngine } from "./ValidationEngine";
+import { AIProvider } from "./ai.types";
 
 export class AcademicOrchestrator {
     private pipelineEngine = new SectionPipelineEngine();
@@ -11,9 +12,15 @@ export class AcademicOrchestrator {
     private validationEngine = new ValidationEngine();
 
     async generateRaw(prompt: string): Promise<{ success: boolean; content: string; error?: string }> {
-        const provider = new GroqProvider();
+        let provider: AIProvider = new GroqProvider();
+
         if (!provider.isEnabled()) {
-            return { success: true, content: "Mock Data fallback..." };
+            const { GeminiProvider } = await import("./providers/gemini");
+            provider = new GeminiProvider();
+
+            if (!provider.isEnabled()) {
+                return { success: false, content: "", error: "No AI Providers available. Please configure Groq or Gemini." };
+            }
         }
 
         try {

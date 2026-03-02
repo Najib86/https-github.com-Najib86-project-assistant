@@ -10,19 +10,28 @@ export interface ValidationResult {
 
 export class ValidationEngine {
     private readonly MIN_WORDS_PER_CHAPTER = 2500; // Realistic academic minimum
+    private readonly MIN_WORDS_PRELIMINARY = 100; // For preliminary pages
 
     validateSection(sectionTitle: string, content: string): ValidationResult {
         const errors: string[] = [];
         let score = 100;
 
         const wordCount = content.split(/\s+/).filter(w => w.length > 0).length;
-        if (wordCount < 100) {
-            // Basic chapters might be smaller (like Dedication), but let's check true chapter sizes
-            const isMajorChapter = sectionTitle.toLowerCase().includes("chapter");
-            if (isMajorChapter && wordCount < this.MIN_WORDS_PER_CHAPTER) {
-                errors.push(`Word count too low (${wordCount}). Minimum required: ${this.MIN_WORDS_PER_CHAPTER}.`);
-                score -= 40;
-            }
+        
+        // Determine if this is a major chapter or preliminary page
+        const isMajorChapter = sectionTitle.toLowerCase().includes("chapter");
+        const isPreliminary = this.isPreliminaryPage(sectionTitle);
+        
+        // Word count validation
+        if (isMajorChapter && wordCount < this.MIN_WORDS_PER_CHAPTER) {
+            errors.push(`Word count too low (${wordCount}). Minimum required for major chapters: ${this.MIN_WORDS_PER_CHAPTER}.`);
+            score -= 40;
+        } else if (isPreliminary && wordCount < this.MIN_WORDS_PRELIMINARY) {
+            errors.push(`Word count too low (${wordCount}). Minimum required: ${this.MIN_WORDS_PRELIMINARY}.`);
+            score -= 30;
+        } else if (!isMajorChapter && !isPreliminary && wordCount < 100) {
+            errors.push(`Content appears too short (${wordCount} words).`);
+            score -= 20;
         }
 
         const missingHeadings = this.detectMissingSections(sectionTitle, content);
@@ -54,35 +63,46 @@ export class ValidationEngine {
         };
     }
 
+    private isPreliminaryPage(sectionTitle: string): boolean {
+        const preliminaryPages = [
+            "title page",
+            "certification",
+            "dedication",
+            "acknowledgement",
+            "table of contents",
+            "abstract"
+        ];
+        const lower = sectionTitle.toLowerCase();
+        return preliminaryPages.some(page => lower.includes(page));
+    }
+
     private detectMissingSections(sectionTitle: string, content: string): string[] {
         const requiredSections: Record<string, string[]> = {
             "Chapter One: Introduction": [
-                "Background of the Study",
+                "Background",
                 "Statement of the Problem",
                 "Research Questions",
                 "Objectives",
                 "Significance",
-                "Scope",
-                "Definition of Terms"
+                "Scope"
             ],
             "Chapter Two: Literature Review": [
                 "Theoretical framework",
-                "Empirical studies"
+                "Empirical"
             ],
             "Chapter Three: Methodology": [
                 "Research design",
                 "Population",
-                "Data collection",
-                "Data analysis"
+                "Data collection"
             ],
             "Chapter Four: Results and Discussion": [
-                "Presentation of results",
+                "Presentation",
                 "Discussion"
             ],
             "Chapter Five: Summary, Conclusion and Recommendations": [
                 "Summary",
                 "Conclusion",
-                "Recommendations"
+                "Recommendation"
             ]
         };
 
@@ -102,17 +122,33 @@ export class ValidationEngine {
     private detectTruncation(content: string): boolean {
         const trimmed = content.trim();
         if (!trimmed) return true;
+        
+        // Check if content ends properly
         const lastChar = trimmed[trimmed.length - 1];
-        if (![".", "!", "?", "\"", "'"].includes(lastChar)) {
+        if (![".", "!", "?", "\"", "'", ")", "]"].includes(lastChar)) {
             const lines = trimmed.split('\n');
             const lastLine = lines[lines.length - 1].trim();
             if (lastLine.length > 0 && !lastLine.startsWith('#')) {
-                if (![".", "!", "?", "\"", "'"].includes(lastLine[lastLine.length - 1])) {
+                if (![".", "!", "?", "\"", "'", ")", "]"].includes(lastLine[lastLine.length - 1])) {
                     return true;
                 }
             }
         }
-        return false;
+        
+        // Check for common truncation indicators
+        const truncationIndicators = [
+            "...",
+            "[continued]",
+            "[to be continued]",
+            "etc...",
+            "and so on..."
+        ];
+        const lower = trimmed.toLowerCase();
+        const endsWithTruncation = truncationIndicators.some(indicator => 
+            lower.endsWith(indicator.toLowerCase())
+        );
+        
+        return endsWithTruncation;
     }
 
     private detectAIArtifacts(content: string): boolean {
@@ -122,7 +158,12 @@ export class ValidationEngine {
             "here is the complete chapter",
             "certainly! here is",
             "sure, here is",
-            "i am an ai"
+            "i am an ai",
+            "as an artificial intelligence",
+            "i don't have personal",
+            "i apologize, but",
+            "here's the chapter",
+            "below is the chapter"
         ];
         const lower = content.toLowerCase();
         return artifacts.some(a => lower.includes(a));

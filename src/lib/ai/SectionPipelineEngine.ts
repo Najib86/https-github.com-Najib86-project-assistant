@@ -123,13 +123,8 @@ export class SectionPipelineEngine {
             await this.notificationService.emitProviderSwitched(projectId, "next-provider");
         } // end provider loop
 
-        // Fallback to mock if configured
-        if (AI_CONFIG.mock.enabled) {
-            console.warn("[SectionPipeline] All providers failed. Falling back to Mock.");
-            const content = `[MOCK CONTENT]\nGenerated mock data for ${chapterTitle} due to all provider failures.`;
-            return await this.saveValidatedSection(projectId, chapterNumber, chapterTitle, content);
-        }
-
+        // Fallback to mock removed for production reliability
+        // If we reach here, all providers failed
         throw new Error(`Failed to generate section ${chapterTitle} successfully. Last error: ${lastError}`);
     }
 
@@ -139,8 +134,25 @@ export class SectionPipelineEngine {
             contextStr += `Student Context:
 - Programme: ${academicMetadata.institution?.programme || "N/A"}
 - Faculty: ${academicMetadata.institution?.faculty || "N/A"}
+- Department: ${academicMetadata.institution?.department || "N/A"}
+- Institution: ${academicMetadata.institution?.name || "N/A"}
 - Research Area: ${academicMetadata.research?.area || "N/A"}
 - Keywords: ${Array.isArray(academicMetadata.research?.keywords) ? academicMetadata.research.keywords.join(", ") : academicMetadata.research?.keywords || ""}\n`;
+        }
+
+        // Extract template structure if available
+        let templateStructure = "";
+        if (academicMetadata?.templateStructureReference && Array.isArray(academicMetadata.templateStructureReference)) {
+            const templateChapter = academicMetadata.templateStructureReference.find((ch: any) => ch.id === chapterNum || ch.chapterNumber === chapterNum);
+            if (templateChapter) {
+                templateStructure = `\n=== TEMPLATE STRUCTURE FOR THIS CHAPTER ===
+Chapter Title: ${templateChapter.title || chapterTitle}
+${templateChapter.subsections ? `Required Subsections:\n${templateChapter.subsections.map((s: any) => `- ${s.title || s}`).join('\n')}` : ''}
+${templateChapter.description ? `Description: ${templateChapter.description}` : ''}
+${templateChapter.wordCount ? `Target Word Count: ${templateChapter.wordCount} words` : ''}
+${templateChapter.guidelines ? `Additional Guidelines: ${templateChapter.guidelines}` : ''}
+===========================================\n`;
+            }
         }
 
         return `Context: You are an expert academic writer and researcher. You are writing a specific section/chapter for a final year project report (Level: ${level || "University"}).
@@ -148,6 +160,7 @@ export class SectionPipelineEngine {
 Project Topic: "${topic}"
 Current Section/Chapter: ${chapterTitle} (ID: ${chapterNum})
 ${contextStr}
+${templateStructure}
 
 === STRICT UNIVERSITY GUIDELINES ===
 ${RESEARCH_GUIDELINES}
@@ -156,11 +169,16 @@ ${RESEARCH_GUIDELINES}
 CRITICAL INSTRUCTIONS:
 1. **ELABORATE & DETAILED**: Write the actual full content. Do NOT write an outline or summary.
 2. **FORMATTING**: Use Markdown formatting (## for main headings, ### for subheadings).
-3. **NEVER USE AI ARTIFICIAL FILLERS**: Start exactly with the academic text.
-4. **SECTION REQUIREMENTS**: You are writing ONLY "${chapterTitle}". Be exhaustive.
+3. **NEVER USE AI ARTIFICIAL FILLERS**: Start exactly with the academic text. Do not include phrases like "As an AI" or "Here is the chapter".
+4. **SECTION REQUIREMENTS**: You are writing ONLY "${chapterTitle}". Be exhaustive and comprehensive.
+5. **FOLLOW TEMPLATE**: If a template structure is provided above, strictly follow the subsections and guidelines specified.
+6. **ACADEMIC STANDARDS**: Ensure proper academic tone, citations where needed, and formal language throughout.
+7. **MINIMUM LENGTH**: Write at least 2500 words for major chapters (Chapter 1-5). Preliminary pages can be shorter but must be complete.
 
 TASK: Write the COMPLETE and EXTREMELY DETAILED content for "${chapterTitle}" now.
-${sampleText ? `Style Reference style: \n"${sampleText.substring(0, 4000)}..."` : ""}`;
+${sampleText ? `\nStyle Reference (match this writing style):\n"${sampleText.substring(0, 4000)}..."\n` : ""}
+
+BEGIN WRITING NOW:`;
     }
 
     private async saveValidatedSection(projectId: number, chapterNumber: number, title: string, content: string) {

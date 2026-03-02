@@ -111,16 +111,21 @@ Topic: "${topic}"`;
             prompt += `\n\n=== EXISTING CONTENT (CONTEXT) ===\n...${contextText.slice(-3000)}\n\n(Continue from here)`;
         }
 
-        prompt += `\n\n=== INSTRUCTIONSPO ===
+        prompt += `\n\n=== CRITICAL WRITING INSTRUCTIONS ===
 1. Write detailed, well-structured academic content appropriate for ${project?.level || level || "university"} level.
 2. STRICTLY FOLLOW the "GUIDELINES FOR RESEARCH PROJECT EXECUTION" provided above.
 3. Ensure the content directly addresses the problem statement and objectives listed above.
 4. Use the methodology context to inform your approach.
 5. Write in formal academic tone with clear, precise language.
-6. Include relevant examples and explanations.
+6. Include relevant examples and explanations where appropriate.
 7. If user instructions are provided, PRIORITIZE them.
+8. DO NOT include AI artifacts like "As an AI", "Here is the chapter", or "Certainly".
+9. Start directly with the academic content.
+10. For major chapters (1-5), write at least 2500 words with comprehensive coverage.
+11. Use proper Markdown formatting: ## for main headings, ### for subheadings.
+12. Ensure content is complete and not truncated - end with proper conclusions.
 
-Write the chapter content now:`;
+Write the chapter content now (BEGIN DIRECTLY WITH THE CONTENT):`;
 
         const result = await streamText({
             model: google("gemini-1.5-flash"),
