@@ -73,6 +73,8 @@ export default function StudentDashboard() {
     const [generatingStatus, setGeneratingStatus] = useState("");
     const [studentId, setStudentId] = useState<number | null>(null);
     const [regeneratingId, setRegeneratingId] = useState<number | null>(null);
+    const [regeneratingAll, setRegeneratingAll] = useState(false);
+    const [failedChaptersCount, setFailedChaptersCount] = useState(0);
 
     const universitiesList = universityData.universities || [];
     const selectedUniversity = universitiesList.find(u => u.name === formData.institutionName);
@@ -112,6 +114,12 @@ export default function StudentDashboard() {
             if (res.ok) {
                 const data = await res.json();
                 setProjects(data);
+                
+                // Count failed chapters
+                const failedCount = data.reduce((total: number, project: Project) => {
+                    return total + project.chapters.filter((ch: any) => ch.status === "Pending Regeneration").length;
+                }, 0);
+                setFailedChaptersCount(failedCount);
             }
         } catch (error) {
             console.error(error);
@@ -285,6 +293,35 @@ export default function StudentDashboard() {
         }
     };
 
+    const handleRegenerateAllFailed = async () => {
+        if (!confirm(`This will regenerate ${failedChaptersCount} failed chapters across all your projects. This may take several minutes. Continue?`)) {
+            return;
+        }
+
+        try {
+            setRegeneratingAll(true);
+            const res = await fetch("/api/chapters/regenerate-failed", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({})
+            });
+
+            if (!res.ok) {
+                const err = await res.json();
+                throw new Error(err.error || "Failed");
+            }
+
+            const data = await res.json();
+            alert(`✅ ${data.message}\n\nThe system will now regenerate these chapters automatically. Check back in a few minutes.`);
+            fetchProjects(); // Refresh list
+        } catch (error) {
+            console.error(error);
+            alert("Failed to trigger regeneration. Please try again.");
+        } finally {
+            setRegeneratingAll(false);
+        }
+    };
+
     const handleDeleteProject = async (projectId: number) => {
         if (!confirm("Are you sure you want to delete this project? This action cannot be undone.")) return;
 
@@ -313,10 +350,34 @@ export default function StudentDashboard() {
                     <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Projects</h1>
                     <p className="text-sm md:text-base text-gray-500 mt-1">Manage your research projects and drafts.</p>
                 </div>
-                <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto shadow-sm">
-                    <PlusCircle className="mr-2 h-4 w-4" />
-                    New Project
-                </Button>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                    {failedChaptersCount > 0 && (
+                        <Button 
+                            onClick={handleRegenerateAllFailed} 
+                            disabled={regeneratingAll}
+                            variant="outline"
+                            className="w-full sm:w-auto shadow-sm border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-700"
+                        >
+                            {regeneratingAll ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Regenerating...
+                                </>
+                            ) : (
+                                <>
+                                    <svg className="mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Fix {failedChaptersCount} Failed Chapters
+                                </>
+                            )}
+                        </Button>
+                    )}
+                    <Button onClick={() => setShowCreateModal(true)} className="w-full sm:w-auto shadow-sm">
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        New Project
+                    </Button>
+                </div>
             </div>
 
             {/* Empty State */}

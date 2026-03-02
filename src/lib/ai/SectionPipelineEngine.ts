@@ -55,7 +55,7 @@ export class SectionPipelineEngine {
             if (this.unhealthyProviders.has(providerName)) continue;
 
             let attempt = 0;
-            const maxStructuralRetries = 3;
+            const maxStructuralRetries = 4; // Increased from 3 to 4
 
             while (attempt < maxStructuralRetries) {
                 if (attempt > 0) {
@@ -166,19 +166,23 @@ ${templateStructure}
 ${RESEARCH_GUIDELINES}
 ====================================
 
-CRITICAL INSTRUCTIONS:
-1. **ELABORATE & DETAILED**: Write the actual full content. Do NOT write an outline or summary.
-2. **FORMATTING**: Use Markdown formatting (## for main headings, ### for subheadings).
-3. **NEVER USE AI ARTIFICIAL FILLERS**: Start exactly with the academic text. Do not include phrases like "As an AI" or "Here is the chapter".
-4. **SECTION REQUIREMENTS**: You are writing ONLY "${chapterTitle}". Be exhaustive and comprehensive.
-5. **FOLLOW TEMPLATE**: If a template structure is provided above, strictly follow the subsections and guidelines specified.
-6. **ACADEMIC STANDARDS**: Ensure proper academic tone, citations where needed, and formal language throughout.
-7. **MINIMUM LENGTH**: Write at least 2500 words for major chapters (Chapter 1-5). Preliminary pages can be shorter but must be complete.
+CRITICAL INSTRUCTIONS - READ CAREFULLY:
+1. **WRITE COMPLETE CONTENT**: This is NOT an outline. Write the FULL, DETAILED chapter content.
+2. **MINIMUM LENGTH**: Write at least 2000 words for major chapters (Chapter 1-5). Do not stop early.
+3. **FORMATTING**: Use Markdown formatting (## for main headings, ### for subheadings).
+4. **NO AI LANGUAGE**: NEVER use phrases like "As an AI", "Here is the chapter", "Certainly", "I'll help you".
+5. **START DIRECTLY**: Begin immediately with the academic content. No introductions about what you're doing.
+6. **SECTION REQUIREMENTS**: Include ALL subsections listed in the template above.
+7. **ACADEMIC STANDARDS**: Use formal academic tone, proper citations format, clear explanations.
+8. **COMPLETE ENDINGS**: End each section properly with conclusions. Do not truncate.
+9. **DETAILED EXPLANATIONS**: Provide examples, analysis, and comprehensive coverage of each topic.
+10. **CONTINUOUS WRITING**: Write continuously without stopping. Fill out all sections completely.
 
-TASK: Write the COMPLETE and EXTREMELY DETAILED content for "${chapterTitle}" now.
-${sampleText ? `\nStyle Reference (match this writing style):\n"${sampleText.substring(0, 4000)}..."\n` : ""}
+IMPORTANT: You must write the ENTIRE chapter content now. Do not summarize or outline. Write full paragraphs with detailed explanations for each subsection.
 
-BEGIN WRITING NOW:`;
+${sampleText ? `\nSTYLE REFERENCE (match this writing style):\n"${sampleText.substring(0, 4000)}..."\n` : ""}
+
+BEGIN WRITING THE COMPLETE CHAPTER NOW (Start directly with content, no preamble):`;
     }
 
     private async saveValidatedSection(projectId: number, chapterNumber: number, title: string, content: string) {

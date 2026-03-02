@@ -6,14 +6,14 @@ export const AI_CONFIG = {
     },
     priority: ["groq", "gemini", "huggingface"],
     timeouts: {
-        default: 30000 // 30 seconds
+        default: 45000 // Increased from 30s to 45s for longer content
     },
     retries: {
-        max: 1,
-        backoff: 1000 // ms
+        max: 2, // Increased from 1 to 2 retries
+        backoff: 1500 // Increased from 1000ms to 1500ms
     },
     mock: {
         enabled: process.env.NODE_ENV === "development"
     },
-    maxTokens: 4000
+    maxTokens: 6000 // Increased from 4000 to 6000 for longer chapters
 };

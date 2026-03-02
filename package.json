@@ -12,6 +12,7 @@
     "start:socket": "node scripts/socket-server.mjs",
     "seed:templates": "node scripts/seed-templates.mjs",
     "test:generation": "node scripts/test-generation.mjs",
+    "regenerate:failed": "node scripts/regenerate-failed-chapters.mjs",
     "db:studio": "npx prisma studio",
     "db:migrate": "npx prisma migrate dev",
     "db:reset": "npx prisma migrate reset"

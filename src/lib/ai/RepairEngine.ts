@@ -2,20 +2,33 @@ import { ValidationResult } from "./ValidationEngine";
 
 export class RepairEngine {
     generateRepairPrompt(chapterTitle: string, validationResult: ValidationResult): string {
+        const issues = validationResult.errors.join("\n- ");
+        const wordCount = validationResult.wordCount;
+        const isMajorChapter = chapterTitle.toLowerCase().includes("chapter");
+        const targetWords = isMajorChapter ? 2500 : 500;
+        
         return `
-Your previous output for "${chapterTitle}" was incomplete or structurally invalid.
+CRITICAL: Your previous output for "${chapterTitle}" failed validation.
 
-Validation Failures:
-${validationResult.errors.map(e => `- ${e}`).join("\n")}
+VALIDATION FAILURES:
+- ${issues}
 
-You MUST:
-- Expand all required sub-sections specified in the guidelines
-- Ensure minimum word count is met
-- Complete unfinished paragraphs
-- Remove summary-style tone
-- Produce a full academic draft
+CURRENT WORD COUNT: ${wordCount} words
+REQUIRED WORD COUNT: ${targetWords}+ words
 
-Rewrite the entire chapter properly. DO NOT output conversational filler like "Here is the revised chapter". Just the academic content.
+MANDATORY REQUIREMENTS:
+1. Write COMPLETE, DETAILED academic content (not an outline or summary)
+2. Include ALL required subsections with full explanations
+3. Write at least ${targetWords} words of substantive content
+4. Use proper academic tone and formal language
+5. End paragraphs and sections properly (no truncation)
+6. DO NOT include phrases like "As an AI", "Here is the chapter", "Certainly"
+7. Start DIRECTLY with the academic content
+8. Use Markdown formatting: ## for main headings, ### for subheadings
+9. Provide examples, explanations, and detailed analysis
+10. Ensure content flows logically from introduction to conclusion
+
+REWRITE THE ENTIRE CHAPTER NOW with full academic detail:
         `.trim();
     }
 }
