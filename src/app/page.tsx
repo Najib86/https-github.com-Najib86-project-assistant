@@ -40,20 +40,27 @@ export default function Home() {
                   AI for Final Year Projects
                 </div>
 
-                <h1 className="text-[2rem] md:text-[3rem] lg:text-[4rem] font-black tracking-tighter text-gray-900 leading-[1.1] md:leading-tight">
-                  Academic projects <br />
-                  <span className="text-indigo-600">reimagined.</span>
+                <h1 className="text-[2.5rem] md:text-[3.5rem] lg:text-[4rem] font-black tracking-tighter text-gray-900 leading-[1.1] md:leading-tight">
+                  {/* <span className="inline-block mb-2 text-3xl md:text-4xl lg:text-5xl">🎓</span><br /> */}
+                  Generate Your Complete <br />
+                  Academic Project in <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">Minutes</span> — <br />
+                  <span className="text-[1.8rem] md:text-[2.5rem] lg:text-[3rem] text-gray-800">12 Chapters Fully Written, Structured & Ready to Export!</span>
                 </h1>
 
-                <p className="text-base md:text-xl text-gray-600 max-w-xl font-medium leading-relaxed">
-                  Transform complex research topics into structured, university-grade documents in minutes. Smart outlines, citations, and full chapters generated instantly.
+                <p className="text-base md:text-xl text-gray-600 max-w-2xl font-medium leading-relaxed">
+                  AI-powered project generator for students — no writer's block, no confusion.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                  <Button size="lg" asChild className="w-full sm:w-auto rounded-xl md:rounded-2xl px-6 py-4 text-lg font-bold shadow-xl shadow-indigo-300 transition-all hover:-translate-y-1 hover:shadow-indigo-400 group h-auto">
+                  <Button size="lg" asChild className="w-full sm:w-auto rounded-xl md:rounded-2xl px-8 py-6 text-lg font-bold shadow-xl shadow-indigo-300 transition-all hover:-translate-y-1 hover:shadow-indigo-400 group h-auto">
                     <Link href="/signup" className="flex items-center justify-center gap-3">
-                      Start Your Project Free
+                      Get Started Now
                       <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-2" />
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild className="w-full sm:w-auto rounded-xl md:rounded-2xl px-8 py-6 text-lg font-bold border-2 border-indigo-100 text-indigo-700 hover:bg-indigo-50 transition-all hover:-translate-y-1 h-auto bg-white">
+                    <Link href="#how-it-works" className="flex items-center justify-center gap-3">
+                      See How It Works
                     </Link>
                   </Button>
                 </div>
@@ -106,45 +113,68 @@ export default function Home() {
                     {/* Header */}
                     <div className="flex items-center justify-between border-b border-gray-100/80 pb-4 mb-4 md:pb-6 md:mb-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center font-bold text-indigo-600 text-xs">AI</div>
+                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-md">
+                          <Sparkles className="w-5 h-5" />
+                        </div>
                         <div>
-                          <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Project</p>
-                          <p className="text-sm font-bold text-gray-900 line-clamp-1">Thesis: AI in Healthcare</p>
+                          <p className="text-[10px] font-black text-indigo-400 uppercase tracking-widest animate-pulse">Generating Project</p>
+                          <div className="text-sm font-bold text-gray-900 flex items-center gap-2">
+                            Topic: Impact of AI in Education
+                            <span className="inline-block w-1.5 h-3 bg-indigo-500 animate-[pulse_1s_infinite]" />
+                          </div>
                         </div>
                       </div>
-                      <div className="px-2 py-1 bg-green-50 text-green-600 rounded-lg text-[10px] font-bold uppercase tracking-wide flex items-center gap-1.5">
-                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                        Live
+                      <div className="px-3 py-1.5 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-bold flex items-center gap-2 border border-indigo-100 shadow-sm">
+                        <div className="w-4 h-4 rounded-full border-2 border-indigo-200 border-t-indigo-600 animate-spin" />
+                        12/12 Chapters
                       </div>
                     </div>
 
                     {/* Dashboard Grid Simulation */}
                     <div className="grid grid-cols-1 gap-4">
-                      {/* Progress Bar */}
-                      <div className="p-3 md:p-4 rounded-xl md:rounded-2xl bg-gray-50/50 border border-gray-100 space-y-2">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[10px] font-black uppercase tracking-wider text-gray-500">Methodology</span>
-                          <span className="text-[10px] font-bold text-indigo-600">85%</span>
+                      {/* Active Tasks Simulation */}
+                      <div className="flex flex-col gap-3">
+                        {/* Task 1 */}
+                        <div className="flex gap-3 animate-in slide-in-from-bottom-2 fade-in duration-500 delay-300 fill-mode-both">
+                          <div className="w-1/4 p-3 rounded-xl bg-green-50 border border-green-100 flex flex-col items-center justify-center gap-1">
+                            <CheckCircle className="w-5 h-5 text-green-500" />
+                            <span className="text-[10px] font-bold text-green-600 uppercase text-center">Done</span>
+                          </div>
+                          <div className="flex-1 p-3 rounded-xl bg-gray-50 border border-gray-100 flex flex-col justify-center relative overflow-hidden">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Chapter 1-11</p>
+                            <p className="text-sm font-bold text-gray-700 truncate">Written & Formatted</p>
+                            <div className="absolute top-0 right-0 h-full w-1 bg-green-400" />
+                          </div>
                         </div>
-                        <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
-                          <div className="h-full w-[85%] bg-indigo-500 rounded-full" />
-                        </div>
-                      </div>
 
-                      {/* Active Task */}
-                      <div className="flex gap-3">
-                        <div className="flex-1 p-4 rounded-xl md:rounded-2xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 relative overflow-hidden">
-                          <div className="relative z-10">
-                            <p className="text-[10px] font-medium opacity-80 uppercase tracking-widest mb-1">Current Task</p>
-                            <p className="text-sm font-bold truncate">Reviewing Citations</p>
+                        {/* Task 2 Active */}
+                        <div className="flex gap-3 animate-in slide-in-from-bottom-2 fade-in duration-500 delay-700 fill-mode-both">
+                          <div className="w-1/4 p-3 rounded-xl bg-indigo-50 border border-indigo-100 flex flex-col items-center justify-center gap-1">
+                            <div className="w-5 h-5 rounded-full border-2 border-indigo-300 border-t-indigo-600 animate-spin" />
+                            <span className="text-[10px] font-bold text-indigo-600 uppercase text-center animate-pulse">Working</span>
+                          </div>
+                          <div className="flex-1 p-3 rounded-xl bg-indigo-600 text-white shadow-lg shadow-indigo-200 relative overflow-hidden">
+                            <div className="relative z-10">
+                              <p className="text-[10px] font-medium opacity-80 uppercase tracking-widest mb-0.5">Chapter 12</p>
+                              <p className="text-sm font-bold truncate">Bibliography & Appendices</p>
+                            </div>
+                            {/* Scanning line animation */}
+                            <div className="absolute top-0 left-0 w-full h-[2px] bg-white shadow-[0_0_8px_2px_rgba(255,255,255,0.8)] animate-[bounce_2s_infinite]" />
                           </div>
                         </div>
-                        <div className="w-1/3 p-4 rounded-xl md:rounded-2xl border border-gray-100 flex flex-col items-center justify-center gap-1">
-                          <div className="w-6 h-6 rounded-full bg-green-50 flex items-center justify-center text-green-600">
-                            <CheckCircle className="w-3 h-3" />
+
+                        {/* Task 3 Export */}
+                        <div className="flex gap-3 animate-in slide-in-from-bottom-2 fade-in duration-500 delay-1000 fill-mode-both opacity-50">
+                          <div className="w-1/4 p-3 rounded-xl bg-gray-50 border border-gray-100 flex flex-col items-center justify-center gap-1">
+                            <div className="w-5 h-5 rounded-md bg-gray-200 flex items-center justify-center"><ArrowRight className="w-3 h-3 text-gray-400" /></div>
+                            <span className="text-[10px] font-bold text-gray-400 uppercase text-center">Export</span>
                           </div>
-                          <span className="text-[10px] font-bold text-gray-400 uppercase text-center">Done</span>
+                          <div className="flex-1 p-3 rounded-xl bg-gray-50 border border-gray-100 flex flex-col justify-center">
+                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Final Step</p>
+                            <p className="text-sm font-bold text-gray-500 truncate">Generate PDF/DOCX</p>
+                          </div>
                         </div>
+
                       </div>
                     </div>
                   </div>
@@ -160,55 +190,88 @@ export default function Home() {
         {/* AI Capabilities Section */}
         <AICapabilities />
 
-        {/* Features Section */}
-        <section id="features" className="py-16 md:py-28 bg-gray-50/80 backdrop-blur-sm relative border-y border-gray-100/50">
+        {/* Features / Pro Benefits Section */}
+        <section id="benefits" className="py-16 md:py-24 bg-white relative border-y border-gray-100/50">
           <div className="container px-4 md:px-6 mx-auto">
             <div className="text-center mb-12 space-y-3">
-              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 opacity-80">The Powerhouse</h2>
-              <p className="text-2xl md:text-3xl lg:text-5xl font-black text-gray-900 leading-tight">Everything you need to <br className="hidden md:block" /> finish your research project.</p>
+              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600 opacity-80">Pro Benefits</h2>
+              <p className="text-2xl md:text-3xl lg:text-4xl font-black text-gray-900 leading-tight">Why students choose <br className="hidden md:block" /> Project Assistant.</p>
             </div>
 
-            {/* Grid: 1 col (mobile) -> 2 cols (tablet) -> 3 cols (desktop) */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
               {[
-                {
-                  title: "AI Research Assistant",
-                  desc: "Instantly generate structured outlines and full drafts for Chapters 1-5, tailored specifically to your research topic and academic level.",
-                },
-                {
-                  title: "Academic Compliance",
-                  desc: "Built-in guidelines ensure strict adherence to university standards for formatting, structure, and content flow automatically.",
-                },
-                {
-                  title: "Smart Synthesis",
-                  desc: "Our AI synthesizes complex information to construct logical arguments, integrating relevant literature for a robust theoretical framework.",
-                },
-                {
-                  title: "Collaboration Hub",
-                  desc: "Invite supervisors to review your work directly. Receive inline comments and approvals in real-time to fast-track your progress.",
-                },
-                {
-                  title: "Progress Tracking",
-                  desc: "Visual dashboards for both students and supervisors to monitor milestones, chapter status, and overall project completion rates.",
-                },
-                {
-                  title: "Plagiarism Awareness",
-                  desc: "Integrated tools to highlight potential originality issues and manage citations managed in APA, MLA, or Harvard styles.",
-                }
-              ].map((feature, i) => (
-                <div key={i} className="flex flex-col p-6 md:p-8 rounded-2xl md:rounded-[2rem] bg-white border border-gray-100 hover:border-indigo-200 hover:shadow-xl transition-all duration-500 group">
-                  <div className="mb-4 w-12 h-12 rounded-2xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-300">
-                    <span className="font-bold text-lg">{i + 1}</span>
+                "Fully structured 12-chapter output",
+                "Academic formatting & references",
+                "Zero writer’s block",
+                "Continuous update integration",
+                "Export to professional PDF/DOCX",
+                "Contextual research synthesis"
+              ].map((benefit, i) => (
+                <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50/50 border border-gray-100 hover:border-indigo-100 hover:shadow-lg transition-all duration-300 group">
+                  <div className="w-10 h-10 rounded-full bg-green-50 text-green-600 flex items-center justify-center group-hover:bg-green-500 group-hover:text-white transition-colors duration-300 shrink-0">
+                    <CheckCircle className="w-5 h-5" />
                   </div>
-                  <h3 className="text-xl md:text-2xl font-black mb-3 md:mb-4 text-gray-900">{feature.title}</h3>
-                  <p className="text-gray-500 font-medium leading-relaxed text-sm md:text-base">
-                    {feature.desc}
-                  </p>
+                  <p className="text-sm md:text-base font-bold text-gray-700">{benefit}</p>
                 </div>
               ))}
             </div>
           </div>
         </section>
+
+        {/* Student Testimonials Section */}
+        {/* <section className="py-20 md:py-32 bg-indigo-950 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-full h-full bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px]" />
+          <div className="container px-4 md:px-6 mx-auto relative z-10">
+            <div className="text-center mb-16 space-y-3">
+              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-300">Testimonials</h2>
+              <p className="text-2xl md:text-4xl font-black text-white leading-tight">Trusted by 2,000+ students globally.</p>
+            </div>
+
+            <div className="max-w-5xl mx-auto relative">
+              <style dangerouslySetInnerHTML={{
+                __html: `
+                .hide-scrollbar::-webkit-scrollbar { display: none; }
+                .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+              `}} />
+              <div className="flex gap-6 overflow-x-auto pb-8 snap-x snap-mandatory hide-scrollbar">
+                {[
+                  {
+                    quote: "I finished my final year project in a week! The AI structured everything perfectly according to my university guidelines.",
+                    author: "Joy",
+                    course: "Computer Science",
+                    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026024d"
+                  },
+                  {
+                    quote: "Writer's block was killing me. This instantly generated a 12-chapter thesis that my supervisor almost approved immediately.",
+                    author: "David",
+                    course: "Business Admin",
+                    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                  },
+                  {
+                    quote: "The ability to upload my own literature and have it synthesized with APA citations saved me months of reading.",
+                    author: "Sarah",
+                    course: "Psychology",
+                    avatar: "https://i.pravatar.cc/150?u=a04258114e29026702d"
+                  }
+                ].map((testimonial, i) => (
+                  <div key={i} className="min-w-[85vw] md:min-w-[400px] lg:min-w-[450px] bg-white/10 backdrop-blur-md border border-white/20 p-8 rounded-3xl snap-center hover:bg-white/15 transition-colors">
+                    <div className="flex gap-1 mb-6">
+                      {[1, 2, 3, 4, 5].map(star => <Sparkles key={star} className="w-4 h-4 text-amber-400 fill-amber-400" />)}
+                    </div>
+                    <p className="text-lg md:text-xl text-white font-medium leading-relaxed mb-8">&quot;{testimonial.quote}&quot;</p>
+                    <div className="flex items-center gap-4">
+                      <Image src={testimonial.avatar} alt={testimonial.author} width={48} height={48} className="rounded-full border-2 border-indigo-500" />
+                      <div>
+                        <p className="text-white font-bold">{testimonial.author}</p>
+                        <p className="text-indigo-300 text-sm">{testimonial.course}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section> */}
         {/* <PricingSection /> */}
       </main>
     </div >
