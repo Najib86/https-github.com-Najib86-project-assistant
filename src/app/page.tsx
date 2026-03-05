@@ -6,7 +6,7 @@ import { HeroCarousel } from "@/components/HeroCarousel";
 import { Navbar } from "@/components/Navbar";
 import { HowItWorksSection } from "@/components/HowItWorksSection";
 import { AICapabilities } from "@/components/AICapabilities";
-// import PricingSection from "@/components/PricingSection";
+import PricingSection from "@/components/PricingSection";
 
 export default function Home() {
   return (
@@ -272,7 +272,7 @@ export default function Home() {
             </div>
           </div>
         </section> */}
-        {/* <PricingSection /> */}
+        <PricingSection />
       </main>
     </div >
   );

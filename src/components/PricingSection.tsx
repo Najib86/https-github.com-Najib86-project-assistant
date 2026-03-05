@@ -21,6 +21,29 @@ export default function PricingSection() {
           Affordable AI-powered academic collaboration for Nigerian students
         </p>
 
+        {/* Advert */}
+        <div className="mb-14 relative group animate-in slide-in-from-bottom-6 duration-1000">
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-500 via-indigo-500 to-purple-500 rounded-3xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-500"></div>
+          <div className="relative bg-white/90 backdrop-blur-xl border border-white/50 p-6 md:p-8 rounded-3xl shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex items-center gap-6">
+              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center shrink-0 shadow-lg shadow-pink-200 animate-bounce">
+                <span className="text-3xl">🎉</span>
+              </div>
+              <div className="text-left space-y-1">
+                <h3 className="text-2xl md:text-3xl font-black bg-clip-text text-transparent bg-gradient-to-r from-pink-600 to-purple-600 uppercase tracking-tight">
+                  100% Free For A Limited Time!
+                </h3>
+                <p className="text-gray-600 font-medium text-sm md:text-lg">
+                  Get full access to all premium features at absolutely no cost today.
+                </p>
+              </div>
+            </div>
+            <button className="px-8 py-4 rounded-xl bg-gray-900 text-white font-black text-lg shadow-xl hover:bg-gray-800 hover:scale-105 transition-all w-full md:w-auto shrink-0 whitespace-nowrap">
+              Claim Free Access
+            </button>
+          </div>
+        </div>
+
         {/* Cards */}
         <div className="grid md:grid-cols-4 gap-8">
 
@@ -54,9 +77,12 @@ export default function PricingSection() {
 
             <h3 className="text-lg font-semibold mb-2 mt-4">Undergraduate Gold</h3>
             <div className="flex items-baseline gap-1 mb-1">
-              <h4 className="text-5xl font-black tracking-tight text-gray-900">₦5,000</h4>
+              <h4 className="text-5xl font-black tracking-tight text-gray-900">
+                <span className="line-through text-gray-300 text-3xl mr-2">₦5,000</span>
+                ₦0
+              </h4>
             </div>
-            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-6">One-time payment</p>
+            <p className="text-xs font-bold text-indigo-600 uppercase tracking-wider mb-6">100% Free today</p>
 
             <ul className="space-y-4 text-left my-8">
               <Feature text="Full Chapters 1–5 Access" />
@@ -80,9 +106,12 @@ export default function PricingSection() {
               Postgraduate Platinum
             </h3>
             <div className="flex items-baseline gap-1 mb-1">
-              <h4 className="text-5xl font-black tracking-tight text-gray-900">₦10,000</h4>
+              <h4 className="text-5xl font-black tracking-tight text-gray-900">
+                <span className="line-through text-gray-300 text-3xl mr-2">₦10,000</span>
+                ₦0
+              </h4>
             </div>
-            <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-6">One-time payment</p>
+            <p className="text-xs font-bold text-blue-600 uppercase tracking-wider mb-6">100% Free today</p>
 
             <ul className="space-y-4 text-left my-8">
               <Feature text="Everything in Gold" />
@@ -106,7 +135,10 @@ export default function PricingSection() {
               Partner & Reseller
             </h3>
             <div className="flex items-baseline gap-1 mb-1">
-              <h4 className="text-4xl font-black tracking-tight text-gray-900">₦35,000</h4>
+              <h4 className="text-4xl font-black tracking-tight text-gray-900">
+                <span className="line-through text-gray-300 text-2xl mr-2">₦35,000</span>
+                ₦0
+              </h4>
             </div>
             <p className="text-[10px] xl:text-xs font-bold text-orange-600 uppercase tracking-wider mb-4 leading-tight">
               10 Undergraduate
