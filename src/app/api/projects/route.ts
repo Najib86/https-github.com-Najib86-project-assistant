@@ -158,10 +158,21 @@ export async function POST(req: Request) {
     try {
         console.log("[POST /api/projects] Starting request");
 
-        const session = await getServerSession(authOptions);
+        // Safely get session - don't let auth errors block project creation
+        let session = null;
+        try {
+            session = await getServerSession(authOptions);
+        } catch (authErr) {
+            console.warn("[POST /api/projects] getServerSession failed (non-fatal):", authErr);
+        }
         const user = session?.user as { id?: string | number } | undefined;
         if (user?.id) {
-            await rateLimit(`project-create:${user.id}`);
+            try {
+                await rateLimit(`project-create:${user.id}`);
+            } catch (rateLimitErr: any) {
+                if (rateLimitErr?.message?.includes("Too many AI requests")) throw rateLimitErr;
+                console.warn("[POST /api/projects] Rate limit check failed (non-fatal):", rateLimitErr);
+            }
         }
 
         const formData = await req.formData();
@@ -205,7 +216,17 @@ export async function POST(req: Request) {
         }
 
         const studentId = parseInt(studentIdStr);
-        let finalSupervisorId = supervisorIdStr ? parseInt(supervisorIdStr) : null;
+        if (isNaN(studentId)) {
+            return NextResponse.json({ error: "Invalid student session. Please log in again." }, { status: 400 });
+        }
+
+        let finalSupervisorId = (supervisorIdStr && supervisorIdStr !== "null" && supervisorIdStr !== "undefined") 
+            ? parseInt(supervisorIdStr) 
+            : null;
+        
+        if (finalSupervisorId !== null && isNaN(finalSupervisorId)) {
+            finalSupervisorId = null;
+        }
 
         // Validation: Ensure student exists
         const studentExists = await prisma.user.findUnique({
@@ -412,9 +433,14 @@ export async function POST(req: Request) {
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : "Failed to create project";
         const errorStack = error instanceof Error ? error.stack : "No stack trace";
-        console.error("Critical POST error:", { message: errorMessage, stack: errorStack });
+        console.error("Critical POST error:", { message: errorMessage, stack: errorStack, error });
         
-        return NextResponse.json({ error: "Failed to create project", message: errorMessage }, { status: 500 });
+        return NextResponse.json({ 
+            error: "Failed to create project", 
+            message: errorMessage,
+            stack: errorStack,
+            details: error
+        }, { status: 500 });
     }
 }
 
