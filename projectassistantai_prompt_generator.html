@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ProjectAssistantAI — Prompt Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"/>
+
+<style>
+/* ── Reset & Base ─────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0d12;
+  --surface:#111620;
+  --surface2:#181f2e;
+  --border:#1e2a3a;
+  --border2:#2a3a52;
+  --gold:#c9a84c;
+  --gold2:#e8c76a;
+  --gold-dim:#8a6f32;
+  --emerald:#2ecc8f;
+  --emerald-dim:#1a5e42;
+  --text:#e8edf5;
+  --text2:#8a9bb5;
+  --text3:#4a5a72;
+  --red:#e05252;
+  --blue:#4a8fff;
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'DM Sans',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --r:12px;
+  --r-sm:8px;
+  --shadow:0 8px 40px rgba(0,0,0,.5);
+  --glow:0 0 30px rgba(201,168,76,.15);
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.7;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── Animated background ──────────────────────────────── */
+.bg-grid{
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(201,168,76,.03) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(201,168,76,.03) 1px, transparent 1px);
+  background-size:50px 50px;
+  pointer-events:none;z-index:0;
+}
+.bg-orb{
+  position:fixed;border-radius:50%;filter:blur(120px);
+  pointer-events:none;z-index:0;animation:orbFloat 12s ease-in-out infinite;
+}
+.bg-orb-1{width:600px;height:600px;top:-200px;left:-200px;background:rgba(201,168,76,.06)}
+.bg-orb-2{width:500px;height:500px;bottom:-150px;right:-150px;background:rgba(46,204,143,.05);animation-delay:-6s}
+@keyframes orbFloat{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-30px)}}
+
+/* ── Layout ───────────────────────────────────────────── */
+.wrapper{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:0 24px}
+
+/* ── Nav ──────────────────────────────────────────────── */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(10,13,18,.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:0 24px;
+}
+.nav-inner{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  height:64px;
+}
+.logo{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+}
+.logo-icon{
+  width:36px;height:36px;border-radius:10px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dim));
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:900;font-size:16px;color:#0a0d12;
+}
+.logo-text{
+  font-family:var(--font-display);font-weight:700;font-size:17px;
+  color:var(--text);letter-spacing:-.3px;
+}
+.logo-text span{color:var(--gold)}
+.nav-badge{
+  background:linear-gradient(135deg,rgba(201,168,76,.15),rgba(201,168,76,.05));
+  border:1px solid var(--gold-dim);color:var(--gold);
+  font-size:11px;font-weight:600;letter-spacing:.5px;
+  padding:4px 10px;border-radius:20px;text-transform:uppercase;
+}
+
+/* ── Hero ─────────────────────────────────────────────── */
+.hero{
+  padding:80px 0 60px;
+  display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;
+}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);
+  color:var(--gold);font-size:12px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;padding:6px 14px;border-radius:20px;
+  margin-bottom:20px;
+}
+.hero-eyebrow::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{
+  font-family:var(--font-display);font-size:clamp(32px,4vw,50px);
+  font-weight:900;line-height:1.15;letter-spacing:-.5px;
+  margin-bottom:20px;
+}
+.hero h1 em{color:var(--gold);font-style:italic}
+.hero-sub{color:var(--text2);font-size:16px;line-height:1.7;margin-bottom:32px}
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap}
+
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 22px;border-radius:var(--r-sm);
+  font-family:var(--font-body);font-size:14px;font-weight:600;
+  cursor:pointer;transition:all .2s;border:none;text-decoration:none;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--gold),#a8762a);
+  color:#0a0d12;box-shadow:0 4px 20px rgba(201,168,76,.25);
+}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(201,168,76,.4)}
+.btn-ghost{background:transparent;border:1px solid var(--border2);color:var(--text2)}
+.btn-ghost:hover{border-color:var(--gold-dim);color:var(--gold);background:rgba(201,168,76,.05)}
+
+.hero-visual{
+  position:relative;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:24px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.hero-visual::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(201,168,76,.05),transparent 60%);
+  pointer-events:none;
+}
+.doc-preview-title{
+  font-family:var(--font-mono);font-size:11px;color:var(--text3);
+  letter-spacing:.5px;text-transform:uppercase;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.doc-preview-title::before{content:'';flex:1;height:1px;background:var(--border)}
+.doc-lines{display:flex;flex-direction:column;gap:8px}
+.doc-line{height:8px;border-radius:4px;background:var(--border2)}
+.doc-line-h{height:12px;border-radius:4px;background:linear-gradient(90deg,var(--gold-dim),transparent);width:70%}
+.doc-line-p{background:var(--border2)}
+.l-90{width:90%}.l-80{width:80%}.l-75{width:75%}.l-60{width:60%}.l-45{width:45%}.l-full{width:100%}
+.doc-block{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:12px;margin:12px 0;
+}
+.doc-block-title{font-size:11px;color:var(--gold);font-weight:600;margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px}
+.mini-bar{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.mini-bar-label{font-size:10px;color:var(--text3);width:70px;flex-shrink:0}
+.mini-bar-track{flex:1;height:5px;background:var(--border2);border-radius:3px;overflow:hidden}
+.mini-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--emerald),var(--gold))}
+
+/* ── Stats bar ────────────────────────────────────────── */
+.stats-bar{
+  display:grid;grid-template-columns:repeat(4,1fr);gap:1px;
+  background:var(--border);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;margin:40px 0;
+}
+.stat{
+  background:var(--surface);padding:24px;text-align:center;
+  transition:background .2s;
+}
+.stat:hover{background:var(--surface2)}
+.stat-val{
+  font-family:var(--font-display);font-size:28px;font-weight:700;
+  color:var(--gold);line-height:1;margin-bottom:6px;
+}
+.stat-label{font-size:12px;color:var(--text2);font-weight:500}
+
+/* ── Section Labels ───────────────────────────────────── */
+.section-label{
+  display:flex;align-items:center;gap:12px;
+  font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text3);margin-bottom:12px;
+}
+.section-label::after{content:'';flex:1;height:1px;background:var(--border)}
+.section-title{
+  font-family:var(--font-display);font-size:clamp(22px,3vw,32px);
+  font-weight:700;margin-bottom:12px;line-height:1.3;
+}
+.section-sub{color:var(--text2);font-size:15px;margin-bottom:32px;max-width:600px}
+
+/* ── Prompt Generator ─────────────────────────────────── */
+.prompt-section{padding:60px 0}
+.generator-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;
+  box-shadow:var(--shadow),var(--glow);
+}
+.card-header{
+  padding:20px 28px;
+  background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(201,168,76,.03));
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;
+}
+.card-header-title{
+  font-family:var(--font-display);font-size:18px;font-weight:700;
+  display:flex;align-items:center;gap:10px;
+}
+.card-header-title .icon{
+  width:32px;height:32px;border-radius:8px;
+  background:linear-gradient(135deg,var(--gold),var(--gold-dim));
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;
+}
+.card-body{padding:28px}
+
+/* Config grid */
+.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px}
+.config-group{display:flex;flex-direction:column;gap:6px}
+.config-group.full{grid-column:1/-1}
+label{font-size:12px;font-weight:600;color:var(--text2);letter-spacing:.3px;text-transform:uppercase}
+input,select,textarea{
+  background:var(--surface2);
+  border:1px solid var(--border2);
+  border-radius:var(--r-sm);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:14px;
+  padding:10px 14px;
+  transition:border-color .2s,box-shadow .2s;
+  width:100%;
+}
+input:focus,select:focus,textarea:focus{
+  outline:none;
+  border-color:var(--gold-dim);
+  box-shadow:0 0 0 3px rgba(201,168,76,.1);
+}
+textarea{resize:vertical;min-height:90px;line-height:1.6}
+select option{background:var(--surface2)}
+
+/* Checkboxes */
+.checkbox-group{display:flex;flex-wrap:wrap;gap:10px;margin-top:4px}
+.check-item{
+  display:flex;align-items:center;gap:8px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);padding:8px 12px;cursor:pointer;
+  transition:all .2s;user-select:none;font-size:13px;
+}
+.check-item:hover{border-color:var(--gold-dim);color:var(--gold)}
+.check-item input[type=checkbox]{
+  width:15px;height:15px;cursor:pointer;
+  accent-color:var(--gold);
+  background:transparent;border:none;padding:0;
+}
+.check-item.selected{
+  border-color:var(--gold-dim);
+  background:rgba(201,168,76,.08);
+  color:var(--gold);
+}
+
+/* Generate btn */
+.generate-row{
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:12px;margin-top:24px;
+  padding-top:24px;border-top:1px solid var(--border);
+}
+.btn-generate{
+  background:linear-gradient(135deg,var(--gold),#a8762a);
+  color:#0a0d12;
+  font-family:var(--font-body);font-size:15px;font-weight:700;
+  padding:14px 28px;border:none;border-radius:var(--r-sm);
+  cursor:pointer;display:flex;align-items:center;gap:10px;
+  box-shadow:0 4px 20px rgba(201,168,76,.3);
+  transition:all .2s;
+}
+.btn-generate:hover{transform:translateY(-2px);box-shadow:0 8px 35px rgba(201,168,76,.5)}
+.btn-generate:active{transform:translateY(0)}
+.btn-generate .spinner{
+  width:16px;height:16px;border:2px solid rgba(10,13,18,.3);
+  border-top-color:#0a0d12;border-radius:50%;
+  animation:spin .6s linear infinite;display:none;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Output Area ──────────────────────────────────────── */
+.output-section{
+  margin-top:28px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  overflow:hidden;
+  display:none;
+}
+.output-section.visible{display:block;animation:fadeIn .4s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.output-header{
+  padding:14px 20px;
+  background:rgba(46,204,143,.06);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-wrap:wrap;gap:10px;
+}
+.output-header-left{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;font-weight:600;color:var(--emerald);
+  text-transform:uppercase;letter-spacing:.5px;
+}
+.output-header-left svg{width:16px;height:16px}
+.output-actions{display:flex;gap:8px}
+.btn-sm{
+  padding:6px 14px;font-size:12px;font-weight:600;
+  border-radius:6px;cursor:pointer;transition:all .2s;
+  display:flex;align-items:center;gap:6px;border:none;
+}
+.btn-copy{background:var(--surface);border:1px solid var(--border2);color:var(--text2)}
+.btn-copy:hover{border-color:var(--emerald);color:var(--emerald)}
+.btn-copy.copied{border-color:var(--emerald);color:var(--emerald);background:rgba(46,204,143,.1)}
+.btn-dl{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0d12}
+.btn-dl:hover{opacity:.9;transform:translateY(-1px)}
+
+.output-body{
+  padding:24px;
+  font-family:var(--font-mono);
+  font-size:13px;
+  line-height:1.8;
+  color:var(--text);
+  white-space:pre-wrap;
+  word-break:break-word;
+  max-height:600px;
+  overflow-y:auto;
+}
+.output-body::-webkit-scrollbar{width:6px}
+.output-body::-webkit-scrollbar-track{background:transparent}
+.output-body::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* Syntax highlights */
+.t-section{color:var(--gold);font-weight:600}
+.t-key{color:#7ec8e3}
+.t-val{color:var(--emerald)}
+.t-comment{color:var(--text3);font-style:italic}
+.t-emphasis{color:var(--text);font-weight:600}
+
+/* ── How It Works ─────────────────────────────────────── */
+.steps-section{padding:60px 0}
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+.step-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:28px;
+  position:relative;
+  overflow:hidden;
+  transition:border-color .2s,transform .2s;
+}
+.step-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.step-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+}
+.step-num{
+  font-family:var(--font-display);font-size:42px;font-weight:900;
+  color:var(--border2);line-height:1;margin-bottom:12px;
+  letter-spacing:-2px;
+}
+.step-title{font-weight:700;font-size:15px;margin-bottom:8px;color:var(--text)}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.6}
+
+/* ── Prompt Preview Tabs ──────────────────────────────── */
+.tabs-row{
+  display:flex;gap:4px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--r-sm);
+  padding:4px;
+  margin-bottom:20px;
+  flex-wrap:wrap;
+}
+.tab{
+  flex:1;min-width:100px;padding:8px 14px;
+  font-size:12px;font-weight:600;letter-spacing:.3px;
+  color:var(--text3);border-radius:6px;cursor:pointer;
+  transition:all .2s;text-align:center;border:none;background:none;
+}
+.tab.active{background:var(--gold);color:#0a0d12}
+.tab:not(.active):hover{color:var(--text);background:var(--border)}
+
+/* ── Sample prompt cards ──────────────────────────────── */
+.sample-section{padding:60px 0}
+.samples-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.sample-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:20px;cursor:pointer;
+  transition:all .2s;position:relative;overflow:hidden;
+}
+.sample-card:hover{border-color:var(--gold-dim);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,.3)}
+.sample-card::after{
+  content:'USE THIS';
+  position:absolute;top:12px;right:12px;
+  font-size:10px;font-weight:700;letter-spacing:1px;
+  color:var(--gold);opacity:0;transition:opacity .2s;
+}
+.sample-card:hover::after{opacity:1}
+.sample-tag{
+  display:inline-block;
+  font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  padding:3px 8px;border-radius:4px;margin-bottom:10px;
+}
+.tag-peace{background:rgba(46,204,143,.15);color:var(--emerald);border:1px solid rgba(46,204,143,.2)}
+.tag-research{background:rgba(201,168,76,.12);color:var(--gold);border:1px solid rgba(201,168,76,.2)}
+.tag-analysis{background:rgba(74,143,255,.12);color:var(--blue);border:1px solid rgba(74,143,255,.2)}
+.sample-title{font-size:14px;font-weight:600;margin-bottom:6px;line-height:1.4}
+.sample-preview{font-size:12px;color:var(--text2);line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* ── Footer ───────────────────────────────────────────── */
+footer{
+  border-top:1px solid var(--border);
+  padding:40px 0;margin-top:80px;
+  text-align:center;
+}
+.footer-logo{
+  font-family:var(--font-display);font-size:20px;font-weight:700;
+  color:var(--text);margin-bottom:8px;
+}
+.footer-logo span{color:var(--gold)}
+.footer-meta{font-size:12px;color:var(--text3);line-height:1.8}
+.footer-meta a{color:var(--gold-dim);text-decoration:none}
+.footer-meta a:hover{color:var(--gold)}
+
+/* ── Toasts ───────────────────────────────────────────── */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--surface);border:1px solid var(--emerald);
+  color:var(--emerald);
+  padding:12px 18px;border-radius:var(--r-sm);
+  font-size:13px;font-weight:600;
+  display:flex;align-items:center;gap:8px;
+  transform:translateY(100px);opacity:0;
+  transition:all .3s;z-index:9999;
+}
+.toast.show{transform:translateY(0);opacity:1}
+
+/* ── Responsive ───────────────────────────────────────── */
+@media(max-width:768px){
+  .hero{grid-template-columns:1fr;padding:40px 0 32px}
+  .hero-visual{display:none}
+  .stats-bar{grid-template-columns:1fr 1fr}
+  .config-grid{grid-template-columns:1fr}
+  .steps-grid{grid-template-columns:1fr}
+  .samples-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="bg-grid"></div>
+<div class="bg-orb bg-orb-1"></div>
+<div class="bg-orb bg-orb-2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo">
+      <div class="logo-icon">P</div>
+      <div class="logo-text">ProjectAssistant<span>AI</span></div>
+    </a>
+    <div class="nav-badge">🇳🇬 Nigeria's #1 Academic AI</div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="wrapper">
+  <section class="hero">
+    <div class="hero-content">
+      <div class="hero-eyebrow">
+        <span>New Feature</span> Prompt Generator v2.0
+      </div>
+      <h1>Generate Your <em>Complete Research Project</em> in Seconds</h1>
+      <p class="hero-sub">
+        Craft a precision-engineered prompt that produces a full 90–120 page NOUN-compliant 
+        research project — with chapters, tables, charts, references, and appendices — 
+        ready to export as a Word document.
+      </p>
+      <div class="hero-actions">
+        <a href="#generator" class="btn btn-primary">
+          ✦ Build My Prompt
+        </a>
+        <a href="#samples" class="btn btn-ghost">View Examples →</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="doc-preview-title">Live Preview — Your Project</div>
+      <div class="doc-lines">
+        <div class="doc-line doc-line-h"></div>
+        <div class="doc-block">
+          <div class="doc-block-title">📊 Data Analysis (Chapter 4)</div>
+          <div class="mini-bar"><span class="mini-bar-label">WhatsApp</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:84%"></div></div><span style="font-size:11px;color:var(--gold)">84.1%</span></div>
+          <div class="mini-bar"><span class="mini-bar-label">Facebook</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:61%"></div></div><span style="font-size:11px;color:var(--gold)">61.3%</span></div>
+          <div class="mini-bar"><span class="mini-bar-label">YouTube</span><div class="mini-bar-track"><div class="mini-bar-fill" style="width:39%"></div></div><span style="font-size:11px;color:var(--gold)">38.7%</span></div>
+        </div>
+        <div class="doc-line l-90"></div>
+        <div class="doc-line l-full"></div>
+        <div class="doc-line l-80"></div>
+        <div class="doc-line doc-line-h" style="width:55%;margin-top:8px"></div>
+        <div class="doc-line l-full"></div>
+        <div class="doc-line l-75"></div>
+        <div class="doc-line l-60"></div>
+        <div class="doc-line l-45"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-val">109+</div><div class="stat-label">Pages Generated</div></div>
+    <div class="stat"><div class="stat-val">14</div><div class="stat-label">Charts & Figures</div></div>
+    <div class="stat"><div class="stat-val">9</div><div class="stat-label">Data Tables</div></div>
+    <div class="stat"><div class="stat-val">55+</div><div class="stat-label">APA References</div></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<div class="wrapper">
+  <section class="steps-section">
+    <div class="section-label">How It Works</div>
+    <h2 class="section-title">Three Steps to Your Complete Project</h2>
+    <p class="section-sub">Paste the generated prompt into any AI assistant and receive a fully structured NOUN-compliant research project.</p>
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <div class="step-title">Configure Your Project</div>
+        <div class="step-desc">Fill in your project title, department, matric number, theoretical frameworks, and research parameters using our smart form below.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <div class="step-title">Generate Your Prompt</div>
+        <div class="step-desc">Click Generate and receive a precision-engineered, multi-thousand-word prompt containing every specification needed for a complete academic project.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <div class="step-title">Export as Word Doc</div>
+        <div class="step-desc">Paste into Claude, ChatGPT, or our AI engine. The AI produces a complete .docx file with chapters, tables, charts, references, and appendices.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- GENERATOR -->
+<div class="wrapper" id="generator">
+  <section class="prompt-section">
+    <div class="section-label">Prompt Generator</div>
+    <h2 class="section-title">Build Your Custom Research Prompt</h2>
+    <p class="section-sub">Configure the parameters below to generate a prompt that will produce your exact research project.</p>
+
+    <div class="generator-card">
+      <div class="card-header">
+        <div class="card-header-title">
+          <div class="icon">✦</div>
+          Project Configuration
+        </div>
+        <span style="font-size:12px;color:var(--text3)">All fields improve output quality</span>
+      </div>
+      <div class="card-body">
+        <div class="tabs-row">
+          <button class="tab active" onclick="switchTab(this,'basic')">📋 Basic Info</button>
+          <button class="tab" onclick="switchTab(this,'content')">📚 Content & Theory</button>
+          <button class="tab" onclick="switchTab(this,'format')">📄 Format & Output</button>
+          <button class="tab" onclick="switchTab(this,'data')">📊 Data & Charts</button>
+        </div>
+
+        <!-- TAB: BASIC INFO -->
+        <div id="tab-basic" class="tab-panel">
+          <div class="config-grid">
+            <div class="config-group full">
+              <label>Research Project Title *</label>
+              <input type="text" id="proj-title" 
+                value="The Role of Digital Media in Promoting Peace and Social Cohesion in Plateau State Conflict-Prone Communities"
+                placeholder="Enter your full project title..."/>
+            </div>
+            <div class="config-group">
+              <label>Student Full Name</label>
+              <input type="text" id="student-name" placeholder="e.g. IBRAHIM, Aminu Suleiman"/>
+            </div>
+            <div class="config-group">
+              <label>Matriculation Number</label>
+              <input type="text" id="matric" placeholder="e.g. NOU/2019/XXXX"/>
+            </div>
+            <div class="config-group">
+              <label>University</label>
+              <select id="university">
+                <option>National Open University of Nigeria (NOUN)</option>
+                <option>University of Jos</option>
+                <option>Ahmadu Bello University, Zaria</option>
+                <option>University of Nigeria, Nsukka</option>
+                <option>Other Nigerian University</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Faculty / Department *</label>
+              <select id="faculty">
+                <option>Faculty of Social Sciences — Mass Communication</option>
+                <option>Faculty of Social Sciences — Sociology</option>
+                <option>Faculty of Humanities — Political Science</option>
+                <option>Faculty of Arts — Linguistics & Communication</option>
+                <option>Faculty of Education — Educational Admin</option>
+                <option>Faculty of Law — International Relations</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Degree Programme *</label>
+              <select id="degree">
+                <option>B.Sc. Mass Communication</option>
+                <option>M.Sc. Mass Communication</option>
+                <option>Ph.D. Mass Communication</option>
+                <option>B.Sc. Sociology</option>
+                <option>B.A. Political Science</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Study Location / State *</label>
+              <input type="text" id="location" value="Plateau State, Nigeria" placeholder="e.g. Plateau State, Nigeria"/>
+            </div>
+            <div class="config-group">
+              <label>Submission Year</label>
+              <input type="text" id="year" value="2024" placeholder="e.g. 2024"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: CONTENT & THEORY -->
+        <div id="tab-content" class="tab-panel" style="display:none">
+          <div class="config-grid">
+            <div class="config-group">
+              <label>Primary Theoretical Framework *</label>
+              <select id="theory1">
+                <option>Peace Communication Theory (Kempf, 2003)</option>
+                <option>Social Identity Theory (Tajfel & Turner, 1979)</option>
+                <option>Agenda-Setting Theory (McCombs & Shaw, 1972)</option>
+                <option>Uses and Gratifications Theory (Katz et al., 1973)</option>
+                <option>Framing Theory (Goffman, 1974)</option>
+                <option>Diffusion of Innovations (Rogers, 1962)</option>
+                <option>Democratic Participation Theory</option>
+                <option>Cultivation Theory (Gerbner, 1969)</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Secondary Theoretical Framework</label>
+              <select id="theory2">
+                <option>Social Identity Theory (Tajfel & Turner, 1979)</option>
+                <option>Peace Communication Theory (Kempf, 2003)</option>
+                <option>Framing Theory (Goffman, 1974)</option>
+                <option>Uses and Gratifications Theory</option>
+                <option>Agenda-Setting Theory</option>
+                <option>Dependency Theory</option>
+                <option>None — Single Framework</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Research Design</label>
+              <select id="research-design">
+                <option>Mixed Methods (Quantitative + Qualitative)</option>
+                <option>Quantitative Survey Design</option>
+                <option>Qualitative (Interviews + FGDs)</option>
+                <option>Content Analysis</option>
+                <option>Case Study Design</option>
+                <option>Historical/Descriptive</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Target Population</label>
+              <input type="text" id="population" value="Adult residents (18+) of conflict-prone communities in Barkin Ladi, Riyom, and Mangu LGAs, Plateau State" placeholder="Describe your study population..."/>
+            </div>
+            <div class="config-group">
+              <label>Sample Size</label>
+              <input type="text" id="sample-size" value="385 (Yamane formula, e=0.05)" placeholder="e.g. 385 respondents"/>
+            </div>
+            <div class="config-group">
+              <label>Data Collection Method</label>
+              <select id="data-method">
+                <option>Structured Questionnaire + In-Depth Interviews + FGDs</option>
+                <option>Structured Questionnaire Only</option>
+                <option>Interviews Only</option>
+                <option>Content Analysis + Questionnaire</option>
+                <option>Observation + Interview</option>
+              </select>
+            </div>
+            <div class="config-group full">
+              <label>Research Objectives (one per line)</label>
+              <textarea id="objectives" placeholder="e.g.
+1. To identify digital platforms used for peacebuilding in conflict-prone communities
+2. To assess how digital media content promotes peaceful attitudes
+3. To examine the relationship between digital media exposure and social cohesion
+4. To identify challenges limiting effective digital peacebuilding
+5. To propose a digital peacebuilding framework for Plateau State">1. To identify digital platforms used for peacebuilding in Plateau State conflict-prone communities
+2. To assess the extent to which digital media content promotes peaceful attitudes and inter-group dialogue
+3. To examine the relationship between digital media exposure and social cohesion outcomes
+4. To identify challenges limiting effective digital media peacebuilding
+5. To propose a contextually grounded digital peacebuilding framework for Plateau State</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: FORMAT & OUTPUT -->
+        <div id="tab-format" class="tab-panel" style="display:none">
+          <div class="config-grid">
+            <div class="config-group">
+              <label>Target Page Count</label>
+              <select id="page-target">
+                <option>90–120 pages (Masters standard)</option>
+                <option>40–60 pages (First Degree)</option>
+                <option>120–160 pages (Extended Masters)</option>
+                <option>250+ pages (PhD)</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Font & Spacing</label>
+              <select id="font-spec">
+                <option>Times New Roman 12pt, Double-spaced (NOUN standard)</option>
+                <option>Times New Roman 12pt, 1.5-spaced</option>
+                <option>Arial 12pt, Double-spaced</option>
+                <option>Calibri 11pt, Double-spaced</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Citation Style</label>
+              <select id="citation">
+                <option>APA 7th Edition</option>
+                <option>APA 6th Edition</option>
+                <option>Harvard Referencing</option>
+                <option>Chicago Author-Date</option>
+                <option>MLA 9th Edition</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Minimum References</label>
+              <select id="ref-count">
+                <option>50+ scholarly references</option>
+                <option>30–49 references</option>
+                <option>70+ references</option>
+                <option>100+ references (PhD level)</option>
+              </select>
+            </div>
+            <div class="config-group full">
+              <label>Chapters to Include</label>
+              <div class="checkbox-group" id="chapters">
+                <label class="check-item selected"><input type="checkbox" checked value="prelims"/>Preliminary Pages</label>
+                <label class="check-item selected"><input type="checkbox" checked value="ch1"/>Chapter 1: Introduction</label>
+                <label class="check-item selected"><input type="checkbox" checked value="ch2"/>Chapter 2: Literature Review</label>
+                <label class="check-item selected"><input type="checkbox" checked value="ch3"/>Chapter 3: Methodology</label>
+                <label class="check-item selected"><input type="checkbox" checked value="ch4"/>Chapter 4: Data & Analysis</label>
+                <label class="check-item selected"><input type="checkbox" checked value="ch5"/>Chapter 5: Summary & Conclusion</label>
+                <label class="check-item selected"><input type="checkbox" checked value="refs"/>References</label>
+                <label class="check-item selected"><input type="checkbox" checked value="appendices"/>Appendices</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB: DATA & CHARTS -->
+        <div id="tab-data" class="tab-panel" style="display:none">
+          <div class="config-grid">
+            <div class="config-group">
+              <label>Export File Format</label>
+              <select id="export-format">
+                <option>Microsoft Word (.docx) via Node.js docx library</option>
+                <option>PDF via LibreOffice conversion</option>
+                <option>Both DOCX and PDF</option>
+                <option>Markdown + DOCX</option>
+              </select>
+            </div>
+            <div class="config-group">
+              <label>Statistical Analysis Tool</label>
+              <select id="stats-tool">
+                <option>SPSS v26 (Pearson Chi-Square + Correlation)</option>
+                <option>R Statistical Software</option>
+                <option>Python (scipy + pandas)</option>
+                <option>Excel Data Analysis ToolPak</option>
+              </select>
+            </div>
+            <div class="config-group full">
+              <label>Charts & Figures to Include</label>
+              <div class="checkbox-group" id="charts">
+                <label class="check-item selected"><input type="checkbox" checked value="bar"/>Bar Charts (platform usage)</label>
+                <label class="check-item selected"><input type="checkbox" checked value="pie"/>Pie Charts (demographics)</label>
+                <label class="check-item selected"><input type="checkbox" checked value="hbar"/>Horizontal Bar (effectiveness)</label>
+                <label class="check-item selected"><input type="checkbox" checked value="grouped"/>Grouped Bar (cohesion scores)</label>
+                <label class="check-item selected"><input type="checkbox" checked value="radar"/>Radar Chart (social cohesion)</label>
+                <label class="check-item selected"><input type="checkbox" checked value="scatter"/>Scatter Plot (correlation)</label>
+                <label class="check-item selected"><input type="checkbox" checked value="line"/>Line Trend Chart (2016–2024)</label>
+                <label class="check-item selected"><input type="checkbox" checked value="stacked"/>Stacked Bar (WhatsApp groups)</label>
+                <label class="check-item selected"><input type="checkbox" checked value="framework"/>Conceptual Framework Diagram</label>
+                <label class="check-item selected"><input type="checkbox" checked value="proposal"/>Recommendations Framework Diagram</label>
+              </div>
+            </div>
+            <div class="config-group full">
+              <label>Data Tables to Include</label>
+              <div class="checkbox-group" id="tables">
+                <label class="check-item selected"><input type="checkbox" checked value="demo"/>Demographics Table</label>
+                <label class="check-item selected"><input type="checkbox" checked value="dm-use"/>Digital Media Use Table</label>
+                <label class="check-item selected"><input type="checkbox" checked value="effectiveness"/>Content Effectiveness Table (with SD)</label>
+                <label class="check-item selected"><input type="checkbox" checked value="freq"/>Activity Frequency Table</label>
+                <label class="check-item selected"><input type="checkbox" checked value="likert"/>Social Cohesion Likert Table</label>
+                <label class="check-item selected"><input type="checkbox" checked value="crosstab"/>Cross-Tabulation Table</label>
+                <label class="check-item selected"><input type="checkbox" checked value="hypothesis"/>Hypothesis Results Summary Table</label>
+                <label class="check-item selected"><input type="checkbox" checked value="themes"/>Qualitative Theme Matrix</label>
+                <label class="check-item selected"><input type="checkbox" checked value="recs"/>Recommendations Framework Table</label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- GENERATE BUTTON -->
+        <div class="generate-row">
+          <div style="font-size:13px;color:var(--text2)">
+            💡 Tip: Fill all tabs for a more detailed, targeted prompt
+          </div>
+          <button class="btn-generate" onclick="generatePrompt()">
+            <div class="spinner" id="spinner"></div>
+            <span id="btn-text">✦ Generate Research Prompt</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- OUTPUT -->
+      <div id="output" class="output-section">
+        <div class="output-header">
+          <div class="output-header-left">
+            <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+            Prompt Generated — Ready to Use
+          </div>
+          <div class="output-actions">
+            <button class="btn-sm btn-copy" id="copy-btn" onclick="copyPrompt()">📋 Copy Prompt</button>
+            <button class="btn-sm btn-dl" onclick="downloadPrompt()">⬇ Download .txt</button>
+          </div>
+        </div>
+        <div class="output-body" id="output-text"></div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- SAMPLES -->
+<div class="wrapper" id="samples">
+  <section class="sample-section">
+    <div class="section-label">Example Outputs</div>
+    <h2 class="section-title">Pre-Built Prompts to Get You Started</h2>
+    <p class="section-sub">Click any card to auto-populate the generator with that project's configuration.</p>
+    <div class="samples-grid">
+      <div class="sample-card" onclick="loadSample('digital-peace')">
+        <span class="sample-tag tag-peace">Peace Studies</span>
+        <div class="sample-title">Digital Media & Peace in Plateau State</div>
+        <div class="sample-preview">Mixed methods study on WhatsApp, Facebook and community radio as peacebuilding tools in Barkin Ladi, Riyom and Mangu LGAs. Peace Communication Theory + Social Identity Theory. 109 pages, 14 figures, 9 tables.</div>
+      </div>
+      <div class="sample-card" onclick="loadSample('social-media-youth')">
+        <span class="sample-tag tag-research">Media Studies</span>
+        <div class="sample-title">Social Media Influence on Youth Political Participation</div>
+        <div class="sample-preview">Examination of Twitter/X, TikTok and Instagram in shaping political awareness among NOUN students. Uses & Gratifications Theory + Agenda-Setting. Survey design, n=384.</div>
+      </div>
+      <div class="sample-card" onclick="loadSample('fake-news')">
+        <span class="sample-tag tag-analysis">Misinformation</span>
+        <div class="sample-title">Fake News & Electoral Behaviour in FCT</div>
+        <div class="sample-preview">Quantitative analysis of WhatsApp misinformation during 2023 general elections and its impact on voter decision-making in Abuja Municipal Area Council. Framing Theory + SIT.</div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrapper">
+    <div class="footer-logo">ProjectAssistant<span>AI</span>.com.ng</div>
+    <div class="footer-meta">
+      Nigeria's Premier Academic Project Generation Platform<br/>
+      Helping Nigerian students produce world-class research since 2023<br/>
+      <a href="https://www.projectassistantai.com.ng">www.projectassistantai.com.ng</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast">✓ Copied to clipboard!</div>
+
+<script>
+/* ── Tab switching ─────────────────────────────────────── */
+function switchTab(btn, id) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  btn.classList.add('active');
+  document.getElementById('tab-' + id).style.display = 'block';
+}
+
+/* ── Checkbox styling ──────────────────────────────────── */
+document.querySelectorAll('.check-item input[type=checkbox]').forEach(cb => {
+  cb.addEventListener('change', function() {
+    this.closest('.check-item').classList.toggle('selected', this.checked);
+  });
+});
+
+/* ── Collect form values ───────────────────────────────── */
+function getChecked(containerId) {
+  return [...document.querySelectorAll(`#${containerId} input:checked`)]
+    .map(cb => cb.closest('.check-item').textContent.trim()).join(', ');
+}
+
+/* ── Main prompt generator ─────────────────────────────── */
+function generatePrompt() {
+  const spinner = document.getElementById('spinner');
+  const btnText = document.getElementById('btn-text');
+  spinner.style.display = 'block';
+  btnText.textContent = 'Building prompt...';
+
+  setTimeout(() => {
+    const title     = document.getElementById('proj-title').value.trim();
+    const name      = document.getElementById('student-name').value.trim() || '[STUDENT FULL NAME]';
+    const matric    = document.getElementById('matric').value.trim() || '[NOU/XXXXXXX/XX]';
+    const uni       = document.getElementById('university').value;
+    const faculty   = document.getElementById('faculty').value;
+    const degree    = document.getElementById('degree').value;
+    const location  = document.getElementById('location').value.trim();
+    const year      = document.getElementById('year').value.trim();
+    const theory1   = document.getElementById('theory1').value;
+    const theory2   = document.getElementById('theory2').value;
+    const design    = document.getElementById('research-design').value;
+    const population= document.getElementById('population').value.trim();
+    const sampleSz  = document.getElementById('sample-size').value.trim();
+    const method    = document.getElementById('data-method').value;
+    const objectives= document.getElementById('objectives').value.trim();
+    const pageTarget= document.getElementById('page-target').value;
+    const fontSpec  = document.getElementById('font-spec').value;
+    const citation  = document.getElementById('citation').value;
+    const refCount  = document.getElementById('ref-count').value;
+    const exportFmt = document.getElementById('export-format').value;
+    const statsTool = document.getElementById('stats-tool').value;
+    const charts    = getChecked('charts');
+    const tables    = getChecked('tables');
+    const chapters  = getChecked('chapters');
+
+    const prompt = buildPrompt({
+      title, name, matric, uni, faculty, degree, location, year,
+      theory1, theory2, design, population, sampleSz, method, objectives,
+      pageTarget, fontSpec, citation, refCount, exportFmt, statsTool,
+      charts, tables, chapters
+    });
+
+    document.getElementById('output-text').textContent = prompt;
+    const outputEl = document.getElementById('output');
+    outputEl.classList.add('visible');
+    outputEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    spinner.style.display = 'none';
+    btnText.textContent = '✦ Regenerate Prompt';
+  }, 800);
+}
+
+/* ── Prompt builder ────────────────────────────────────── */
+function buildPrompt(c) {
+  return `╔══════════════════════════════════════════════════════════════════════════════╗
+║          PROJECTASSISTANTAI.COM.NG — RESEARCH PROJECT GENERATOR            ║
+║          Complete Academic Project Prompt | NOUN-Compliant | ${c.year}           ║
+╚══════════════════════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+MASTER INSTRUCTION TO AI SYSTEM
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+You are an expert Nigerian academic writing assistant and research project 
+generator. Your task is to produce a COMPLETE, FULL-LENGTH, PUBLICATION-QUALITY 
+research project document following ALL specifications below. Do not produce 
+summaries, outlines, or partial sections — produce the ENTIRE document from 
+cover page to final appendix.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 1: PROJECT IDENTITY & INSTITUTIONAL DETAILS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PROJECT TITLE     : ${c.title}
+STUDENT NAME      : ${c.name}
+MATRICULATION NO  : ${c.matric}
+UNIVERSITY        : ${c.uni}
+FACULTY/DEPT      : ${c.faculty}
+DEGREE PROGRAMME  : ${c.degree}
+GEOGRAPHIC FOCUS  : ${c.location}
+SUBMISSION YEAR   : ${c.year}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 2: FORMATTING SPECIFICATIONS (STRICTLY ENFORCE)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FONT & SPACING    : ${c.fontSpec}
+TARGET LENGTH     : ${c.pageTarget}
+CITATION STYLE    : ${c.citation}
+MINIMUM REFS      : ${c.refCount}
+PAPER SIZE        : A4 (297 × 210mm)
+MARGINS           : Top 1", Bottom 1", Left 1.25", Right 1"
+PARAGRAPH INDENT  : 0.5" first-line indent on all body paragraphs
+HEADING STYLES    : Chapter titles UPPERCASE BOLD centered; Sub-headings bold
+                    numbered (1.1, 1.2, 1.2.1 etc.)
+PRELIMINARY PAGES : Roman numeral pagination (i, ii, iii...)
+MAIN BODY PAGES   : Arabic numeral pagination (1, 2, 3...) starting at Chapter 1
+EXPORT FORMAT     : ${c.exportFmt}
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 3: DOCUMENT STRUCTURE — PRODUCE EVERY SECTION BELOW IN FULL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CHAPTERS REQUIRED : ${c.chapters}
+
+PRELIMINARY PAGES (produce each fully):
+  ► Cover Page — Title at upper half; student name (surname first); matric no.;
+                 "A project submitted to the ${c.faculty} of the ${c.uni} in 
+                 partial fulfillment of the requirements for the award of 
+                 ${c.degree}"; Month, Year at bottom.
+  ► Spine       — Student's surname, initials, degree, year
+  ► Inside Cover Page — As cover but add matric no. and partial fulfillment statement
+  ► Declaration — Full original declaration statement with signature line
+  ► Certification — Supervisor certification with signature/date lines
+  ► Dedication  — Thoughtful, personalised dedication paragraph (150+ words)
+  ► Acknowledgement — Comprehensive acknowledgement (400+ words) thanking:
+                     God, supervisor, NOUN management, field participants,
+                     research assistants, family
+  ► Abstract    — Exactly ONE blocked paragraph, single-spaced, max 400 words.
+                 Must cover: problem, purpose, methodology, findings, 
+                 recommendations. End with 6–8 keywords.
+  ► List of Tables — All tables numbered with page numbers
+  ► List of Figures — All figures numbered with page numbers  
+  ► List of Abbreviations — All acronyms used
+  ► Table of Contents — Full with all sub-headings and page numbers
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 4: CHAPTER-BY-CHAPTER CONTENT SPECIFICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+CHAPTER ONE: INTRODUCTION (Target: 18–22 pages)
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+1.1 Background to the Study (6–8 paragraphs, 3–4 pages minimum)
+    - Open with the historical and contemporary conflict context of ${c.location}
+    - Trace the emergence of digital media as a communication force in conflict areas
+    - Establish the dual nature of digital media (peacebuilding potential vs. 
+      conflict-escalating risk)
+    - Cite minimum 8 academic sources. Include Nigerian-context statistics.
+    - End with a clear statement of why this study is needed NOW.
+
+1.2 Statement of the Problem (4–5 paragraphs, 2–3 pages)
+    - Identify the specific gap in knowledge this study addresses
+    - Link the problem to practical consequences for ${c.location}
+    - Conclude with a precise, single-sentence problem statement
+
+1.3 Research Questions (list 5 questions, numbered)
+    - Use active verbs (are, does, what, how, to what extent)
+    - Align each question directly with an objective
+    - Research questions must correspond to the hypotheses
+
+1.4 Aims and Objectives of the Study
+    - State the overall AIM (one sentence)
+    - List 5 specific OBJECTIVES numbered 1–5
+    - Each objective starts with an infinitive verb (To identify, To assess, etc.)
+
+1.5 Hypotheses (3 formal hypotheses)
+    - H1: Relationship between digital peace content exposure and dialogue willingness
+    - H2: Association between digital peacebuilding use and social cohesion outcomes  
+    - H3: Relationship between hate speech exposure and reduced social cohesion
+
+1.6 Significance of the Study (4–6 paragraphs)
+    Sub-sections: Theoretical / Methodological / Policy / Practical / Academic
+
+1.7 Scope of the Study (2–3 paragraphs)
+    - Geographic scope: specific LGAs in ${c.location}
+    - Thematic scope: specific digital platforms studied
+    - Temporal scope: specific years covered
+
+1.8 Definition of Concepts/Operationalisation (one sub-section per concept)
+    Define each concept in 2–3 paragraphs with scholarly citations:
+    - Digital Media (operationalise for this study)
+    - Peace / Peacebuilding (distinguish negative vs. positive peace, cite Galtung 1969)
+    - Social Cohesion (operationalise with measurable indicators)
+    - Conflict-Prone Communities (with operational selection criteria)
+    - Peace Communication (link to theory)
+    - Hate Speech (cite UN definition 2019)
+
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+CHAPTER TWO: LITERATURE REVIEW (Target: 28–35 pages)
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+INTRODUCTORY PARAGRAPH: Brief overview of chapter structure
+
+2.1 Conceptual Literature (10–14 pages)
+    2.1.1 The Evolution of Digital Media (Web 1.0 → Web 2.0 → social media era)
+          - Discuss algorithmic amplification, network effects, mobile-first Africa
+          - Nigeria digital statistics (NCC 2022, DataReportal 2023)
+    2.1.2 Digital Media and Conflict in Sub-Saharan Africa
+          - Kenya 2007-8, Ethiopia Tigray, DRC, Nigeria #EndSARS
+          - Mechanisms: coordination, misinformation, hate speech amplification
+          - Müller & Schwarz (2023) on social media and hate crime
+    2.1.3 Digital Media as a Peacebuilding Resource
+          - Four modalities: peace communication, early warning, dialogue,
+            documentation and accountability
+          - IMC Jos WhatsApp model; Search for Common Ground Nigeria
+          - Rwandan community radio transition to digital
+    2.1.4 Social Cohesion in Post-Conflict Settings
+          - Durkheim → Berger-Schmitt (2000) → Chan et al. (2006) 5-component model
+          - Lederach (2005) moral imagination framework
+          - UNDP (2020) Plateau State social cohesion data
+
+2.2 Theoretical Framework (10–12 pages)
+    2.2.1 ${c.theory1}
+          - Origin, core propositions, key scholars
+          - How it applies to this specific study
+          - Critical evaluation of the theory's limitations
+    2.2.2 ${c.theory2}
+          - Origin, core propositions, key scholars  
+          - Specific relevance to digital media and inter-group attitudes
+          - Allport's Contact Hypothesis integration (if relevant)
+    2.2.3 Integration of Theoretical Frameworks
+          - How both theories complement each other
+          - The integrated analytical model for this study
+    ► INSERT FIGURE 6 HERE: Conceptual Framework Diagram showing inputs → 
+      mediating factors → peace/cohesion outcomes
+
+2.3 Empirical Review (8–10 pages)
+    2.3.1 Digital Media and Conflict in the Nigerian Context
+          (Adibe 2021, Aliyu & Musa 2022, Nwosu 2021, Mohammed 2014)
+    2.3.2 Digital Media Peacebuilding in Sub-Saharan Africa
+          (Moyo 2019, Brosché & Höglund 2016, Uzochukwu & Ikechukwu 2021)
+    2.3.3 Social Cohesion Measurement in Post-Conflict Settings
+          (UNDP 2018, Odeyemi & Adeyemi 2019, Lochner et al. 1999)
+    ► INSERT FIGURE 7 HERE: Trend line chart 2016–2024 (peace content vs. 
+      harmful content awareness in study communities)
+
+2.4 Summary of Literature Review (1–2 pages)
+    - 5 key conclusions from the literature
+    - Explicit identification of the gap this study fills
+
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+CHAPTER THREE: RESEARCH METHODOLOGY (Target: 14–18 pages)
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+3.1 Preamble — Epistemological orientation (pragmatic mixed methods)
+3.2 Research Design — ${c.design}
+    - Justify the choice with reference to research questions
+    - Distinguish quantitative vs. qualitative strands
+    - Convergent parallel integration model
+3.3 Population of the Study
+    - ${c.population}
+    - Cite population size sources (NPC 2006 + projections)
+3.4 Sampling and Sample Size
+    - Target sample: ${c.sampleSz}
+    - Apply Yamane (1967) formula explicitly: n = N / (1 + Ne²)
+    - Multi-stage sampling: Stage 1 (community selection), Stage 2 (household),
+      Stage 3 (Kish grid respondent selection)
+    - Qualitative: 18 key informants + 3 FGDs (8 each)
+3.5 Data Collection Instrument and Validation
+    - ${c.method}
+    - Questionnaire sections: A (Demographics), B (Digital Media Use), 
+      C (Peace Communication), D (Social Cohesion — 16-item Likert scale)
+    - Validity: expert review by 2 UNIJOS academics
+    - Reliability: Cronbach's Alpha = 0.81; pre-test on Bassa LGA (n=40)
+    - Translation to Hausa and Berom; back-translation verification
+3.6 Techniques of Data Analysis
+    - Quantitative: ${c.statsTool}
+      * Univariate: frequencies, percentages, means, SDs
+      * Bivariate: Pearson r (H1), Chi-Square (H2 and H3)
+      * Significance level α = 0.05; report Cramér's V effect sizes
+    - Qualitative: Braun & Clarke (2006) 6-phase thematic analysis
+    - Integration: convergent parallel side-by-side comparison
+3.7 Limitations of Methodology
+    - Cross-sectional design (cannot establish causality)
+    - Social desirability bias (mitigations described)
+    - Geographic and purposive sampling limitations
+    - Security environment constraints
+    - Rapidly evolving digital media landscape
+
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+CHAPTER FOUR: DATA PRESENTATION AND ANALYSIS (Target: 25–32 pages)
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+4.1 Preamble — Field work summary; response rates; exclusion reasons
+
+4.2 Presentation and Analysis of Data According to Research Questions
+
+  4.2.1 Demographic Profile
+        ► INSERT TABLE 1: Full demographics (sex, age, education, occupation, 
+          LGA, religion) with Freq and % columns
+        ► INSERT FIGURE 2: Age distribution pie chart
+        ► INSERT FIGURE 8: Occupational distribution bar chart
+        Narrative: 3–4 paragraphs interpreting each demographic variable
+
+  4.2.2 Research Question 1 — Platform Usage and Peacebuilding Activities
+        ► INSERT FIGURE 1: Digital platform usage bar chart (WhatsApp 84.1%, 
+          Facebook 61.3%, YouTube 38.7%, Twitter/X 22.1%, Blogs 14.8%)
+        ► INSERT TABLE 2: Full digital media access and peacebuilding use (12 rows)
+        ► INSERT FIGURE 9: LGA comparison grouped bar chart
+        Narrative: 5–6 paragraphs; include verbatim quote from civil society KII
+
+  4.2.3 Research Question 2 — Content Effectiveness
+        ► INSERT FIGURE 3: Horizontal bar chart of content effectiveness scores
+        ► INSERT TABLE 3: Full effectiveness table with mean, SD, min, max, rating
+        ► INSERT TABLE 4: Activity frequency table (daily/weekly/monthly/never)
+        ► INSERT FIGURE 11: Stacked bar — WhatsApp group content composition
+        Narrative: 4–5 paragraphs; include verbatim quote from FGD participant
+
+  4.2.4 Research Question 3 — Attitudes Toward Peace
+        Data on 67.3% vs. 38.9% attitudinal comparison
+        Narrative: 3–4 paragraphs including SIT theoretical linkage
+
+  4.2.5 Research Question 4 — Challenges to Digital Peacebuilding
+        ► INSERT FIGURE 5: Major challenges bar chart
+        ► INSERT FIGURE 13: Connectivity sub-challenges horizontal bar
+        Narrative: 4–5 paragraphs; include verbatim quote from digital literacy trainer
+
+  4.2.6 Social Cohesion Likert Analysis
+        ► INSERT TABLE 5: Full 8-item Likert table (SA/A/U/D/SD percentages + mean)
+        ► INSERT FIGURE 10: Social cohesion radar chart (pre vs. post engagement)
+        ► INSERT TABLE 6: Cross-tabulation (DM use category × Cohesion score category)
+        Narrative: 4–5 paragraphs interpreting cohesion patterns
+
+4.3 Test of Hypotheses
+
+  H1 Testing (Pearson r = 0.63, p < 0.001, r² = 0.40):
+     ► INSERT FIGURE 12: Scatter plot with regression line
+     Narrative: state test used, report result, calculate r², interpret effect size
+     Decision: Accept H1 — significant positive relationship confirmed
+
+  H2 Testing (χ² = 47.82, df = 4, p < 0.001, Cramér's V = 0.36):
+     Narrative: state test, report χ² value, df, p, Cramér's V
+     Compare group means: Active DM (3.79) vs. No DM (2.93)
+     Decision: Accept H2 — significant positive association confirmed
+
+  H3 Testing (χ² = 52.41, df = 4, p < 0.001, Cramér's V = 0.38):
+     Narrative: report all statistics; compare High Hate Speech (2.47) vs. 
+     Low Hate Speech (3.62) cohesion scores — 1.15-point difference
+     Decision: Accept H3 — significant negative association confirmed
+
+  ► INSERT TABLE 7: Hypothesis summary table (all 3 with test stat, df, p, effect size, decision)
+  ► INSERT FIGURE 4: Grouped bar comparing cohesion scores across hypothesis groups
+
+4.4 Discussion of Findings (6–8 pages, 4 themed sub-sections)
+  4.4.1 The WhatsApp-Centred Digital Peacebuilding Ecosystem
+  4.4.2 The Power of Personal Narrative in Digital Peace Communication
+  4.4.3 Structural Constraints as a Fundamental Barrier
+  4.4.4 Qualitative Dimension — Theme Matrix
+        ► INSERT TABLE 8: Qualitative theme matrix (6 themes × 4 columns)
+
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+CHAPTER FIVE: SUMMARY, CONCLUSION AND RECOMMENDATIONS (Target: 12–16 pages)
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌
+
+5.1 Summary — One paragraph per chapter (5 paragraphs minimum)
+    Include key statistics: r=0.63, χ²=47.82, χ²=52.41, WhatsApp 84.1%, etc.
+
+5.2 Conclusion — 5 named sub-conclusions:
+    5.2.1 Dual nature of digital media confirmed
+    5.2.2 Peacebuilding potential real but conditional
+    5.2.3 Hate speech as measurable social cohesion threat
+    5.2.4 Content quality and source trust as primary effectiveness determinants
+    5.2.5 Structural barriers limiting peacebuilding potential realisation
+
+5.3 Recommendations — 9 detailed recommendations:
+    ► INSERT TABLE 9: Full recommendations framework (No., Recommendation, 
+      Responsible Actor, Timeframe & Indicators)
+    ► INSERT FIGURE 14: Proposed digital peace communication framework diagram
+    Write each recommendation as a detailed paragraph (150+ words each)
+    Target stakeholders: PLASPA, NCC, NITDA, Meta Nigeria, Civil Society,
+    University of Jos, UNDP, State Government, Ministry of Education
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 5: CHARTS, TABLES AND DIAGRAMS — COMPLETE SPECIFICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CHARTS TO GENERATE (${c.charts}):
+
+Generate each chart as a Python matplotlib PNG (150 DPI, white background):
+
+Figure 1  : Bar chart — Platform usage (WhatsApp 84.1%, Facebook 61.3%, 
+            YouTube 38.7%, Twitter/X 22.1%, Blogs 14.8%) | 9×5 inches
+Figure 2  : Pie chart — Age distribution (18-25: 28.6%, 26-35: 34.5%, 
+            36-45: 22.6%, 46+: 14.3%) | 7×6 inches with explode
+Figure 3  : Horizontal bar — Content effectiveness (10 types, colour-coded 
+            Green≥3.5, Amber≥3.0, Red<3.0) | 9×5.5 inches
+Figure 4  : Grouped bar — Social cohesion by group (positive vs. negative 
+            engagement, 3 hypothesis categories) | 9×5 inches
+Figure 5  : Bar chart — Challenges (5 types with %) | 9×5 inches
+Figure 6  : Flow diagram — Conceptual framework (inputs → mediating factors → 
+            outcomes → sustainable peace) | 11×7 inches, FancyBboxPatch boxes
+Figure 7  : Dual line chart — Peace content awareness vs. harmful content 
+            2016-2024 (fill_between shading) | 9×5 inches
+Figure 8  : Bar chart — Occupation distribution | 8×4.5 inches
+Figure 9  : Grouped bar — LGA comparison (peace vs. harmful content by LGA) | 9×5
+Figure 10 : Radar chart — Social cohesion 5 dimensions (pre vs. post) | 7×6 inches
+Figure 11 : Stacked bar — WhatsApp group content composition (4 group types) | 9×5
+Figure 12 : Scatter plot with regression line (r=0.63) | 8×5 inches, n=371 points
+Figure 13 : Horizontal bar — Connectivity challenges | 8×4.5 inches
+Figure 14 : Multi-row framework diagram — Digital peace communication framework 
+            (banner + 4 input boxes + 2 process boxes + 3 output boxes) | 11×8
+
+TABLES TO INCLUDE (${c.tables}):
+
+Table 1: Demographics — Variables: Sex, Age, Education, Occupation, LGA, Religion
+         Columns: Variable | Category | Frequency (%)
+         Style: Blue header (#1F4E79 white text), alternating rows (#DEEAF1)
+
+Table 2: Digital Media Use — 12 activity rows
+         Columns: Activity | Yes (%) | No (%)
+         Include: smartphone ownership, reliable internet, platform usage,
+         peace activities, harmful content exposure
+
+Table 3: Content Effectiveness — 10 content types
+         Columns: Content Type | Mean | SD | Min | Max | Rating
+         Include SD values and effectiveness labels
+
+Table 4: Activity Frequency — 6 activity types
+         Columns: Activity | Daily | Weekly | Monthly | Never
+
+Table 5: Social Cohesion Likert — 8 statements
+         Columns: Statement | SA% | A% | U% | D% | SD% | Mean
+         Note scores as SA=5 down to SD=1
+
+Table 6: Cross-tabulation — DM engagement × Cohesion score category
+         5 cohesion categories × 4 DM use groups + Total column
+
+Table 7: Hypothesis Summary — All 3 hypotheses
+         Columns: Hypothesis | Test Statistic | df | p-value | Effect Size | Decision
+
+Table 8: Qualitative Theme Matrix — 6 themes
+         Columns: Theme | Evidence Sources | Key Findings | Implications
+
+Table 9: Recommendations Framework — 9 recommendations
+         Columns: No. | Recommendation | Responsible Actor(s) | Timeframe & Indicators
+
+TABLE FORMATTING RULES:
+- Use WidthType.DXA (NOT PERCENTAGE) for all widths — total = 9160 DXA
+- Header row: fill "#1F4E79", white bold text
+- Alternate rows: fill "#DEEAF1" 
+- Use ShadingType.CLEAR (NEVER SOLID) to prevent black backgrounds
+- Add cell margins: top:80, bottom:80, left:120, right:120
+- All table notes in italic 18pt below table
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 6: REFERENCES (MINIMUM ${c.refCount})
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+CITATION STYLE: ${c.citation}
+FORMAT: Hanging indent (0.5" left indent, 0.5" hanging)
+ORDER: Alphabetical by author surname
+
+MANDATORY REFERENCES TO INCLUDE (plus additional relevant sources):
+
+Primary Nigerian/African sources:
+- Adibe, J. (2021). Journal of African Conflicts and Peace Studies, 5(1), 1–24
+- Aliyu, M., & Musa, A. (2022). African Communication Research, 12(2), 45–67
+- ACLED. (2022). Nigeria conflict database 2016–2022
+- Adesoji, A. (2010). Africa Spectrum, 45(2), 95–108
+- Nwosu, I. (2021). New Media and Society, 24(11), 2432–2449
+- Odeyemi, T., & Adeyemi, S. (2019). Journal of Peacebuilding and Development, 14(3)
+- Uzochukwu, A., & Ikechukwu, E. (2021). Journal of Communication and Media Research, 13(1)
+- NCC. (2022). Subscriber data Q4 2022 statistics
+- UNDP. (2020). Farmer-herder conflicts in Plateau State
+- Human Rights Watch. (2018). Nigeria Plateau State violence
+- ICG. (2018). Africa Report No. 262
+- Premium Times. (2021, April 13)
+
+Key Theoretical Sources:
+- Galtung, J. (1969). Journal of Peace Research, 6(3), 167–191
+- Kempf, W. (2003). Conflict and Communication Online, 2(2), 1–15
+- Manoff, R. K. (1998). Track Two, 7(4), 11–15
+- Tajfel, H., & Turner, J. C. (1979). In Austin & Worchel (Eds.)
+- Tajfel, H., & Turner, J. C. (1986). In Worchel & Austin (Eds.)
+- Allport, G. W. (1954). The nature of prejudice
+- Lederach, J. P. (2005). The moral imagination
+- Berger-Schmitt, R. (2000). EuReporting Working Paper No. 14
+- Chan, J., To, H. P., & Chan, E. (2006). Social Indicators Research, 75(2)
+- Durkheim, E. (1893). The division of labour in society
+
+Methodology Sources:
+- Creswell, J. W. (2014). Research design (4th ed.). SAGE
+- Creswell & Plano Clark. (2011). Mixed methods research (2nd ed.)
+- Tashakkori, A., & Teddlie, C. (2010). SAGE handbook of mixed methods
+- Yamane, T. (1967). Statistics: An introductory analysis (2nd ed.)
+- Braun, V., & Clarke, V. (2006). Qualitative Research in Psychology, 3(2)
+- Lochner, K., Kawachi, I., & Kennedy, B. P. (1999). Health and Place, 5(4)
+
+Media/Technology Sources:
+- DataReportal. (2023). Digital 2023: Nigeria
+- Moyo, D. (2019). International Journal of Communication, 13, 2754–2776
+- Brosché, J., & Höglund, K. (2016). Journal of Peace Research, 53(6)
+- Howard, P. N. (2011). The digital origins of dictatorship and democracy
+- Lister, M. et al. (2009). New media: A critical introduction (2nd ed.)
+- Wardle, C., & Derakhshan, H. (2017). Council of Europe Report
+- Müller, K., & Schwarz, C. (2023). Journal of the European Economic Association
+- Goldstein, J., & Rotich, J. (2008). Berkman Center Research Publication
+- Bail, C. A. et al. (2018). PNAS, 115(37), 9216–9221
+- United Nations. (2019). UN strategy and plan of action on hate speech
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 7: APPENDICES (PRODUCE ALL IN FULL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Appendix A: RESEARCH QUESTIONNAIRE (produce all 30 items in 4 sections)
+  Section A: 8 demographic items
+  Section B: 5 digital media access/usage items  
+  Section C: 7 peace communication items (include 10-item effectiveness scale)
+  Section D: 12 social cohesion items (Likert 1–5, show scale options)
+  Plus 2 open-ended questions
+
+Appendix B: KEY INFORMANT INTERVIEW GUIDE
+  5 themed sections: Digital Media Use, Content Effectiveness, Conflict Dynamics,
+  Structural Challenges, Recommendations
+  14 questions total
+
+Appendix C: FOCUS GROUP DISCUSSION GUIDE
+  5 sections: Opening, Digital Media Use Patterns, Peace Communication,
+  Community Relations, Closing/Recommendations
+  13 discussion prompts total
+
+Appendix D: LIST OF ABBREVIATIONS (all acronyms used in the project)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 8: WORD DOCUMENT EXPORT SPECIFICATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+GENERATE USING: Node.js docx npm package (npm install -g docx)
+EXPORT FORMAT:  ${c.exportFmt}
+IMPORT MODULES: Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+                ImageRun, AlignmentType, HeadingLevel, LevelFormat, BorderStyle,
+                WidthType, ShadingType, VerticalAlign, PageBreak, PageNumber,
+                Header, Footer
+
+DOCUMENT STRUCTURE:
+const doc = new Document({
+  numbering: {
+    config: [
+      { reference: "bullets", levels: [{ level:0, format:LevelFormat.BULLET, 
+        text:"•", alignment:AlignmentType.LEFT,
+        style:{ paragraph:{ indent:{ left:720, hanging:360 }, spacing:{line:480} } } }] },
+      { reference: "numbers", levels: [{ level:0, format:LevelFormat.DECIMAL, 
+        text:"%1.", alignment:AlignmentType.LEFT,
+        style:{ paragraph:{ indent:{ left:720, hanging:360 }, spacing:{line:480} } } }] }
+    ]
+  },
+  styles: {
+    default: { document: { run: { font:"Times New Roman", size:24 } } },
+    paragraphStyles: [
+      { id:"Heading1", name:"Heading 1", basedOn:"Normal", next:"Normal",
+        run:{ size:28, bold:true, font:"Times New Roman", color:"000000" },
+        paragraph:{ spacing:{ before:600, after:280 }, outlineLevel:0 } },
+      { id:"Heading2", name:"Heading 2", basedOn:"Normal", next:"Normal",
+        run:{ size:26, bold:true, font:"Times New Roman", color:"000000" },
+        paragraph:{ spacing:{ before:400, after:220 }, outlineLevel:1 } }
+    ]
+  },
+  sections:[{
+    properties:{
+      page:{
+        size:{ width:11906, height:16838 },        // A4
+        margin:{ top:1440, right:1260, bottom:1440, left:1800 }  // 1" × 1.25"
+      }
+    },
+    footers:{ default: new Footer({ children:[
+      new Paragraph({ alignment:AlignmentType.CENTER,
+        children:[new TextRun({ children:[PageNumber.CURRENT], size:20, 
+          font:"Times New Roman" })] })
+    ]}) },
+    children: [ ...ALL_CONTENT ]
+  }]
+});
+
+PARAGRAPH HELPER (use for all body text):
+const para = (text, opts={}) => new Paragraph({
+  alignment: AlignmentType.JUSTIFIED,
+  spacing: { before:160, after:160, line:480 },   // Double-spaced
+  indent: opts.noIndent ? {} : { firstLine:720 },  // 0.5" first line
+  children: [new TextRun({ text, size:24, font:"Times New Roman",
+    bold:opts.bold, italic:opts.italic })]
+});
+
+TABLE RULE — ALWAYS use WidthType.DXA:
+new Table({
+  width: { size:9160, type:WidthType.DXA },
+  columnWidths: [col1, col2, col3],  // Must sum to 9160
+  rows: [ new TableRow({ children:[
+    new TableCell({
+      borders: { top: borderStyle, bottom: borderStyle, ... },
+      shading: { fill:"1F4E79", type:ShadingType.CLEAR },  // ALWAYS CLEAR not SOLID
+      width: { size:colWidth, type:WidthType.DXA },
+      margins: { top:80, bottom:80, left:120, right:120 },
+      children: [ new Paragraph({ children:[new TextRun({text, bold:true, 
+        color:"FFFFFF"})] }) ]
+    })
+  ]}) ]
+});
+
+CHART EMBEDDING:
+Generate charts using Python matplotlib (150 DPI, white facecolor).
+Embed each chart as ImageRun:
+new ImageRun({
+  type:"png",
+  data: fs.readFileSync('./charts/figN_name.png'),
+  transformation:{ width:540, height:300 },
+  altText:{ title:"Chart Title", description:"Description", name:"figN" }
+})
+
+EXECUTION:
+Packer.toBuffer(doc).then(buffer => {
+  fs.writeFileSync('plateau_state_project_FINAL.docx', buffer);
+  console.log('SUCCESS: Document created!');
+});
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 9: QUALITY CONTROL CHECKLIST (VERIFY BEFORE FINISHING)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Before declaring the document complete, verify ALL of the following:
+
+  ☑ Total page count: ${c.pageTarget}
+  ☑ All 5 chapters present and fully written (not summarised)
+  ☑ All preliminary pages complete (cover, declaration, certification, 
+    dedication, acknowledgement, abstract, TOC, lists)
+  ☑ Abstract is exactly ONE blocked paragraph, under 400 words, single-spaced
+  ☑ All 14 figures embedded with captions (Figure N: Description)
+  ☑ All 9 tables properly formatted with blue headers and alternating rows
+  ☑ All 3 hypotheses explicitly tested with full statistics reported
+  ☑ Minimum ${c.refCount} citations in ${c.citation} format
+  ☑ References in hanging indent format, alphabetical order
+  ☑ All 4 appendices complete (questionnaire, interview guide, FGD guide, 
+    abbreviations list)
+  ☑ No WidthType.PERCENTAGE in any table (use DXA only)
+  ☑ No ShadingType.SOLID in any table (use CLEAR only)
+  ☑ All bullet points use LevelFormat.BULLET via numbering config (NO unicode •)
+  ☑ No standalone PageBreak — always inside a Paragraph
+  ☑ All ImageRun have required type parameter ("png")
+  ☑ Table column widths sum exactly to 9160 DXA
+  ☑ Page footer with page numbers on every page
+  ☑ Document passes docx validation (python scripts/office/validate.py)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+SECTION 10: EXPECTED DATA VALUES (USE THESE EXACT NUMBERS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PLATFORM USAGE: WhatsApp 84.1%, Facebook 61.3%, YouTube 38.7%, Twitter/X 22.1%
+DEMOGRAPHICS: Male 57.7%, Female 42.3%; Farmer 34.5%, Trader 28.3%
+PEACE ACTIVITIES: 56.3% shared peace messages; 43.8% in peacebuilding WhatsApp groups
+CONTENT EFFECTIVENESS: Video testimonials mean=4.21; Audio leaders mean=4.07;
+  Stories cooperation mean=3.89; Political content mean=2.41 (lowest)
+CHALLENGES: Poor connectivity 72.8%; Limited literacy 67.4%; Misinformation 64.1%
+COHESION SCORES: Inter-group trust mean=2.96; Joint activity mean=3.24; 
+  Active DM peacebuilding mean=3.79; No DM peacebuilding mean=2.93;
+  High hate speech exposure mean=2.47; Low hate speech exposure mean=3.62
+HYPOTHESIS RESULTS: H1: r=0.63, r²=0.40, p=0.000 | H2: χ²=47.82, df=4, V=0.36, p=0.000
+  H3: χ²=52.41, df=4, V=0.38, p=0.000 | All: ACCEPTED
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+END OF PROMPT — BEGIN GENERATING THE COMPLETE PROJECT NOW
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Generated by ProjectAssistantAI.com.ng | Nigeria's Premier Academic AI Platform
+Prompt Version 2.0 | ${c.citation} | ${c.pageTarget}
+`;
+}
+
+/* ── Copy prompt ───────────────────────────────────────── */
+function copyPrompt() {
+  const text = document.getElementById('output-text').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.textContent = '✓ Copied!';
+    btn.classList.add('copied');
+    showToast('Prompt copied to clipboard!');
+    setTimeout(() => {
+      btn.textContent = '📋 Copy Prompt';
+      btn.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+/* ── Download prompt ───────────────────────────────────── */
+function downloadPrompt() {
+  const text = document.getElementById('output-text').textContent;
+  const title = document.getElementById('proj-title').value.trim()
+    .replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'_').slice(0,40);
+  const blob = new Blob([text], { type: 'text/plain' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `ProjectPrompt_${title}_NOUN_2024.txt`;
+  a.click();
+  showToast('Prompt downloaded as .txt file!');
+}
+
+/* ── Toast ─────────────────────────────────────────────── */
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = '✓ ' + msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+/* ── Load sample configs ───────────────────────────────── */
+function loadSample(id) {
+  if (id === 'digital-peace') {
+    document.getElementById('proj-title').value = 'The Role of Digital Media in Promoting Peace and Social Cohesion in Plateau State Conflict-Prone Communities';
+    document.getElementById('faculty').value = 'Faculty of Social Sciences — Mass Communication';
+    document.getElementById('degree').value = 'B.Sc. Mass Communication';
+    document.getElementById('location').value = 'Plateau State, Nigeria';
+    document.getElementById('theory1').value = 'Peace Communication Theory (Kempf, 2003)';
+    document.getElementById('theory2').value = 'Social Identity Theory (Tajfel & Turner, 1979)';
+    document.getElementById('research-design').value = 'Mixed Methods (Quantitative + Qualitative)';
+    document.getElementById('population').value = 'Adult residents (18+) of conflict-prone communities in Barkin Ladi, Riyom, and Mangu LGAs, Plateau State';
+    document.getElementById('page-target').value = '90–120 pages (Masters standard)';
+  } else if (id === 'social-media-youth') {
+    document.getElementById('proj-title').value = 'The Influence of Social Media on Youth Political Participation: A Study of NOUN Students';
+    document.getElementById('faculty').value = 'Faculty of Social Sciences — Mass Communication';
+    document.getElementById('degree').value = 'B.Sc. Mass Communication';
+    document.getElementById('location').value = 'Abuja, FCT, Nigeria';
+    document.getElementById('theory1').value = 'Uses and Gratifications Theory (Katz et al., 1973)';
+    document.getElementById('theory2').value = 'Agenda-Setting Theory (McCombs & Shaw, 1972)';
+    document.getElementById('research-design').value = 'Quantitative Survey Design';
+    document.getElementById('population').value = 'Undergraduate students of National Open University of Nigeria Study Centres in Abuja';
+  } else if (id === 'fake-news') {
+    document.getElementById('proj-title').value = 'Fake News, WhatsApp and Voting Behaviour During the 2023 Nigerian General Elections in FCT';
+    document.getElementById('faculty').value = 'Faculty of Social Sciences — Mass Communication';
+    document.getElementById('degree').value = 'B.Sc. Mass Communication';
+    document.getElementById('location').value = 'Abuja Municipal Area Council, FCT';
+    document.getElementById('theory1').value = 'Framing Theory (Goffman, 1974)';
+    document.getElementById('theory2').value = 'Social Identity Theory (Tajfel & Turner, 1979)';
+    document.getElementById('research-design').value = 'Quantitative Survey Design';
+    document.getElementById('population').value = 'Registered voters in Abuja Municipal Area Council who used WhatsApp during 2023 election period';
+  }
+
+  // Scroll to generator and switch to basic tab
+  document.getElementById('generator').scrollIntoView({ behavior: 'smooth' });
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.style.display = 'none');
+  document.querySelector('.tab').classList.add('active');
+  document.getElementById('tab-basic').style.display = 'block';
+
+  showToast('Sample configuration loaded!');
+}
+
+/* ── Animate stats on scroll ───────────────────────────── */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.step-card, .sample-card, .stat').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity .5s ease, transform .5s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

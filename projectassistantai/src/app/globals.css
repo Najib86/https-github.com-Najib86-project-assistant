@@ -1,0 +1,129 @@
+/* src/app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #0a0d12;
+    --surface: #111620;
+    --surface2: #181f2e;
+    --border: #1e2a3a;
+    --border2: #2a3a52;
+    --gold: #c9a84c;
+    --gold2: #e8c76a;
+    --gold-dim: #8a6f32;
+    --emerald: #2ecc8f;
+    --text: #e8edf5;
+    --text2: #8a9bb5;
+    --text3: #4a5a72;
+    --red: #e05252;
+    --blue: #4a8fff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body), 'Segoe UI', sans-serif;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--border); }
+
+  /* Selection */
+  ::selection { background: rgba(201, 168, 76, 0.2); color: var(--gold2); }
+}
+
+@layer components {
+  .font-display { font-family: var(--font-display), Georgia, serif; }
+  .font-mono { font-family: var(--font-mono), 'Courier New', monospace; }
+
+  /* Gold gradient text */
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #c9a84c, #e8c76a);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-[#111620] border border-[#1e2a3a] rounded-xl;
+  }
+
+  .card-hover {
+    @apply card transition-all duration-200 hover:border-[#2a3a52] hover:-translate-y-0.5;
+  }
+
+  /* Button variants */
+  .btn-gold {
+    @apply bg-gradient-to-r from-[#c9a84c] to-[#8a6f32] text-[#0a0d12] font-bold rounded-lg transition-all hover:shadow-[0_8px_30px_rgba(201,168,76,.4)] hover:-translate-y-0.5 active:translate-y-0;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent border border-[#1e2a3a] text-[#8a9bb5] rounded-lg transition-all hover:border-[#8a6f32] hover:text-[#c9a84c] hover:bg-[rgba(201,168,76,.05)];
+  }
+
+  /* Input fields */
+  .input {
+    @apply w-full px-3 py-2.5 bg-[#0d1117] border border-[#1e2a3a] rounded-lg text-sm text-[#e8edf5] placeholder:text-[#2a3a52] focus:outline-none focus:border-[#8a6f32] focus:ring-1 focus:ring-[rgba(201,168,76,.2)] transition-all;
+  }
+
+  /* Status badges */
+  .badge-draft { @apply bg-[rgba(74,143,255,.12)] text-[#4a8fff] border border-[rgba(74,143,255,.2)]; }
+  .badge-submitted { @apply bg-[rgba(201,168,76,.12)] text-[#c9a84c] border border-[rgba(201,168,76,.2)]; }
+  .badge-approved { @apply bg-[rgba(46,204,143,.12)] text-[#2ecc8f] border border-[rgba(46,204,143,.2)]; }
+  .badge-revision { @apply bg-[rgba(224,82,82,.12)] text-[#e05252] border border-[rgba(224,82,82,.2)]; }
+}
+
+@layer utilities {
+  /* Animated gradient background */
+  .bg-animated {
+    background: linear-gradient(-45deg, #0a0d12, #111620, #0d1520, #0a0d12);
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+  }
+
+  @keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
+
+  /* Glow effects */
+  .glow-gold { box-shadow: 0 0 30px rgba(201, 168, 76, 0.15); }
+  .glow-emerald { box-shadow: 0 0 30px rgba(46, 204, 143, 0.15); }
+
+  /* Grid background */
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(201, 168, 76, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201, 168, 76, 0.03) 1px, transparent 1px);
+    background-size: 50px 50px;
+  }
+
+  /* Noise texture overlay */
+  .noise::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}

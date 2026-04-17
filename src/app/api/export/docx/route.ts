@@ -11,7 +11,10 @@ import {
     SectionType,
     HeadingLevel,
     NumberFormat,
-    TableOfContents
+    TableOfContents,
+    Footer,
+    LevelFormat,
+    PageNumber
 } from "docx";
 
 // Helper: Extract valid text from HTML and convert to docx Paragraphs
@@ -35,8 +38,9 @@ const htmlToDocxElements = (html: string) => {
     return cleanHtml.split("\n").filter(line => line.trim()).map(line =>
         new Paragraph({
             children: [new TextRun({ text: line.trim(), size: 24, font: "Times New Roman" })],
-            spacing: { line: 480, before: 120, after: 120 }, // Double spacing (240 * 2 = 480)
+            spacing: { line: 480, before: 160, after: 160 }, // Double spacing (240 * 2 = 480)
             alignment: AlignmentType.JUSTIFIED,
+            indent: { firstLine: 720 }, // 0.5" first line
         })
     );
 };
@@ -71,17 +75,16 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Project not found" }, { status: 404 });
         }
 
-        const meta = (project.academicMetadata as Record<string, any>) || {};
-        const studentInfo = meta.student || {};
-        const institutionInfo = meta.institution || {};
-        const supervisorInfo = meta.supervisor || {};
+        const meta = (project.academicMetadata as Record<string, unknown>) || {};
+        const studentInfo = (meta.student as Record<string, unknown>) || {};
+        const institutionInfo = (meta.institution as Record<string, unknown>) || {};
+        const supervisorInfo = (meta.supervisor as Record<string, unknown>) || {};
 
-        const studentName = (studentInfo.fullName || project.student?.name || "Student Name").toUpperCase();
-        const matricNo = studentInfo.studentIdNo || "STUDENT ID";
-        const department = (institutionInfo.department || project.student?.department || "Department Name").toUpperCase();
-        const institutionName = (institutionInfo.name || "National Open University of Nigeria").toUpperCase();
-        const faculty = (institutionInfo.faculty || "Faculty of Social Sciences").toUpperCase();
-        const programme = (institutionInfo.programme || "Bachelor of Science").toUpperCase();
+        const studentName = String(studentInfo.fullName || project.student?.name || "Student Name").toUpperCase();
+        const matricNo = String(studentInfo.studentIdNo || "STUDENT ID");
+        const department = (String(institutionInfo.department || project.student?.department || "Department Name")).toUpperCase();
+        const institutionName = (String(institutionInfo.name || "National Open University of Nigeria")).toUpperCase();
+        const programme = (String(institutionInfo.programme || "Bachelor of Science")).toUpperCase();
         const gradDate = `${institutionInfo.graduationMonth || "March"} ${institutionInfo.graduationYear || new Date().getFullYear()}`;
         const supervisorName = supervisorInfo.name ? `${supervisorInfo.title || ""} ${supervisorInfo.name}`.trim() : "Supervisor Name";
 
@@ -308,6 +311,18 @@ export async function GET(req: Request) {
 
         // Final Document Construction
         const doc = new Document({
+            numbering: {
+                config: [
+                    { 
+                        reference: "bullets", 
+                        levels: [{ level:0, format:LevelFormat.BULLET, text:"•", alignment:AlignmentType.LEFT, style:{ paragraph:{ indent:{ left:720, hanging:360 }, spacing:{line:480} } } }] 
+                    },
+                    { 
+                        reference: "numbers", 
+                        levels: [{ level:0, format:LevelFormat.DECIMAL, text:"%1.", alignment:AlignmentType.LEFT, style:{ paragraph:{ indent:{ left:720, hanging:360 }, spacing:{line:480} } } }] 
+                    }
+                ]
+            },
             styles: {
                 default: {
                     document: {
@@ -317,16 +332,36 @@ export async function GET(req: Request) {
                         },
                     },
                 },
+                paragraphStyles: [
+                    { 
+                        id:"Heading1", name:"Heading 1", basedOn:"Normal", next:"Normal",
+                        run:{ size:28, bold:true, font:"Times New Roman", color:"000000" },
+                        paragraph:{ spacing:{ before:600, after:280 }, outlineLevel:0 } 
+                    },
+                    { 
+                        id:"Heading2", name:"Heading 2", basedOn:"Normal", next:"Normal",
+                        run:{ size:26, bold:true, font:"Times New Roman", color:"000000" },
+                        paragraph:{ spacing:{ before:400, after:220 }, outlineLevel:1 } 
+                    }
+                ]
             },
             sections: [
                 {
                     properties: {
                         page: {
+                            size: { width: 11906, height: 16838 }, // A4
+                            margin: { top: 1440, right: 1260, bottom: 1440, left: 1800 }, // 1" × 1.25"
                             pageNumbers: {
                                 start: 1,
                                 formatType: NumberFormat.LOWER_ROMAN,
                             },
                         },
+                    },
+                    footers: { 
+                        default: new Footer({ children:[
+                            new Paragraph({ alignment: AlignmentType.CENTER,
+                                children: [new TextRun({ children: [PageNumber.CURRENT], size: 20, font: "Times New Roman" })] })
+                        ]}) 
                     },
                     children: prelimSections,
                 },
@@ -334,11 +369,19 @@ export async function GET(req: Request) {
                     properties: {
                         type: SectionType.NEXT_PAGE,
                         page: {
+                            size: { width: 11906, height: 16838 }, // A4
+                            margin: { top: 1440, right: 1260, bottom: 1440, left: 1800 }, // 1" × 1.25"
                             pageNumbers: {
                                 start: 1,
                                 formatType: NumberFormat.DECIMAL,
                             },
                         },
+                    },
+                    footers: { 
+                        default: new Footer({ children:[
+                            new Paragraph({ alignment: AlignmentType.CENTER,
+                                children: [new TextRun({ children: [PageNumber.CURRENT], size: 20, font: "Times New Roman" })] }) 
+                        ]}) 
                     },
                     children: bodySections,
                 }

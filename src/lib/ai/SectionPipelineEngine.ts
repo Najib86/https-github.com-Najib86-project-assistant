@@ -39,9 +39,9 @@ export class SectionPipelineEngine {
         topic: string,
         level: string,
         sampleText?: string,
-        academicMetadata?: Record<string, any>
+        academicMetadata?: Record<string, unknown>
     ) {
-        let initialPrompt = this.buildInitialPrompt(chapterNumber, chapterTitle, topic, level, sampleText, academicMetadata);
+        const initialPrompt = this.buildInitialPrompt(chapterNumber, chapterTitle, topic, level, sampleText, academicMetadata);
         let currentPrompt = initialPrompt;
 
         await this.notificationService.emitChapterStarted(projectId, chapterNumber);
@@ -105,8 +105,8 @@ export class SectionPipelineEngine {
                             console.error(`[SectionPipeline] Max retries reached for ${chapterTitle} on provider ${providerName}. Switching provider...`);
                         }
                     }
-                } catch (error: any) {
-                    const errorMessage = error.message || String(error);
+                } catch (error: unknown) {
+                    const errorMessage = error instanceof Error ? error.message : String(error);
 
                     if (this.isPermanentError(errorMessage)) {
                         this.unhealthyProviders.add(providerName);
@@ -128,26 +128,30 @@ export class SectionPipelineEngine {
         throw new Error(`Failed to generate section ${chapterTitle} successfully. Last error: ${lastError}`);
     }
 
-    private buildInitialPrompt(chapterNum: number, chapterTitle: string, topic: string, level: string, sampleText?: string, academicMetadata?: any) {
+    private buildInitialPrompt(chapterNum: number, chapterTitle: string, topic: string, level: string, sampleText?: string, academicMetadata?: Record<string, unknown> | null) {
         let contextStr = "";
         if (academicMetadata) {
+            const institution = academicMetadata.institution as Record<string, unknown> | undefined;
+            const research = academicMetadata.research as Record<string, unknown> | undefined;
             contextStr += `Student Context:
-- Programme: ${academicMetadata.institution?.programme || "N/A"}
-- Faculty: ${academicMetadata.institution?.faculty || "N/A"}
-- Department: ${academicMetadata.institution?.department || "N/A"}
-- Institution: ${academicMetadata.institution?.name || "N/A"}
-- Research Area: ${academicMetadata.research?.area || "N/A"}
-- Keywords: ${Array.isArray(academicMetadata.research?.keywords) ? academicMetadata.research.keywords.join(", ") : academicMetadata.research?.keywords || ""}\n`;
+- Programme: ${institution?.programme || "N/A"}
+- Faculty: ${institution?.faculty || "N/A"}
+- Department: ${institution?.department || "N/A"}
+- Institution: ${institution?.name || "N/A"}
+- Research Area: ${research?.area || "N/A"}
+- Keywords: ${Array.isArray(research?.keywords) ? research.keywords.join(", ") : research?.keywords || ""}\n`;
         }
 
         // Extract template structure if available
         let templateStructure = "";
-        if (academicMetadata?.templateStructureReference && Array.isArray(academicMetadata.templateStructureReference)) {
-            const templateChapter = academicMetadata.templateStructureReference.find((ch: any) => ch.id === chapterNum || ch.chapterNumber === chapterNum);
+        const templateRef = academicMetadata?.templateStructureReference;
+        if (templateRef && Array.isArray(templateRef)) {
+            const templateChapter = templateRef.find((ch: Record<string, unknown>) => ch.id === chapterNum || ch.chapterNumber === chapterNum);
             if (templateChapter) {
+                const subSecs = templateChapter.subsections as Array<Record<string, unknown> | string> | undefined;
                 templateStructure = `\n=== TEMPLATE STRUCTURE FOR THIS CHAPTER ===
 Chapter Title: ${templateChapter.title || chapterTitle}
-${templateChapter.subsections ? `Required Subsections:\n${templateChapter.subsections.map((s: any) => `- ${s.title || s}`).join('\n')}` : ''}
+${subSecs ? `Required Subsections:\n${subSecs.map((s) => `- ${typeof s === 'string' ? s : s?.title || ''}`).join('\n')}` : ''}
 ${templateChapter.description ? `Description: ${templateChapter.description}` : ''}
 ${templateChapter.wordCount ? `Target Word Count: ${templateChapter.wordCount} words` : ''}
 ${templateChapter.guidelines ? `Additional Guidelines: ${templateChapter.guidelines}` : ''}
@@ -168,15 +172,15 @@ ${RESEARCH_GUIDELINES}
 
 CRITICAL INSTRUCTIONS - READ CAREFULLY:
 1. **WRITE COMPLETE CONTENT**: This is NOT an outline. Write the FULL, DETAILED chapter content.
-2. **MINIMUM LENGTH**: Write at least 2000 words for major chapters (Chapter 1-5). Do not stop early.
+2. **MINIMUM LENGTH**: Write at least 2000 words for major chapters (Chapter 1-5). Do not stop early. Ensure comprehensive coverage.
 3. **FORMATTING**: Use Markdown formatting (## for main headings, ### for subheadings).
-4. **NO AI LANGUAGE**: NEVER use phrases like "As an AI", "Here is the chapter", "Certainly", "I'll help you".
-5. **START DIRECTLY**: Begin immediately with the academic content. No introductions about what you're doing.
-6. **SECTION REQUIREMENTS**: Include ALL subsections listed in the template above.
-7. **ACADEMIC STANDARDS**: Use formal academic tone, proper citations format, clear explanations.
-8. **COMPLETE ENDINGS**: End each section properly with conclusions. Do not truncate.
-9. **DETAILED EXPLANATIONS**: Provide examples, analysis, and comprehensive coverage of each topic.
-10. **CONTINUOUS WRITING**: Write continuously without stopping. Fill out all sections completely.
+4. **NO AI LANGUAGE - CRITICAL**: AVOID the following AI-sounding words and phrases AT ALL COSTS: "Delve", "Moreover", "Furthermore", "In conclusion", "Robust", "Seamless", "Tapestry", "Crucial", "Vital", "It is important to note", "As a matter of fact", "Sheds light", "Navigating", "Landscape", "Realm", "In today's fast-paced world". USE NATURAL, ACADEMIC SYNONYMS OR OMIT ENTIRELY. NEVER use phrases like "As an AI", "Here is the chapter", "Certainly", "I'll help you".
+5. **TONE AND STYLE**: Write in a formal, scholarly third-person tone (e.g., "This study investigates..."). No first-person or second-person pronouns.
+6. **START DIRECTLY**: Begin immediately with the academic content. No introductions about what you're doing.
+7. **SECTION REQUIREMENTS**: Include ALL subsections listed in the template above.
+8. **ACADEMIC STANDARDS**: Use formal academic tone, adhere to the specified citation style, and provide clear, well-supported explanations based on empirical literature and theoretical frameworks.
+9. **COMPLETE ENDINGS**: End each section properly with conclusions. Do not truncate.
+10. **CONTINUOUS WRITING**: Write continuously without stopping. Fill out all sections completely. Ensure semantic richness and avoid structural redundancy.
 
 IMPORTANT: You must write the ENTIRE chapter content now. Do not summarize or outline. Write full paragraphs with detailed explanations for each subsection.
 

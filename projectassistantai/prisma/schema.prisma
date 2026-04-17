@@ -1,0 +1,315 @@
+// prisma/schema.prisma
+// ProjectAssistantAI — Neon PostgreSQL Schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ─────────────────────────────────────────────
+// AUTH & USERS
+// ─────────────────────────────────────────────
+
+enum Role {
+  STUDENT
+  SUPERVISOR
+  ADMIN
+}
+
+enum ProjectStatus {
+  DRAFT
+  IN_PROGRESS
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+enum ChapterStatus {
+  NOT_STARTED
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  NEEDS_REVISION
+}
+
+model User {
+  id                    String    @id @default(cuid())
+  email                 String    @unique
+  name                  String?
+  password              String?
+  role                  Role      @default(STUDENT)
+  image                 String?
+  emailVerified         DateTime?
+  department            String?
+  faculty               String?
+  institution           String?
+  phone                 String?
+  bio                   String?   @db.Text
+  failedLoginAttempts   Int       @default(0)
+  lockUntil             DateTime?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  // Relations
+  accounts              Account[]
+  sessions              Session[]
+  ownedProjects         Project[]             @relation("ProjectOwner")
+  supervisedProjects    Project[]             @relation("ProjectSupervisor")
+  projectMembers        ProjectMember[]
+  comments              Comment[]
+  verificationTokens    VerificationToken[]
+  passwordResetTokens   PasswordResetToken[]
+  generatedPrompts      GeneratedPrompt[]
+  activityLogs          ActivityLog[]
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("verification_tokens")
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("password_reset_tokens")
+}
+
+// ─────────────────────────────────────────────
+// PROJECTS & CHAPTERS
+// ─────────────────────────────────────────────
+
+model Project {
+  id             String        @id @default(cuid())
+  title          String
+  description    String?       @db.Text
+  topic          String
+  department     String?
+  faculty        String?
+  institution    String        @default("National Open University of Nigeria")
+  level          String        @default("BSc")  // BSc, MSc, PhD
+  status         ProjectStatus @default(DRAFT)
+  supervisorCode String?       @unique
+  ownerId        String
+  supervisorId   String?
+  targetPages    String        @default("90-120")
+  theory1        String?
+  theory2        String?
+  researchDesign String?
+  studyLocation  String?
+  sampleSize     String?
+  submittedAt    DateTime?
+  approvedAt     DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  // Relations
+  owner          User          @relation("ProjectOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+  supervisor     User?         @relation("ProjectSupervisor", fields: [supervisorId], references: [id])
+  chapters       Chapter[]
+  members        ProjectMember[]
+  comments       Comment[]
+  citations      Citation[]
+  generatedPrompts GeneratedPrompt[]
+  activityLogs   ActivityLog[]
+
+  @@map("projects")
+}
+
+model ProjectMember {
+  id        String   @id @default(cuid())
+  projectId String
+  userId    String
+  role      String   @default("COLLABORATOR")
+  joinedAt  DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, userId])
+  @@map("project_members")
+}
+
+model Chapter {
+  id          String        @id @default(cuid())
+  projectId   String
+  number      Int           // 1-5
+  title       String
+  content     String?       @db.Text
+  status      ChapterStatus @default(NOT_STARTED)
+  wordCount   Int           @default(0)
+  aiGenerated Boolean       @default(false)
+  lastAiAt    DateTime?
+  submittedAt DateTime?
+  approvedAt  DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  project  Project          @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  versions ChapterVersion[]
+  comments Comment[]
+
+  @@unique([projectId, number])
+  @@map("chapters")
+}
+
+model ChapterVersion {
+  id        String   @id @default(cuid())
+  chapterId String
+  content   String   @db.Text
+  wordCount Int      @default(0)
+  snapshot  String?  @db.Text  // JSON metadata
+  createdAt DateTime @default(now())
+
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+
+  @@map("chapter_versions")
+}
+
+model Comment {
+  id         String    @id @default(cuid())
+  projectId  String
+  chapterId  String?
+  authorId   String
+  content    String    @db.Text
+  resolved   Boolean   @default(false)
+  resolvedAt DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  project Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  chapter Chapter? @relation(fields: [chapterId], references: [id])
+  author  User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model Citation {
+  id        String   @id @default(cuid())
+  projectId String
+  authors   String
+  year      String
+  title     String
+  journal   String?
+  volume    String?
+  issue     String?
+  pages     String?
+  doi       String?
+  url       String?
+  publisher String?
+  style     String   @default("APA")
+  formatted String?  @db.Text
+  createdAt DateTime @default(now())
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@map("citations")
+}
+
+// ─────────────────────────────────────────────
+// PROMPT GENERATOR
+// ─────────────────────────────────────────────
+
+model GeneratedPrompt {
+  id           String   @id @default(cuid())
+  userId       String?
+  projectId    String?
+  title        String
+  config       String   @db.Text  // JSON config
+  promptText   String   @db.Text  // Full generated prompt
+  wordCount    Int      @default(0)
+  useCount     Int      @default(0)
+  isPublic     Boolean  @default(false)
+  tags         String[] @default([])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user    User?    @relation(fields: [userId], references: [id])
+  project Project? @relation(fields: [projectId], references: [id])
+
+  @@map("generated_prompts")
+}
+
+// ─────────────────────────────────────────────
+// ACTIVITY & ANALYTICS
+// ─────────────────────────────────────────────
+
+model ActivityLog {
+  id        String   @id @default(cuid())
+  userId    String
+  projectId String?
+  action    String
+  metadata  String?  @db.Text  // JSON
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [projectId], references: [id])
+
+  @@map("activity_logs")
+}
+
+model SiteStats {
+  id              String   @id @default(cuid())
+  totalUsers      Int      @default(0)
+  totalProjects   Int      @default(0)
+  totalPrompts    Int      @default(0)
+  totalChapters   Int      @default(0)
+  updatedAt       DateTime @updatedAt
+
+  @@map("site_stats")
+}
