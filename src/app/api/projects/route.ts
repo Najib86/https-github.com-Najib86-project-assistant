@@ -156,6 +156,8 @@ export async function GET(req: Request) {
  */
 export async function POST(req: Request) {
     try {
+        console.log("[POST /api/projects] Starting request");
+
         const session = await getServerSession(authOptions);
         const user = session?.user as { id?: string | number } | undefined;
         if (user?.id) {
@@ -326,16 +328,22 @@ export async function POST(req: Request) {
 
         // Trigger AI chapter generation reliably using Promise.all logic to ensure it doesn't quietly die.
         const generationPromise = Promise.all(
-            chaptersToGenerate.map(async (chapter) => {
+            chaptersToGenerate.map(async (chapter, index) => {
                 let attempts = 0;
                 while (attempts < 2) {
                     try {
                         console.log(`[Background] Starting Generation for: ${chapter.title}`);
 
+                        // Small delay to prevent initial burst (staggered start)
+                        await new Promise(resolve => setTimeout(resolve, index * 2000));
+
                         // Enforce max 60s timeout per chapter natively wrapping the request inside race
                         const controller = new AbortController();
                         const timeoutId = setTimeout(() => controller.abort(), 60000);
 
+                        // Small delay to prevent initial burst
+                        await new Promise(resolve => setTimeout(resolve, index * 1000));
+                        
                         const genTask = generateChapterContent(
                             project.project_id,
                             chapter.id,
@@ -363,7 +371,8 @@ export async function POST(req: Request) {
                             projectId: project.project_id,
                             chapterNumber: chapter.id,
                             attempt: attempts,
-                            error: e.message || String(e)
+                            error: e.message || String(e),
+                            stack: e.stack
                         });
 
                         if (attempts >= 2) {
@@ -371,7 +380,21 @@ export async function POST(req: Request) {
                             await prisma.chapter.update({
                                 where: { projectId_chapterNumber: { projectId: project.project_id, chapterNumber: chapter.id } },
                                 data: { status: "Pending Regeneration" }
-                            }).catch(() => { });
+                            }).catch((err) => console.error("Failed to update status to Pending Regeneration:", err));
+
+                            // Log the final failure to DB for easy testing
+                            await prisma.generationLog.create({
+                                data: {
+                                    projectId: project.project_id,
+                                    chapterNumber: chapter.id,
+                                    provider: "Orchestrator",
+                                    retries: attempts,
+                                    validationScore: 0,
+                                    wordCount: 0,
+                                    success: false,
+                                    failureReason: e.message || "Max retries reached"
+                                }
+                            }).catch(() => {});
                         }
                     }
                 }
@@ -388,7 +411,9 @@ export async function POST(req: Request) {
         return NextResponse.json(project, { status: 201 });
     } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : "Failed to create project";
-        console.error("Critical POST error:", error);
+        const errorStack = error instanceof Error ? error.stack : "No stack trace";
+        console.error("Critical POST error:", { message: errorMessage, stack: errorStack });
+        
         return NextResponse.json({ error: "Failed to create project", message: errorMessage }, { status: 500 });
     }
 }

@@ -1,36 +1,27 @@
-import Redis from "ioredis";
-
-const redisClient = new Redis(process.env.REDIS_URL!);
+/**
+ * Redis is currently REMOVED from the system.
+ * This file provides a no-op implementation of the redis utility 
+ * to maintain compatibility with existing code without requiring a Redis server.
+ */
 
 export const redis = {
     async get<T>(key: string): Promise<T | null> {
-        const data = await redisClient.get(key);
-        if (!data) return null;
-        try {
-            return JSON.parse(data) as T;
-        } catch {
-            return data as unknown as T;
-        }
+        return null;
     },
     async set(key: string, value: any, options?: { ex?: number, nx?: boolean }): Promise<string | null> {
-        const stringValue = typeof value === "string" ? value : JSON.stringify(value);
-        if (options?.ex && options?.nx) {
-            return await redisClient.set(key, stringValue, "EX", options.ex, "NX");
-        } else if (options?.ex) {
-            return await redisClient.set(key, stringValue, "EX", options.ex);
-        } else if (options?.nx) {
-            return await redisClient.set(key, stringValue, "NX");
-        } else {
-            return await redisClient.set(key, stringValue);
-        }
+        return "OK";
     },
     async incr(key: string): Promise<number> {
-        return await redisClient.incr(key);
+        return 1;
     },
     async expire(key: string, seconds: number): Promise<number> {
-        return await redisClient.expire(key, seconds);
+        return 1;
     },
     async del(key: string): Promise<number> {
-        return await redisClient.del(key);
+        return 1;
+    },
+    async publish(channel: string, message: string): Promise<number> {
+        console.log(`[StubRedis] Publish to ${channel}: ${message.substring(0, 50)}...`);
+        return 1;
     }
 };

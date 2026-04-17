@@ -251,7 +251,10 @@ export default function StudentDashboard() {
                 return;
             }
 
-            if (!res.ok) throw new Error("Failed to create project");
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.message || errorData.error || "Failed to create project");
+            }
 
             const newProject = await res.json();
             setProjects([{ ...newProject, chapters: newProject.chapters || [] }, ...projects]);
